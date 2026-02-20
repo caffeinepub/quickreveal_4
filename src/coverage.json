@@ -1,0 +1,218 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-20T12:22:24.392Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 15,
+    "implemented": 13,
+    "items": [
+      {
+        "id": "REQ-63",
+        "summary": "Create ProLogin screen authentication flow that validates credentials against hardcoded demo account (pro@nexus.ch / nexus2025), displays red toast 'Identifiants incorrects' for invalid credentials, and navigates to NexusOS screen upon successful authentication",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ProLogin.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ProLogin.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ]
+      },
+      {
+        "id": "REQ-64",
+        "summary": "Implement RADAR tab in NexusOS showing incoming booking request cards with avatar initials, client name, location type, date/time, service name, price in serif font, REFUSER (dark button) and ACCEPTER (sand button) actions where ACCEPTER adds green border with '✓ ACCEPTÉ' label and updates counter, REFUSER causes fade-out and removal, and empty state displays centered checkmark circle with 'TOUT EST CALME' message",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ]
+      },
+      {
+        "id": "REQ-65",
+        "summary": "Implement WALLET tab in NexusOS with balance card displaying 'SOLDE TOTAL ↗' and amount '245.–' in Inter 900 52px font, VIREMENT and ANALYTICS buttons, escrow card with ⏳ icon showing 'En attente de prestation' and '60.–' amount, and transaction history list showing Sarah L. +120.–, Marc D. +45.–, Sophie M. +80.–",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/NexusOS.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/NexusOS.tsx"
+        ]
+      },
+      {
+        "id": "REQ-66",
+        "summary": "Implement PORTFOLIO tab in NexusOS with initial empty state showing message and 'CRÉER MON STUDIO' button that navigates to Builder screen, and after publication displays studio name, cover photo, service list, and Modifier/Partager buttons",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ]
+      },
+      {
+        "id": "REQ-67",
+        "summary": "Create Builder multi-step form with Step 1 (artist name, category dropdown for Barber/Coiffure/Esthétique/Massage, city, phone, bio textarea), Step 2 Logistics (JE ME DÉPLACE and/or AU STUDIO checkboxes with both options allowed, conditional studio address and GPS coordinates latitude/longitude fields required when AU STUDIO is selected), Step 3 Services (service name, dual pricing fields for 🏠 Domicile and ✂️ Studio, duration, ability to add multiple services), and Step 4 Availability (days of week with toggleable time slots)",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Builder.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Builder.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ]
+      },
+      {
+        "id": "REQ-68",
+        "summary": "Create subscription screen after Builder completion with 'OFFRE DE LANCEMENT' badge, pricing display showing 'GRATUIT le premier mois, puis 199 CHF/an', list of advantages with green checkmarks, and 'COMMENCER GRATUITEMENT' button that publishes studio, returns to NexusOS PORTFOLIO tab showing published studio, and displays '🚀 Studio en ligne!' toast notification",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Subscription.tsx",
+          "frontend/src/context/AppContext.tsx",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Subscription.tsx",
+          "frontend/src/context/AppContext.tsx",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-69",
+        "summary": "Add newly published studio from Builder to Explorer screen provider list with all configured data (name, category, services, pricing, location modes, GPS coordinates, availability) so it appears alongside existing hardcoded providers and is searchable/filterable",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/context/AppContext.tsx",
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/components/BookingDate.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/context/AppContext.tsx",
+          "frontend/src/components/Explorer.tsx"
+        ]
+      },
+      {
+        "id": "REQ-70",
+        "summary": "Implement AGENDA tab in NexusOS with weekly calendar view (Monday through Sunday) showing time slots from 09h to 19h, clickable slots that toggle between available (sand background) and blocked (red dim background) states, and navigation buttons for previous/next week",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ]
+      },
+      {
+        "id": "REQ-71",
+        "summary": "Filter blocked time slots from BookingDate component availability based on provider's agenda configuration set in NexusOS AGENDA tab, preventing clients from selecting time slots that the provider has marked as blocked",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/BookingDate.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-72",
+        "summary": "Make NEXUS logo clickable throughout the application (Explorer, NexusOS, all booking screens) to navigate back to Splash screen",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/components/BookingLocation.tsx",
+          "frontend/src/components/BookingDate.tsx",
+          "frontend/src/components/BookingContact.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/components/BookingLocation.tsx",
+          "frontend/src/context/AppContext.tsx"
+        ]
+      },
+      {
+        "id": "REQ-73",
+        "summary": "Enhance BookingDate component to visually disable all past dates and past time slots for the current date by applying opacity 0.3 and cursor not-allowed styles, comparing against real-time current Date() to ensure elapsed hours on today are grayed out",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/BookingDate.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-74",
+        "summary": "Fix AU STUDIO availability bug in BookingLocation component to ensure AU STUDIO option is selectable and not showing 'Non disponible' when provider has configured studio address and GPS coordinates in Builder logistics step",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/BookingLocation.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/BookingLocation.tsx"
+        ]
+      },
+      {
+        "id": "REQ-75",
+        "summary": "Implement geolocation filter '📍 Autour de moi' in Explorer screen that uses navigator.geolocation to get user's current position, calculates distances to all providers using Haversine formula, sorts results by distance ascending, and displays distance in 'X km' format on each provider card",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Explorer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Explorer.tsx"
+        ]
+      },
+      {
+        "id": "REQ-76",
+        "summary": "Update AppContext to add screen state for Builder screen, add subscription screen state, update provider data structure to include studio configuration (address, GPS coordinates, availability schedule, blocked time slots), and add pro authentication session state",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/context/AppContext.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/context/AppContext.tsx"
+        ]
+      },
+      {
+        "id": "REQ-77",
+        "summary": "Update App.tsx screen router to include conditional rendering for Builder and subscription screens with proper slide transition animations matching existing screen navigation patterns",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/App.tsx"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
+    "frontend/src/components/BookingLocation.tsx",
+    "frontend/src/components/Builder.tsx",
+    "frontend/src/components/Explorer.tsx",
+    "frontend/src/components/NexusOS.tsx",
+    "frontend/src/components/ProLogin.tsx",
+    "frontend/src/components/Subscription.tsx",
+    "frontend/src/context/AppContext.tsx",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

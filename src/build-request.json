@@ -1,0 +1,332 @@
+{
+  "kind": "build_request",
+  "title": "Implement complete NEXUS OS professional space with authentication, dashboard tabs, and builder workflow",
+  "projectName": "NEXUS",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-63",
+      "text": "Create ProLogin screen authentication flow that validates credentials against hardcoded demo account (pro@nexus.ch / nexus2025), displays red toast 'Identifiants incorrects' for invalid credentials, and navigates to NexusOS screen upon successful authentication",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "Cliquer sur 'ESPACE PRO' ouvre un écran de connexion avec : Logo NEXUS OS. + sous-titre 'MODE PROFESSIONNEL', Champ email + champ mot de passe (style dark, même design system), Bouton SE CONNECTER (btn-sand), Compte de démo hardcodé : pro@nexus.ch / nexus2025, Si mauvais identifiants → toast rouge 'Identifiants incorrects', Si correct → transition vers NEXUS OS dashboard"
+        ]
+      },
+      "acceptanceCriteria": [
+        "ProLogin screen displays NEXUS OS logo with subtitle 'MODE PROFESSIONNEL'",
+        "Email and password fields use dark theme matching design system",
+        "SE CONNECTER button uses btn-sand styling",
+        "Invalid credentials trigger red toast with message 'Identifiants incorrects'",
+        "Valid credentials (pro@nexus.ch / nexus2025) navigate to NexusOS dashboard with transition animation"
+      ]
+    },
+    {
+      "id": "REQ-64",
+      "text": "Implement RADAR tab in NexusOS showing incoming booking request cards with avatar initials, client name, location type, date/time, service name, price in serif font, REFUSER (dark button) and ACCEPTER (sand button) actions where ACCEPTER adds green border with '✓ ACCEPTÉ' label and updates counter, REFUSER causes fade-out and removal, and empty state displays centered checkmark circle with 'TOUT EST CALME' message",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "TAB 1 — RADAR: Liste des demandes entrantes avec cards : Avatar initiale + Nom client + type de lieu + jour/heure, Nom de la prestation en dessous, Prix à droite en serif, Boutons REFUSER (dark) / ACCEPTER (sand), ACCEPTER → border verte + label '✓ ACCEPTÉ' + compteur mis à jour, REFUSER → fade out + disparition, Quand liste vide → cercle ✓ centré + 'TOUT EST CALME', Données démo : 2 demandes entrantes hardcodées"
+        ]
+      },
+      "acceptanceCriteria": [
+        "RADAR tab displays list of incoming booking requests as cards",
+        "Each card shows avatar with client initials, client name, location type, date/time",
+        "Service name appears below client info, price displayed on right in serif font",
+        "REFUSER button uses dark styling and triggers fade-out animation followed by card removal",
+        "ACCEPTER button uses sand styling and adds green border with '✓ ACCEPTÉ' label",
+        "Counter updates when requests are accepted",
+        "Empty state shows centered checkmark circle with 'TOUT EST CALME' text",
+        "2 hardcoded demo booking requests are displayed initially"
+      ]
+    },
+    {
+      "id": "REQ-65",
+      "text": "Implement WALLET tab in NexusOS with balance card displaying 'SOLDE TOTAL ↗' and amount '245.–' in Inter 900 52px font, VIREMENT and ANALYTICS buttons, escrow card with ⏳ icon showing 'En attente de prestation' and '60.–' amount, and transaction history list showing Sarah L. +120.–, Marc D. +45.–, Sophie M. +80.–",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "TAB 2 — WALLET: Card solde : 'SOLDE TOTAL ↗' + montant '245.–' (Inter 900, 52px), Boutons VIREMENT + ANALYTICS, Card séquestre : icône ⏳ + 'En attente de prestation' + '60.–', Historique : Sarah L. +120.– / Marc D. +45.– / Sophie M. +80.–"
+        ]
+      },
+      "acceptanceCriteria": [
+        "WALLET tab displays balance card with 'SOLDE TOTAL ↗' label and '245.–' in Inter 900 52px",
+        "VIREMENT and ANALYTICS buttons are present and styled appropriately",
+        "Escrow card shows ⏳ icon with 'En attente de prestation' text and '60.–' amount",
+        "Transaction history displays three hardcoded entries: Sarah L. +120.–, Marc D. +45.–, Sophie M. +80.–"
+      ]
+    },
+    {
+      "id": "REQ-66",
+      "text": "Implement PORTFOLIO tab in NexusOS with initial empty state showing message and 'CRÉER MON STUDIO' button that navigates to Builder screen, and after publication displays studio name, cover photo, service list, and Modifier/Partager buttons",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "TAB 3 — PORTFOLIO: État initial : message + bouton 'CRÉER MON STUDIO' → ouvre le Builder (4 étapes), Après publication : affiche nom du studio + cover + liste des prestations + boutons Modifier/Partager"
+        ]
+      },
+      "acceptanceCriteria": [
+        "PORTFOLIO tab shows empty state with descriptive message and 'CRÉER MON STUDIO' button",
+        "Clicking 'CRÉER MON STUDIO' navigates to Builder screen",
+        "After studio publication, displays studio name with cover photo",
+        "Published state shows list of configured services",
+        "Modifier and Partager buttons are displayed in published state"
+      ]
+    },
+    {
+      "id": "REQ-67",
+      "text": "Create Builder multi-step form with Step 1 (artist name, category dropdown for Barber/Coiffure/Esthétique/Massage, city, phone, bio textarea), Step 2 Logistics (JE ME DÉPLACE and/or AU STUDIO checkboxes with both options allowed, conditional studio address and GPS coordinates latitude/longitude fields required when AU STUDIO is selected), Step 3 Services (service name, dual pricing fields for 🏠 Domicile and ✂️ Studio, duration, ability to add multiple services), and Step 4 Availability (days of week with toggleable time slots)",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "Builder 4 étapes : Étape 1 : Nom d'artiste, Catégorie (Barber/Coiffure/Esthétique/Massage), Ville, Téléphone, Bio, Étape 2 : Logistique — JE ME DÉPLACE / AU STUDIO (les deux possibles). Si 'Au Studio' : champ adresse complète + coordonnées GPS (latitude/longitude) pour le filtre proximité côté client, Étape 3 : Prestations avec double tarification (🏠 Domicile + ✂️ Studio), durée, possibilité d'ajouter plusieurs prestations, Étape 4 : Disponibilités (jours + créneaux horaires toggleables)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Step 1 includes fields for artist name, category dropdown (Barber/Coiffure/Esthétique/Massage), city, phone, and bio textarea",
+        "Step 2 includes JE ME DÉPLACE and AU STUDIO checkboxes allowing both to be selected",
+        "When AU STUDIO is selected in Step 2, studio address and GPS coordinates (latitude/longitude) fields become required",
+        "Step 3 includes service name field, dual pricing inputs for 🏠 Domicile and ✂️ Studio, duration field, and add service button for multiple services",
+        "Step 4 displays days of week with toggleable time slots for availability configuration",
+        "Builder includes PUBLIER button on final step"
+      ]
+    },
+    {
+      "id": "REQ-68",
+      "text": "Create subscription screen after Builder completion with 'OFFRE DE LANCEMENT' badge, pricing display showing 'GRATUIT le premier mois, puis 199 CHF/an', list of advantages with green checkmarks, and 'COMMENCER GRATUITEMENT' button that publishes studio, returns to NexusOS PORTFOLIO tab showing published studio, and displays '🚀 Studio en ligne!' toast notification",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "Écran abonnement : Badge 'OFFRE DE LANCEMENT', Prix : GRATUIT le premier mois, puis 199 CHF/an, Liste des avantages (✓ vert), Bouton 'COMMENCER GRATUITEMENT' → publie le studio → retour NEXUS OS tab Portfolio rempli + toast '🚀 Studio en ligne!'"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Subscription screen displays 'OFFRE DE LANCEMENT' badge prominently",
+        "Pricing shows 'GRATUIT le premier mois, puis 199 CHF/an'",
+        "List of advantages displayed with green checkmark icons",
+        "'COMMENCER GRATUITEMENT' button triggers studio publication",
+        "After publication, navigates back to NexusOS PORTFOLIO tab",
+        "PORTFOLIO tab now displays published studio data",
+        "Toast notification with '🚀 Studio en ligne!' message appears and auto-dismisses"
+      ]
+    },
+    {
+      "id": "REQ-69",
+      "text": "Add newly published studio from Builder to Explorer screen provider list with all configured data (name, category, services, pricing, location modes, GPS coordinates, availability) so it appears alongside existing hardcoded providers and is searchable/filterable",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "Le nouveau studio publié apparaît dans l'Explorer côté client avec ses vraies données"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Published studio from Builder appears in Explorer provider list",
+        "Studio includes all configured data: name, category, services with pricing, location modes",
+        "Studio includes GPS coordinates for geolocation filtering",
+        "Studio respects configured availability when showing booking time slots",
+        "Studio is filterable by category, mode, and city filters in Explorer",
+        "Studio appears in geolocation-based distance sorting when applicable"
+      ]
+    },
+    {
+      "id": "REQ-70",
+      "text": "Implement AGENDA tab in NexusOS with weekly calendar view (Monday through Sunday) showing time slots from 09h to 19h, clickable slots that toggle between available (sand background) and blocked (red dim background) states, and navigation buttons for previous/next week",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "TAB 4 — AGENDA: Vue semaine (Lun→Dim) avec créneaux de 09h à 19h, Cliquer sur un créneau = toggle disponible (fond sand) / bloqué (fond rouge dim), Les créneaux bloqués ici n'apparaissent plus dans le booking flow côté client, Bouton 'Semaine suivante / précédente' pour naviguer"
+        ]
+      },
+      "acceptanceCriteria": [
+        "AGENDA tab displays weekly calendar with days Monday through Sunday",
+        "Time slots from 09h to 19h are shown for each day",
+        "Clicking a time slot toggles between available state (sand background) and blocked state (red dim background)",
+        "Previous week and next week navigation buttons allow browsing different weeks",
+        "Blocked time slots are stored in provider's agenda configuration"
+      ]
+    },
+    {
+      "id": "REQ-71",
+      "text": "Filter blocked time slots from BookingDate component availability based on provider's agenda configuration set in NexusOS AGENDA tab, preventing clients from selecting time slots that the provider has marked as blocked",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "Les créneaux bloqués ici n'apparaissent plus dans le booking flow côté client",
+          "Filtre out blocked time slots from availability in BookingDate component based on provider's agenda configuration in NEXUS OS"
+        ]
+      },
+      "acceptanceCriteria": [
+        "BookingDate component reads provider's agenda configuration from AppContext",
+        "Time slots marked as blocked in AGENDA tab do not appear in available slots",
+        "Filtering applies to specific days and times based on provider's settings",
+        "Only available time slots are displayed to clients during booking flow"
+      ]
+    },
+    {
+      "id": "REQ-72",
+      "text": "Make NEXUS logo clickable throughout the application (Explorer, NexusOS, all booking screens) to navigate back to Splash screen",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "Logo NEXUS. cliquable partout → retour splash"
+        ]
+      },
+      "acceptanceCriteria": [
+        "NEXUS logo in Explorer header is clickable and navigates to Splash",
+        "NEXUS logo in NexusOS header is clickable and navigates to Splash",
+        "NEXUS logo in all booking flow screens is clickable and navigates to Splash",
+        "Click triggers appropriate screen transition animation"
+      ]
+    },
+    {
+      "id": "REQ-73",
+      "text": "Enhance BookingDate component to visually disable all past dates and past time slots for the current date by applying opacity 0.3 and cursor not-allowed styles, comparing against real-time current Date() to ensure elapsed hours on today are grayed out",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "Créneaux passés désactivés dans le booking (jour actuel = heures écoulées grisées)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Past dates are visually disabled with opacity 0.3 and cursor not-allowed",
+        "For current date, time slots that have passed are visually disabled",
+        "Real-time comparison uses current Date() to determine elapsed times",
+        "Past dates and times are not selectable",
+        "Visual feedback clearly indicates unavailable past slots"
+      ]
+    },
+    {
+      "id": "REQ-74",
+      "text": "Fix AU STUDIO availability bug in BookingLocation component to ensure AU STUDIO option is selectable and not showing 'Non disponible' when provider has configured studio address and GPS coordinates in Builder logistics step",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "Fix bug 'AU STUDIO — Non disponible' : si le pro a configuré une adresse studio, l'option est disponible"
+        ]
+      },
+      "acceptanceCriteria": [
+        "BookingLocation component checks if provider has configured studio address and GPS coordinates",
+        "AU STUDIO option is enabled when studio address and GPS are present in provider data",
+        "AU STUDIO option shows 'Non disponible' only when studio is not configured",
+        "Proper validation of studio configuration before displaying availability"
+      ]
+    },
+    {
+      "id": "REQ-75",
+      "text": "Implement geolocation filter '📍 Autour de moi' in Explorer screen that uses navigator.geolocation to get user's current position, calculates distances to all providers using Haversine formula, sorts results by distance ascending, and displays distance in 'X km' format on each provider card",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ],
+        "quotes": [
+          "Filtre '📍 Autour de moi' dans l'Explorer : navigator.geolocation + tri Haversine + affichage 'X km'"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Explorer includes '📍 Autour de moi' filter pill",
+        "Clicking filter requests user's geolocation via navigator.geolocation",
+        "Calculates distance to each provider using existing Haversine utility function",
+        "Sorts provider list by calculated distance in ascending order",
+        "Displays distance in 'à X km' format on each provider card when filter is active",
+        "Handles geolocation permission denial gracefully"
+      ]
+    },
+    {
+      "id": "REQ-76",
+      "text": "Update AppContext to add screen state for Builder screen, add subscription screen state, update provider data structure to include studio configuration (address, GPS coordinates, availability schedule, blocked time slots), and add pro authentication session state",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ]
+      },
+      "acceptanceCriteria": [
+        "AppContext includes Builder screen state with navigation function",
+        "AppContext includes subscription screen state with navigation function",
+        "Provider data structure extended to store studio address and GPS coordinates",
+        "Provider data structure includes availability schedule and blocked time slots",
+        "Pro authentication session state tracks logged-in pro user",
+        "Navigation functions support all new screens with proper transitions"
+      ]
+    },
+    {
+      "id": "REQ-77",
+      "text": "Update App.tsx screen router to include conditional rendering for Builder and subscription screens with proper slide transition animations matching existing screen navigation patterns",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-user-pro-space-request"
+        ]
+      },
+      "acceptanceCriteria": [
+        "App.tsx router includes Builder screen rendering",
+        "App.tsx router includes subscription screen rendering",
+        "Screen transitions use existing slide-left/slide-right animations",
+        "Transitions maintain consistent 300ms duration",
+        "Navigation direction (forward/backward) determines animation direction"
+      ]
+    }
+  ],
+  "constraints": [
+    "All implementation must be frontend-only with no backend Motoko changes",
+    "Use existing design system tokens: background #0a0a0a, accent sand #E8D5B0, white #FFFFFF, muted #9CA3AF",
+    "Typography must use Inter 900 for headings and Playfair Display italic for body text",
+    "All authentication is simulated with hardcoded credentials (pro@nexus.ch / nexus2025)",
+    "Do not modify immutable frontend paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui",
+    "Maintain single-actor backend architecture (no backend changes needed for this request)",
+    "All studio and booking data remains in local state management via AppContext",
+    "Screen transitions must use existing CSS animations with 300ms duration"
+  ],
+  "nonGoals": [
+    "Real backend integration for pro authentication or studio data persistence",
+    "Real payment processing for subscription",
+    "Real-time synchronization between client and pro views",
+    "Email/SMS notifications for booking confirmations",
+    "Integration with external calendar systems",
+    "Mobile native app packaging",
+    "Multi-language support beyond French",
+    "Admin panel for platform management"
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

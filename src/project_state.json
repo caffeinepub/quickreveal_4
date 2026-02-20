@@ -1,0 +1,672 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 9,
+  "summary": "NEXUS - Application mobile-first de réservation de prestataires beauté/bien-être pour la Suisse romande. Refonte complète en React/TypeScript avec design system dark (#0a0a0a), accent sand (#E8D5B0), typographie Inter 900 + Playfair Display italic. Sprint 1 complété : écrans 1-6 (Splash → Explorer → Fiche → Booking flow) avec données hardcodées (6 prestataires), géolocalisation (navigator.geolocation + Haversine), filtre ville (Lausanne/Genève/Zurich/Paris), blocage créneaux passés, navigation logo cliquable, toggle MODE PRO ⇄ MODE CLIENT. Sprint 2 en cours : authentification simulée frontend (client OTP 4 chiffres, pro email/mdp hardcodé pro@nexus.ch / nexus2025), NEXUS OS complet avec 4 onglets (RADAR demandes Accept/Refuse, WALLET solde/séquestre/historique, PORTFOLIO état vide → Builder 4 étapes → Écran abonnement → Publication, AGENDA créneaux dispo/bloqués), Builder avec adresse GPS obligatoire si Studio, dashboard client (réservations/annulation). Tout hardcodé frontend, pas de backend Motoko pour Sprint 2.",
+  "architectural_notes": [
+    "Refonte complète : suppression totale de AppV1.jsx et ancien code React",
+    "Architecture React + TypeScript pure avec composants modulaires pour chaque écran (Splash, Explorer, Fiche, Booking flow)",
+    "Design system dark theme : fond #0a0a0a, accent sand #E8D5B0, typographie Inter 900 (titres uppercase) + Playfair Display italic (accroches)",
+    "CSS-in-JS inline ou fichier global (zéro Tailwind, zéro UI library) avec Google Fonts uniquement comme dépendance externe",
+    "Transitions fluides entre écrans (slide horizontal ou fade) pour expérience native mobile-first",
+    "État global géré avec useState/useContext React (pas de localStorage pour ce sprint)",
+    "Données hardcodées : 6 prestataires avec services, tarifs double (domicile/studio), modes, bio, photos",
+    "Sprint 1 scope : écrans 1-6 (Splash → Explorer → Fiche prestataire → Booking lieu/date/coord)",
+    "Priorité absolue : fidélité visuelle pixel-perfect au design system fourni",
+    "Sprint 2 en cours : NEXUS OS complet avec 4 onglets, Builder 4 étapes avec écran abonnement, géolocalisation Haversine, blocage créneaux passés"
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "existing_features": [
+    {
+      "id": "feature-create-frontend-src-appv1-jsx-with-the-exact-code-provided-by-the-user-including-all-simulated-features-sms-marketing-counter-increment-gps-placeholder-text-carte-interactive-local-pos-without-real-payments",
+      "title": "Create frontend/src/AppV1.jsx with the exact code provided by the user, including all simulated features (SMS marketing counter increment, GPS placeholder text 'Carte Interactive', local POS without real payments)",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-frontend-src-app-tsx-that-imports-and-renders-appv1-component-exactly-as-specified",
+      "title": "Create frontend/src/App.tsx that imports and renders AppV1 component exactly as specified",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-frontend-src-main-tsx-with-the-provider-setup-exactly-as-provided",
+      "title": "Create frontend/src/main.tsx with the provider setup exactly as provided",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-frontend-src-index-css-with-all-animations-exactly-as-provided-by-the-user",
+      "title": "Create frontend/src/index.css with all animations exactly as provided by the user",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-frontend-index-html-with-google-fonts-integration-exactly-as-specified",
+      "title": "Create frontend/index.html with Google Fonts integration exactly as specified",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-frontend-tailwind-config-js-with-exact-configuration-provided",
+      "title": "Create frontend/tailwind.config.js with exact configuration provided",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-frontend-src-utils-auragenerator-ts-with-exact-code-provided",
+      "title": "Create frontend/src/utils/auraGenerator.ts with exact code provided",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-frontend-src-utils-urlparams-ts-with-exact-code-provided",
+      "title": "Create frontend/src/utils/urlParams.ts with exact code provided",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-localstorage-integration-using-key-nexus-v12-clean-exactly-as-it-exists-in-the-provided-code-allowing-frontend-to-function-autonomously-alongside-the-backend",
+      "title": "Implement localStorage integration using key 'nexus_v12_clean' exactly as it exists in the provided code, allowing frontend to function autonomously alongside the backend",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-delete-all-existing-react-code-appv1-jsx-app-tsx-auragenerator-ts-urlparams-ts-and-remove-tailwind-css-configuration-to-start-fresh-refactor",
+      "title": "Delete all existing React code (AppV1.jsx, App.tsx, auraGenerator.ts, urlParams.ts) and remove Tailwind CSS configuration to start fresh refactor",
+      "reqIds": [
+        "REQ-24"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-configure-google-fonts-playfair-display-with-italic-variant-and-inter-with-900-weight-in-frontend-index-html-removing-any-other-font-dependencies",
+      "title": "Configure Google Fonts (Playfair Display with italic variant and Inter with 900 weight) in frontend/index.html, removing any other font dependencies",
+      "reqIds": [
+        "REQ-25"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-global-css-file-frontend-src-index-css-or-frontend-src-styles-css-with-nexus-design-system-tokens-background-0a0a0a-accent-sand-e8d5b0-text-colors-white-ffffff-muted-9ca3af-and-component-classes-btn-white-btn-sand-btn-dark-with-hover-states-and-rounded-full-styling",
+      "title": "Create global CSS file (frontend/src/index.css or frontend/src/styles.css) with NEXUS design system tokens: background #0a0a0a, accent sand #E8D5B0, text colors (white #FFFFFF, muted #9CA3AF), and component classes (btn-white, btn-sand, btn-dark with hover states and rounded-full styling)",
+      "reqIds": [
+        "REQ-26"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-react-context-frontend-src-context-appcontext-tsx-for-global-state-management-with-usestate-usecontext-including-hardcoded-6-providers-array-julien-rossi-coiffure-domicile-mageste-labs-coiffure-salon-sophiane-hair-barber-domicile-salon-lucie-esthetics-esth-tique-domicile-zen-touch-massage-domicile-noura-beauty-onglerie-salon-current-screen-state-selected-category-filter-selected-mode-filter-selected-provider-selected-service-selected-location-selected-date-time-and-booking-form-data",
+      "title": "Create React context (frontend/src/context/AppContext.tsx) for global state management with useState/useContext, including: hardcoded 6 providers array (Julien Rossi - Coiffure domicile, Mageste Labs - Coiffure salon, Sophiane Hair - Barber domicile/salon, Lucie Esthetics - Esthétique domicile, Zen Touch - Massage domicile, Noura Beauty - Onglerie salon), current screen state, selected category filter, selected mode filter, selected provider, selected service, selected location, selected date/time, and booking form data",
+      "reqIds": [
+        "REQ-27"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-splash-screen-component-frontend-src-components-splash-tsx-with-nexus-logo-text-based-with-playfair-display-italic-hero-background-photo-dark-overlay-tagline-in-playfair-display-italic-and-two-rounded-full-buttons-explorer-in-sand-e8d5b0-espace-pro-in-white-outline-with-fade-in-animation-on-mount",
+      "title": "Create Splash screen component (frontend/src/components/Splash.tsx) with NEXUS logo (text-based with Playfair Display italic), hero background photo (dark overlay), tagline in Playfair Display italic, and two rounded-full buttons (Explorer in sand #E8D5B0, Espace Pro in white outline) with fade-in animation on mount",
+      "reqIds": [
+        "REQ-28"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-explorer-screen-component-frontend-src-components-explorer-tsx-with-category-filter-pills-tous-coiffure-barber-esth-tique-massage-onglerie-mode-filter-pills-tous-domicile-salon-results-counter-showing-filtered-count-and-provider-cards-grid-with-cover-photo-category-badge-name-in-inter-900-uppercase-and-clickable-card-navigation-to-provider-detail",
+      "title": "Create Explorer screen component (frontend/src/components/Explorer.tsx) with category filter pills (Tous/Coiffure/Barber/Esthétique/Massage/Onglerie), mode filter pills (Tous/Domicile/Salon), results counter showing filtered count, and provider cards grid with cover photo, category badge, name in Inter 900 uppercase, and clickable card navigation to provider detail",
+      "reqIds": [
+        "REQ-29"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-provider-detail-screen-component-frontend-src-components-providerdetail-tsx-with-back-button-hero-cover-photo-with-gradient-overlay-provider-name-in-inter-900-uppercase-category-badge-bio-text-in-playfair-display-italic-services-list-with-service-name-and-dual-pricing-studio-domicile-with-strike-through-for-unavailable-and-service-selection-that-navigates-to-booking-location-screen",
+      "title": "Create Provider Detail screen component (frontend/src/components/ProviderDetail.tsx) with back button, hero cover photo with gradient overlay, provider name in Inter 900 uppercase, category badge, bio text in Playfair Display italic, services list with service name and dual pricing (Studio/Domicile with strike-through for unavailable), and service selection that navigates to booking location screen",
+      "reqIds": [
+        "REQ-30"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-booking-location-screen-component-frontend-src-components-bookinglocation-tsx-with-back-button-service-recap-name-and-provider-location-choice-pills-domicile-studio-disabled-if-provider-doesn-t-offer-that-mode-dynamic-price-display-updating-based-on-selected-location-and-continue-button-that-navigates-to-date-selection-screen",
+      "title": "Create Booking Location screen component (frontend/src/components/BookingLocation.tsx) with back button, service recap (name and provider), location choice pills (Domicile/Studio, disabled if provider doesn't offer that mode), dynamic price display updating based on selected location, and Continue button that navigates to date selection screen",
+      "reqIds": [
+        "REQ-31"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-booking-date-screen-component-frontend-src-components-bookingdate-tsx-with-back-button-service-and-location-recap-date-selector-showing-next-4-days-as-pills-format-lun-15-jan-time-slots-grid-in-3-columns-showing-available-times-format-09-00-09-30-etc-selection-highlighting-with-sand-background-for-selected-date-and-time-and-continue-button-that-navigates-to-contact-form-screen",
+      "title": "Create Booking Date screen component (frontend/src/components/BookingDate.tsx) with back button, service and location recap, date selector showing next 4 days as pills (format: 'Lun 15 Jan'), time slots grid in 3 columns showing available times (format: '09:00', '09:30', etc.), selection highlighting with sand background for selected date and time, and Continue button that navigates to contact form screen",
+      "reqIds": [
+        "REQ-32"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-booking-contact-form-screen-component-frontend-src-components-bookingcontact-tsx-with-back-button-full-booking-recap-service-provider-location-date-time-price-form-fields-for-name-required-and-phone-required-conditional-address-field-required-only-if-location-is-domicile-field-validation-with-error-messages-confirm-button-that-validates-form-and-shows-success-toast-and-success-toast-that-displays-r-servation-confirm-e-and-auto-dismisses-after-3-seconds",
+      "title": "Create Booking Contact Form screen component (frontend/src/components/BookingContact.tsx) with back button, full booking recap (service, provider, location, date, time, price), form fields for name (required) and phone (required), conditional address field (required only if location is Domicile), field validation with error messages, Confirm button that validates form and shows success toast, and success toast that displays 'Réservation confirmée!' and auto-dismisses after 3 seconds",
+      "reqIds": [
+        "REQ-33"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-screen-transition-system-in-main-app-component-with-slide-horizontal-or-fade-animations-between-all-screens-splash-explorer-providerdetail-bookinglocation-bookingdate-bookingcontact-to-create-native-app-experience-without-page-reloads-using-css-transitions-with-300ms-duration",
+      "title": "Implement screen transition system in main App component with slide horizontal or fade animations between all screens (Splash, Explorer, ProviderDetail, BookingLocation, BookingDate, BookingContact) to create native app experience without page reloads, using CSS transitions with 300ms duration",
+      "reqIds": [
+        "REQ-34"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-frontend-src-app-tsx-to-render-appcontext-provider-wrapping-screen-router-that-conditionally-renders-current-screen-component-based-on-context-state-replacing-the-old-appv1-import",
+      "title": "Update frontend/src/App.tsx to render AppContext provider wrapping screen router that conditionally renders current screen component based on context state, replacing the old AppV1 import",
+      "reqIds": [
+        "REQ-35"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-nexus-logo-in-splash-screen-component-clickable-and-navigate-back-to-splash-screen-when-clicked-from-explorer-or-nexus-os-screens",
+      "title": "Make NEXUS logo in Splash screen component clickable and navigate back to Splash screen when clicked from Explorer or NEXUS OS screens",
+      "reqIds": [
+        "REQ-37"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-back-arrow-button-in-explorer-screen-header-that-navigates-back-to-splash-screen",
+      "title": "Add back arrow (←) button in Explorer screen header that navigates back to Splash screen",
+      "reqIds": [
+        "REQ-38"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-mode-pro-toggle-button-mode-pro-in-explorer-screen-that-navigates-to-nexus-os-screen",
+      "title": "Add MODE PRO toggle button (⇄ MODE PRO) in Explorer screen that navigates to NEXUS OS screen",
+      "reqIds": [
+        "REQ-39"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-mode-client-toggle-button-mode-client-in-nexus-os-screen-that-navigates-back-to-explorer-screen",
+      "title": "Add MODE CLIENT toggle button (⇄ MODE CLIENT) in NEXUS OS screen that navigates back to Explorer screen",
+      "reqIds": [
+        "REQ-40"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-gps-coordinates-latitude-and-longitude-as-hardcoded-data-for-all-6-existing-providers-in-appcontext-provider-data-array",
+      "title": "Add GPS coordinates (latitude and longitude) as hardcoded data for all 6 existing providers in AppContext provider data array",
+      "reqIds": [
+        "REQ-41"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-haversine-distance-calculation-utility-function-that-computes-distance-in-kilometers-between-two-gps-coordinate-pairs",
+      "title": "Implement Haversine distance calculation utility function that computes distance in kilometers between two GPS coordinate pairs",
+      "reqIds": [
+        "REQ-42"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-geolocation-filter-pill-autour-de-moi-in-explorer-screen-that-uses-navigator-geolocation-to-get-user-position-calculates-distances-to-all-providers-using-haversine-formula-and-sorts-results-by-distance-ascending",
+      "title": "Add geolocation filter pill (📍 Autour de moi) in Explorer screen that uses navigator.geolocation to get user position, calculates distances to all providers using Haversine formula, and sorts results by distance ascending",
+      "reqIds": [
+        "REQ-43"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-static-city-selector-filter-in-explorer-screen-with-options-lausanne-gen-ve-zurich-paris-and-tous-all-filtering-providers-by-their-hardcoded-city-property",
+      "title": "Add static city selector filter in Explorer screen with options: Lausanne, Genève, Zurich, Paris, and Tous (all), filtering providers by their hardcoded city property",
+      "reqIds": [
+        "REQ-44"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-city-property-to-all-6-providers-in-appcontext-data-array-with-values-from-lausanne-gen-ve-zurich-or-paris",
+      "title": "Add city property to all 6 providers in AppContext data array with values from Lausanne, Genève, Zurich, or Paris",
+      "reqIds": [
+        "REQ-45"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-display-calculated-distance-in-kilometers-format-x-km-on-each-provider-card-in-explorer-when-geolocation-filter-is-active",
+      "title": "Display calculated distance in kilometers (format: 'à X km') on each provider card in Explorer when geolocation filter is active",
+      "reqIds": [
+        "REQ-46"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-in-bookingdate-component-visually-disable-all-past-dates-and-past-time-slots-for-current-date-using-opacity-0-3-and-cursor-not-allowed-comparing-against-current-date-in-real-time",
+      "title": "In BookingDate component, visually disable all past dates and past time slots for current date using opacity 0.3 and cursor not-allowed, comparing against current Date() in real-time",
+      "reqIds": [
+        "REQ-47"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-clientlogin-screen-component-frontend-src-components-clientlogin-tsx-with-phone-number-input-field-and-simulated-4-digit-otp-code-displayed-in-toast-notification-implementing-local-frontend-validation-only",
+      "title": "Create ClientLogin screen component (frontend/src/components/ClientLogin.tsx) with phone number input field and simulated 4-digit OTP code displayed in toast notification, implementing local frontend validation only",
+      "reqIds": [
+        "REQ-48"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-clientdashboard-screen-component-frontend-src-components-clientdashboard-tsx-showing-user-s-current-reservations-reservation-history-provider-info-name-phone-address-and-ability-to-cancel-pending-requests",
+      "title": "Create ClientDashboard screen component (frontend/src/components/ClientDashboard.tsx) showing user's current reservations, reservation history, provider info (name, phone, address), and ability to cancel pending requests",
+      "reqIds": [
+        "REQ-49"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-user-icon-button-in-explorer-screen-header-that-navigates-to-clientlogin-screen",
+      "title": "Add user icon (👤) button in Explorer screen header that navigates to ClientLogin screen",
+      "reqIds": [
+        "REQ-50"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-prologin-screen-component-frontend-src-components-prologin-tsx-with-email-and-password-input-fields-validating-against-hardcoded-demo-account-pro-nexus-ch-nexus2025-with-frontend-only-validation",
+      "title": "Create ProLogin screen component (frontend/src/components/ProLogin.tsx) with email and password input fields, validating against hardcoded demo account (pro@nexus.ch / nexus2025) with frontend-only validation",
+      "reqIds": [
+        "REQ-51"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-existing-espace-pro-screen-completely-and-create-new-nexusos-screen-component-frontend-src-components-nexusos-tsx-with-4-fixed-tabs-radar-wallet-portfolio-agenda",
+      "title": "Replace existing Espace Pro screen completely and create new NexusOS screen component (frontend/src/components/NexusOS.tsx) with 4 fixed tabs: RADAR, WALLET, PORTFOLIO, AGENDA",
+      "reqIds": [
+        "REQ-52"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-radar-tab-in-nexusos-screen-showing-incoming-booking-requests-with-accepter-and-refuser-buttons-for-each-request",
+      "title": "Implement RADAR tab in NexusOS screen showing incoming booking requests with ACCEPTER and REFUSER buttons for each request",
+      "reqIds": [
+        "REQ-53"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-wallet-tab-in-nexusos-screen-displaying-balance-escrow-amount-s-questre-and-transaction-history",
+      "title": "Implement WALLET tab in NexusOS screen displaying balance, escrow amount (séquestre), and transaction history",
+      "reqIds": [
+        "REQ-54"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-portfolio-tab-in-nexusos-screen-with-empty-state-message-and-cr-er-mon-studio-button-that-navigates-to-builder-screen",
+      "title": "Implement PORTFOLIO tab in NexusOS screen with empty state message and 'Créer mon studio' button that navigates to Builder screen",
+      "reqIds": [
+        "REQ-55"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-builder-screen-component-frontend-src-components-builder-tsx-with-multi-step-form-including-logistics-step-that-requires-studio-address-and-gps-coordinates-when-au-studio-or-mixed-mode-is-selected",
+      "title": "Create Builder screen component (frontend/src/components/Builder.tsx) with multi-step form including logistics step that requires studio address and GPS coordinates when AU STUDIO or mixed mode is selected",
+      "reqIds": [
+        "REQ-56"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-booking-availability-bug-ensure-au-studio-option-in-bookinglocation-screen-is-available-and-not-showing-non-disponible-when-provider-has-configured-studio-address-and-gps-coordinates-in-builder",
+      "title": "Fix booking availability bug: ensure AU STUDIO option in BookingLocation screen is available and not showing 'Non disponible' when provider has configured studio address and GPS coordinates in Builder",
+      "reqIds": [
+        "REQ-57"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-agenda-tab-in-nexusos-screen-with-weekly-calendar-view-showing-time-slots-that-can-be-clicked-to-toggle-between-available-green-and-blocked-red-states",
+      "title": "Implement AGENDA tab in NexusOS screen with weekly calendar view showing time slots that can be clicked to toggle between available (green) and blocked (red) states",
+      "reqIds": [
+        "REQ-58"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-filter-out-blocked-time-slots-from-availability-in-bookingdate-component-based-on-provider-s-agenda-configuration-in-nexus-os",
+      "title": "Filter out blocked time slots from availability in BookingDate component based on provider's agenda configuration in NEXUS OS",
+      "reqIds": [
+        "REQ-59"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-appcontext-to-add-screen-states-for-all-new-screens-clientlogin-clientdashboard-prologin-nexusos-builder-and-implement-navigation-functions-for-these-screens",
+      "title": "Update AppContext to add screen states for all new screens: ClientLogin, ClientDashboard, ProLogin, NexusOS, Builder, and implement navigation functions for these screens",
+      "reqIds": [
+        "REQ-60"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-app-tsx-screen-router-to-include-conditional-rendering-for-all-new-screen-components-clientlogin-clientdashboard-prologin-nexusos-builder-with-proper-screen-transition-animations",
+      "title": "Update App.tsx screen router to include conditional rendering for all new screen components: ClientLogin, ClientDashboard, ProLogin, NexusOS, Builder with proper screen transition animations",
+      "reqIds": [
+        "REQ-61"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-store-client-and-pro-authentication-state-in-appcontext-using-local-state-management-including-logged-in-status-user-type-client-pro-and-session-data",
+      "title": "Store client and pro authentication state in AppContext using local state management, including logged-in status, user type (client/pro), and session data",
+      "reqIds": [
+        "REQ-62"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-prologin-screen-authentication-flow-that-validates-credentials-against-hardcoded-demo-account-pro-nexus-ch-nexus2025-displays-red-toast-identifiants-incorrects-for-invalid-credentials-and-navigates-to-nexusos-screen-upon-successful-authentication",
+      "title": "Create ProLogin screen authentication flow that validates credentials against hardcoded demo account (pro@nexus.ch / nexus2025), displays red toast 'Identifiants incorrects' for invalid credentials, and navigates to NexusOS screen upon successful authentication",
+      "reqIds": [
+        "REQ-63"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-radar-tab-in-nexusos-showing-incoming-booking-request-cards-with-avatar-initials-client-name-location-type-date-time-service-name-price-in-serif-font-refuser-dark-button-and-accepter-sand-button-actions-where-accepter-adds-green-border-with-accept-label-and-updates-counter-refuser-causes-fade-out-and-removal-and-empty-state-displays-centered-checkmark-circle-with-tout-est-calme-message",
+      "title": "Implement RADAR tab in NexusOS showing incoming booking request cards with avatar initials, client name, location type, date/time, service name, price in serif font, REFUSER (dark button) and ACCEPTER (sand button) actions where ACCEPTER adds green border with '✓ ACCEPTÉ' label and updates counter, REFUSER causes fade-out and removal, and empty state displays centered checkmark circle with 'TOUT EST CALME' message",
+      "reqIds": [
+        "REQ-64"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-wallet-tab-in-nexusos-with-balance-card-displaying-solde-total-and-amount-245-in-inter-900-52px-font-virement-and-analytics-buttons-escrow-card-with-icon-showing-en-attente-de-prestation-and-60-amount-and-transaction-history-list-showing-sarah-l-120-marc-d-45-sophie-m-80",
+      "title": "Implement WALLET tab in NexusOS with balance card displaying 'SOLDE TOTAL ↗' and amount '245.–' in Inter 900 52px font, VIREMENT and ANALYTICS buttons, escrow card with ⏳ icon showing 'En attente de prestation' and '60.–' amount, and transaction history list showing Sarah L. +120.–, Marc D. +45.–, Sophie M. +80.–",
+      "reqIds": [
+        "REQ-65"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-portfolio-tab-in-nexusos-with-initial-empty-state-showing-message-and-cr-er-mon-studio-button-that-navigates-to-builder-screen-and-after-publication-displays-studio-name-cover-photo-service-list-and-modifier-partager-buttons",
+      "title": "Implement PORTFOLIO tab in NexusOS with initial empty state showing message and 'CRÉER MON STUDIO' button that navigates to Builder screen, and after publication displays studio name, cover photo, service list, and Modifier/Partager buttons",
+      "reqIds": [
+        "REQ-66"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-builder-multi-step-form-with-step-1-artist-name-category-dropdown-for-barber-coiffure-esth-tique-massage-city-phone-bio-textarea-step-2-logistics-je-me-d-place-and-or-au-studio-checkboxes-with-both-options-allowed-conditional-studio-address-and-gps-coordinates-latitude-longitude-fields-required-when-au-studio-is-selected-step-3-services-service-name-dual-pricing-fields-for-domicile-and-studio-duration-ability-to-add-multiple-services-and-step-4-availability-days-of-week-with-toggleable-time-slots",
+      "title": "Create Builder multi-step form with Step 1 (artist name, category dropdown for Barber/Coiffure/Esthétique/Massage, city, phone, bio textarea), Step 2 Logistics (JE ME DÉPLACE and/or AU STUDIO checkboxes with both options allowed, conditional studio address and GPS coordinates latitude/longitude fields required when AU STUDIO is selected), Step 3 Services (service name, dual pricing fields for 🏠 Domicile and ✂️ Studio, duration, ability to add multiple services), and Step 4 Availability (days of week with toggleable time slots)",
+      "reqIds": [
+        "REQ-67"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-subscription-screen-after-builder-completion-with-offre-de-lancement-badge-pricing-display-showing-gratuit-le-premier-mois-puis-199-chf-an-list-of-advantages-with-green-checkmarks-and-commencer-gratuitement-button-that-publishes-studio-returns-to-nexusos-portfolio-tab-showing-published-studio-and-displays-studio-en-ligne-toast-notification",
+      "title": "Create subscription screen after Builder completion with 'OFFRE DE LANCEMENT' badge, pricing display showing 'GRATUIT le premier mois, puis 199 CHF/an', list of advantages with green checkmarks, and 'COMMENCER GRATUITEMENT' button that publishes studio, returns to NexusOS PORTFOLIO tab showing published studio, and displays '🚀 Studio en ligne!' toast notification",
+      "reqIds": [
+        "REQ-68"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-newly-published-studio-from-builder-to-explorer-screen-provider-list-with-all-configured-data-name-category-services-pricing-location-modes-gps-coordinates-availability-so-it-appears-alongside-existing-hardcoded-providers-and-is-searchable-filterable",
+      "title": "Add newly published studio from Builder to Explorer screen provider list with all configured data (name, category, services, pricing, location modes, GPS coordinates, availability) so it appears alongside existing hardcoded providers and is searchable/filterable",
+      "reqIds": [
+        "REQ-69"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-agenda-tab-in-nexusos-with-weekly-calendar-view-monday-through-sunday-showing-time-slots-from-09h-to-19h-clickable-slots-that-toggle-between-available-sand-background-and-blocked-red-dim-background-states-and-navigation-buttons-for-previous-next-week",
+      "title": "Implement AGENDA tab in NexusOS with weekly calendar view (Monday through Sunday) showing time slots from 09h to 19h, clickable slots that toggle between available (sand background) and blocked (red dim background) states, and navigation buttons for previous/next week",
+      "reqIds": [
+        "REQ-70"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-nexus-logo-clickable-throughout-the-application-explorer-nexusos-all-booking-screens-to-navigate-back-to-splash-screen",
+      "title": "Make NEXUS logo clickable throughout the application (Explorer, NexusOS, all booking screens) to navigate back to Splash screen",
+      "reqIds": [
+        "REQ-72"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-au-studio-availability-bug-in-bookinglocation-component-to-ensure-au-studio-option-is-selectable-and-not-showing-non-disponible-when-provider-has-configured-studio-address-and-gps-coordinates-in-builder-logistics-step",
+      "title": "Fix AU STUDIO availability bug in BookingLocation component to ensure AU STUDIO option is selectable and not showing 'Non disponible' when provider has configured studio address and GPS coordinates in Builder logistics step",
+      "reqIds": [
+        "REQ-74"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-geolocation-filter-autour-de-moi-in-explorer-screen-that-uses-navigator-geolocation-to-get-user-s-current-position-calculates-distances-to-all-providers-using-haversine-formula-sorts-results-by-distance-ascending-and-displays-distance-in-x-km-format-on-each-provider-card",
+      "title": "Implement geolocation filter '📍 Autour de moi' in Explorer screen that uses navigator.geolocation to get user's current position, calculates distances to all providers using Haversine formula, sorts results by distance ascending, and displays distance in 'X km' format on each provider card",
+      "reqIds": [
+        "REQ-75"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-appcontext-to-add-screen-state-for-builder-screen-add-subscription-screen-state-update-provider-data-structure-to-include-studio-configuration-address-gps-coordinates-availability-schedule-blocked-time-slots-and-add-pro-authentication-session-state",
+      "title": "Update AppContext to add screen state for Builder screen, add subscription screen state, update provider data structure to include studio configuration (address, GPS coordinates, availability schedule, blocked time slots), and add pro authentication session state",
+      "reqIds": [
+        "REQ-76"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-app-tsx-screen-router-to-include-conditional-rendering-for-builder-and-subscription-screens-with-proper-slide-transition-animations-matching-existing-screen-navigation-patterns",
+      "title": "Update App.tsx screen router to include conditional rendering for Builder and subscription screens with proper slide transition animations matching existing screen navigation patterns",
+      "reqIds": [
+        "REQ-77"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-13",
+      "summary": "Créer écran Splash NEXUS avec hero photo, logo stylisé, boutons Explorer/Espace Pro, animations fluides",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Créer écran Explorer avec filtres catégorie/mode, liste 6 prestataires hardcodés, cards avec cover photo gradient, compteur résultats",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Créer écran Fiche prestataire avec hero cover, bio, liste prestations, sélection service, double tarification domicile/studio",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Créer écran Booking - Lieu avec choix domicile/studio, récap prestation, mise à jour prix dynamique selon lieu",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Créer écran Booking - Date avec sélecteur jour (4 pills), sélecteur heure (grid 3 colonnes), gestion état sélection",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Créer écran Booking - Coordonnées avec formulaire validation (nom/téléphone/adresse conditionnelle), confirmation réservation, toast succès",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Implémenter système de transitions fluides entre écrans (slide horizontal ou fade) pour expérience native",
+      "reqIds": [
+        "REQ-19"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Créer design system global avec tokens couleurs (#0a0a0a, #E8D5B0, etc.), typographie (Inter/Playfair Display), composants réutilisables (btn-white, btn-sand, btn-dark, cards, fields)",
+      "reqIds": [
+        "REQ-20"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Configurer Google Fonts (Playfair Display + Inter) et structure CSS globale (CSS-in-JS inline ou fichier global, pas de Tailwind)",
+      "reqIds": [
+        "REQ-21"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-22",
+      "summary": "Créer contexte React pour gestion état global (prestataires, filtres, sélections booking) avec useState/useContext",
+      "reqIds": [
+        "REQ-22"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-23",
+      "summary": "Hardcoder les 6 prestataires (Julien Rossi, Mageste Labs, Sophiane Hair, Lucie Esthetics, Zen Touch, Noura Beauty) avec services, tarifs, modes",
+      "reqIds": [
+        "REQ-23"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-36",
+      "summary": "Update frontend/src/main.tsx to remove Tailwind-related setup and ensure QueryClient and InternetIdentityProvider remain configured while rendering the new App component",
+      "reqIds": [
+        "REQ-36"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-37",
+      "summary": "Navigation : Logo NEXUS cliquable retour Splash depuis Explorer et NEXUS OS, flèche ← header Explorer, toggle ⇄ MODE PRO / ⇄ MODE CLIENT entre Explorer et NEXUS OS",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-38",
+      "summary": "Géolocalisation : Filtre 📍 Autour de moi avec navigator.geolocation + calcul Haversine, sélecteur ville (Lausanne/Genève/Zurich/Paris/Tous), affichage distance 'à X km' sur cards, coordonnées GPS hardcodées pour 6 prestataires",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-39",
+      "summary": "Blocage créneaux passés : Désactiver visuellement (opacity 0.3, cursor not-allowed) jours passés et heures écoulées du jour actuel dans booking Date/Heure avec comparaison new Date()",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-40",
+      "summary": "Authentification client : Connexion par téléphone → OTP 4 chiffres simulé affiché dans toast → accès dashboard client, validation locale frontend uniquement",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-41",
+      "summary": "Dashboard client : Écran avec réservations en cours, historique, infos pro (nom/téléphone/adresse), possibilité annuler demande en attente, accessible via icône 👤 dans Explorer",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-42",
+      "summary": "Authentification pro : Connexion email + mot de passe validée contre liste hardcodée (pro@nexus.ch / nexus2025), validation locale frontend uniquement, accès à NEXUS OS",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-43",
+      "summary": "NEXUS OS complet : Remplacement total ancien espace pro, 4 onglets fixes RADAR (demandes entrantes Accept/Refuse), WALLET (solde/séquestre/historique), PORTFOLIO (état vide → bouton Créer mon studio → Builder), AGENDA (créneaux disponibles/bloqués)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-44",
+      "summary": "Builder avec adresse GPS : Étape Logistique si mode AU STUDIO ou mixte, saisie adresse complète + coordonnées GPS du studio obligatoires, fix bug 'Non disponible' pour permettre réservations studio si configuré",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-45",
+      "summary": "Agenda pro : 4ème onglet 📅 AGENDA dans NEXUS OS, vue semaine avec créneaux cliquables, marquer disponible (vert) ou bloqué (rouge), créneaux bloqués masqués dans booking flow client",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-54",
+      "summary": "Filter blocked time slots from BookingDate component availability based on provider's agenda configuration set in NexusOS AGENDA tab, preventing clients from selecting time slots that the provider has marked as blocked",
+      "reqIds": [
+        "REQ-71"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-56",
+      "summary": "Enhance BookingDate component to visually disable all past dates and past time slots for the current date by applying opacity 0.3 and cursor not-allowed styles, comparing against real-time current Date() to ensure elapsed hours on today are grayed out",
+      "reqIds": [
+        "REQ-73"
+      ],
+      "status": "pending"
+    }
+  ],
+  "projectName": "QuickReveal",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

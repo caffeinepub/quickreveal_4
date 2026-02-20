@@ -1,0 +1,257 @@
+/* ═══════════════════════════════
+   NEXUS DESIGN SYSTEM
+   Reset & Base Styles
+═══════════════════════════════ */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: 'Inter', system-ui, sans-serif;
+  background: #0a0a0a;
+  color: #ffffff;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  max-width: 430px;
+  margin: 0 auto;
+}
+
+/* ═══════════════════════════════
+   CSS CUSTOM PROPERTIES
+═══════════════════════════════ */
+
+:root {
+  --color-black: #0a0a0a;
+  --color-dark1: #111111;
+  --color-dark2: #1a1a1a;
+  --color-dark3: #222222;
+  --color-dark4: #2a2a2a;
+  --color-border: rgba(255, 255, 255, 0.09);
+  --color-border2: rgba(255, 255, 255, 0.15);
+  --color-white: #ffffff;
+  --color-off: rgba(255, 255, 255, 0.55);
+  --color-faint: rgba(255, 255, 255, 0.25);
+  --color-sand: #E8D5B0;
+  --color-sand-dim: rgba(232, 213, 176, 0.12);
+  --color-green: #3ecf8e;
+  --color-red: #e05252;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-pill: 999px;
+}
+
+/* ═══════════════════════════════
+   TYPOGRAPHY CLASSES
+═══════════════════════════════ */
+
+.title-main {
+  font-family: var(--font-sans);
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: -0.5px;
+}
+
+.accent-text {
+  font-family: var(--font-serif);
+  font-style: italic;
+}
+
+/* ═══════════════════════════════
+   BUTTON CLASSES
+═══════════════════════════════ */
+
+.btn-white {
+  display: block;
+  width: 100%;
+  background: var(--color-white);
+  color: var(--color-black);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 18px 24px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+}
+
+.btn-white:hover {
+  opacity: 0.9;
+}
+
+.btn-white:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-sand {
+  display: block;
+  width: 100%;
+  background: var(--color-sand);
+  color: var(--color-black);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  border: none;
+  border-radius: var(--radius-pill);
+  padding: 18px 24px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+}
+
+.btn-sand:hover {
+  filter: brightness(0.92);
+}
+
+.btn-sand:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-dark {
+  display: block;
+  width: 100%;
+  background: var(--color-dark2);
+  color: var(--color-white);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  border: 1px solid var(--color-border2);
+  border-radius: var(--radius-pill);
+  padding: 17px 24px;
+  cursor: pointer;
+  transition: all 0.18s;
+  text-align: center;
+}
+
+.btn-dark:hover {
+  background: var(--color-dark3);
+}
+
+/* ═══════════════════════════════
+   SCREEN TRANSITION ANIMATIONS
+═══════════════════════════════ */
+
+@keyframes slide-in-left {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in-right {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slide-out-left {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+@keyframes slide-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fade-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+.screen-enter-forward {
+  animation: slide-in-left 300ms ease-in-out forwards;
+}
+
+.screen-enter-backward {
+  animation: slide-in-right 300ms ease-in-out forwards;
+}
+
+.screen-exit-forward {
+  animation: slide-out-left 300ms ease-in-out forwards;
+}
+
+.screen-exit-backward {
+  animation: slide-out-right 300ms ease-in-out forwards;
+}
+
+.screen-fade-in {
+  animation: fade-in 300ms ease-in-out forwards;
+}
+
+.screen-fade-out {
+  animation: fade-out 300ms ease-in-out forwards;
+}
+
+/* ═══════════════════════════════
+   UTILITY CLASSES
+═══════════════════════════════ */
+
+.section-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--color-off);
+  margin-bottom: 12px;
+}
+
+.card {
+  background: var(--color-dark2);
+  border-radius: var(--radius);
+  border: 1px solid var(--color-border);
+}

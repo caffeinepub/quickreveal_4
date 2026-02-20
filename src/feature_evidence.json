@@ -1,0 +1,263 @@
+{
+  "kind": "feature_evidence_report",
+  "features": [
+    {
+      "featureId": "feature-create-prologin-screen-authentication-flow-that-validates-credentials-against-hardcoded-demo-account-pro-nexus-ch-nexus2025-displays-red-toast-identifiants-incorrects-for-invalid-credentials-and-navigates-to-nexusos-screen-upon-successful-authentication",
+      "featureTitle": "Create ProLogin screen authentication flow that validates credentials against hardcoded demo account (pro@nexus.ch / nexus2025), displays red toast 'Identifiants incorrects' for invalid credentials, and navigates to NexusOS screen upon successful authentication",
+      "files": [
+        "frontend/src/components/ProLogin.tsx",
+        "frontend/src/context/AppContext.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-63"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-radar-tab-in-nexusos-showing-incoming-booking-request-cards-with-avatar-initials-client-name-location-type-date-time-service-name-price-in-serif-font-refuser-dark-button-and-accepter-sand-button-actions-where-accepter-adds-green-border-with-accept-label-and-updates-counter-refuser-causes-fade-out-and-removal-and-empty-state-displays-centered-checkmark-circle-with-tout-est-calme-message",
+      "featureTitle": "Implement RADAR tab in NexusOS showing incoming booking request cards with avatar initials, client name, location type, date/time, service name, price in serif font, REFUSER (dark button) and ACCEPTER (sand button) actions where ACCEPTER adds green border with '✓ ACCEPTÉ' label and updates counter, REFUSER causes fade-out and removal, and empty state displays centered checkmark circle with 'TOUT EST CALME' message",
+      "files": [
+        "frontend/src/components/NexusOS.tsx",
+        "frontend/src/context/AppContext.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-64"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-wallet-tab-in-nexusos-with-balance-card-displaying-solde-total-and-amount-245-in-inter-900-52px-font-virement-and-analytics-buttons-escrow-card-with-icon-showing-en-attente-de-prestation-and-60-amount-and-transaction-history-list-showing-sarah-l-120-marc-d-45-sophie-m-80",
+      "featureTitle": "Implement WALLET tab in NexusOS with balance card displaying 'SOLDE TOTAL ↗' and amount '245.–' in Inter 900 52px font, VIREMENT and ANALYTICS buttons, escrow card with ⏳ icon showing 'En attente de prestation' and '60.–' amount, and transaction history list showing Sarah L. +120.–, Marc D. +45.–, Sophie M. +80.–",
+      "files": [
+        "frontend/src/components/NexusOS.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-65"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-portfolio-tab-in-nexusos-with-initial-empty-state-showing-message-and-cr-er-mon-studio-button-that-navigates-to-builder-screen-and-after-publication-displays-studio-name-cover-photo-service-list-and-modifier-partager-buttons",
+      "featureTitle": "Implement PORTFOLIO tab in NexusOS with initial empty state showing message and 'CRÉER MON STUDIO' button that navigates to Builder screen, and after publication displays studio name, cover photo, service list, and Modifier/Partager buttons",
+      "files": [
+        "frontend/src/components/NexusOS.tsx",
+        "frontend/src/context/AppContext.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-66"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-builder-multi-step-form-with-step-1-artist-name-category-dropdown-for-barber-coiffure-esth-tique-massage-city-phone-bio-textarea-step-2-logistics-je-me-d-place-and-or-au-studio-checkboxes-with-both-options-allowed-conditional-studio-address-and-gps-coordinates-latitude-longitude-fields-required-when-au-studio-is-selected-step-3-services-service-name-dual-pricing-fields-for-domicile-and-studio-duration-ability-to-add-multiple-services-and-step-4-availability-days-of-week-with-toggleable-time-slots",
+      "featureTitle": "Create Builder multi-step form with Step 1 (artist name, category dropdown for Barber/Coiffure/Esthétique/Massage, city, phone, bio textarea), Step 2 Logistics (JE ME DÉPLACE and/or AU STUDIO checkboxes with both options allowed, conditional studio address and GPS coordinates latitude/longitude fields required when AU STUDIO is selected), Step 3 Services (service name, dual pricing fields for 🏠 Domicile and ✂️ Studio, duration, ability to add multiple services), and Step 4 Availability (days of week with toggleable time slots)",
+      "files": [
+        "frontend/src/components/Builder.tsx",
+        "frontend/src/context/AppContext.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-67"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-subscription-screen-after-builder-completion-with-offre-de-lancement-badge-pricing-display-showing-gratuit-le-premier-mois-puis-199-chf-an-list-of-advantages-with-green-checkmarks-and-commencer-gratuitement-button-that-publishes-studio-returns-to-nexusos-portfolio-tab-showing-published-studio-and-displays-studio-en-ligne-toast-notification",
+      "featureTitle": "Create subscription screen after Builder completion with 'OFFRE DE LANCEMENT' badge, pricing display showing 'GRATUIT le premier mois, puis 199 CHF/an', list of advantages with green checkmarks, and 'COMMENCER GRATUITEMENT' button that publishes studio, returns to NexusOS PORTFOLIO tab showing published studio, and displays '🚀 Studio en ligne!' toast notification",
+      "files": [
+        "frontend/src/App.tsx",
+        "frontend/src/components/Subscription.tsx",
+        "frontend/src/context/AppContext.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-68"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-add-newly-published-studio-from-builder-to-explorer-screen-provider-list-with-all-configured-data-name-category-services-pricing-location-modes-gps-coordinates-availability-so-it-appears-alongside-existing-hardcoded-providers-and-is-searchable-filterable",
+      "featureTitle": "Add newly published studio from Builder to Explorer screen provider list with all configured data (name, category, services, pricing, location modes, GPS coordinates, availability) so it appears alongside existing hardcoded providers and is searchable/filterable",
+      "files": [
+        "frontend/src/components/Explorer.tsx",
+        "frontend/src/context/AppContext.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-69"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-agenda-tab-in-nexusos-with-weekly-calendar-view-monday-through-sunday-showing-time-slots-from-09h-to-19h-clickable-slots-that-toggle-between-available-sand-background-and-blocked-red-dim-background-states-and-navigation-buttons-for-previous-next-week",
+      "featureTitle": "Implement AGENDA tab in NexusOS with weekly calendar view (Monday through Sunday) showing time slots from 09h to 19h, clickable slots that toggle between available (sand background) and blocked (red dim background) states, and navigation buttons for previous/next week",
+      "files": [
+        "frontend/src/components/NexusOS.tsx",
+        "frontend/src/context/AppContext.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-70"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-make-nexus-logo-clickable-throughout-the-application-explorer-nexusos-all-booking-screens-to-navigate-back-to-splash-screen",
+      "featureTitle": "Make NEXUS logo clickable throughout the application (Explorer, NexusOS, all booking screens) to navigate back to Splash screen",
+      "files": [
+        "frontend/src/components/BookingLocation.tsx",
+        "frontend/src/components/Explorer.tsx",
+        "frontend/src/components/NexusOS.tsx",
+        "frontend/src/context/AppContext.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-72"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-fix-au-studio-availability-bug-in-bookinglocation-component-to-ensure-au-studio-option-is-selectable-and-not-showing-non-disponible-when-provider-has-configured-studio-address-and-gps-coordinates-in-builder-logistics-step",
+      "featureTitle": "Fix AU STUDIO availability bug in BookingLocation component to ensure AU STUDIO option is selectable and not showing 'Non disponible' when provider has configured studio address and GPS coordinates in Builder logistics step",
+      "files": [
+        "frontend/src/components/BookingLocation.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-74"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-geolocation-filter-autour-de-moi-in-explorer-screen-that-uses-navigator-geolocation-to-get-user-s-current-position-calculates-distances-to-all-providers-using-haversine-formula-sorts-results-by-distance-ascending-and-displays-distance-in-x-km-format-on-each-provider-card",
+      "featureTitle": "Implement geolocation filter '📍 Autour de moi' in Explorer screen that uses navigator.geolocation to get user's current position, calculates distances to all providers using Haversine formula, sorts results by distance ascending, and displays distance in 'X km' format on each provider card",
+      "files": [
+        "frontend/src/components/Explorer.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-75"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-appcontext-to-add-screen-state-for-builder-screen-add-subscription-screen-state-update-provider-data-structure-to-include-studio-configuration-address-gps-coordinates-availability-schedule-blocked-time-slots-and-add-pro-authentication-session-state",
+      "featureTitle": "Update AppContext to add screen state for Builder screen, add subscription screen state, update provider data structure to include studio configuration (address, GPS coordinates, availability schedule, blocked time slots), and add pro authentication session state",
+      "files": [
+        "frontend/src/context/AppContext.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-76"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-app-tsx-screen-router-to-include-conditional-rendering-for-builder-and-subscription-screens-with-proper-slide-transition-animations-matching-existing-screen-navigation-patterns",
+      "featureTitle": "Update App.tsx screen router to include conditional rendering for Builder and subscription screens with proper slide transition animations matching existing screen navigation patterns",
+      "files": [
+        "frontend/src/App.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0"
+      ],
+      "testIds": [
+        "REQ-77"
+      ],
+      "confidence": "high"
+    }
+  ]
+}

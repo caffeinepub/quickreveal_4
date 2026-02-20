@@ -1,0 +1,352 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Implement complete NEXUS OS professional space with authentication, dashboard tabs, and builder workflow",
+  "requirements": [
+    {
+      "id": "REQ-63",
+      "summary": "Create ProLogin screen authentication flow with hardcoded demo credentials and navigation to NexusOS",
+      "acceptanceCriteria": [
+        "ProLogin screen displays NEXUS OS logo with subtitle 'MODE PROFESSIONNEL'",
+        "Email and password fields use dark theme matching design system",
+        "SE CONNECTER button uses btn-sand styling",
+        "Invalid credentials trigger red toast with message 'Identifiants incorrects'",
+        "Valid credentials (pro@nexus.ch / nexus2025) navigate to NexusOS dashboard with transition animation"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProLogin.tsx",
+          "operation": "modify",
+          "description": "Update ProLogin component to add subtitle 'MODE PROFESSIONNEL' below logo, implement credential validation against hardcoded demo account (pro@nexus.ch / nexus2025), display red toast notification with message 'Identifiants incorrects' for invalid credentials, and navigate to NexusOS screen upon successful authentication using AppContext navigation method"
+        },
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Add proSession state to track authenticated professional user session, add navigateToNexusOS method to handle navigation from ProLogin to NexusOS screen with forward transition animation"
+        }
+      ]
+    },
+    {
+      "id": "REQ-64",
+      "summary": "Implement RADAR tab showing incoming booking request cards with accept/refuse actions and empty state",
+      "acceptanceCriteria": [
+        "RADAR tab displays list of incoming booking requests as cards",
+        "Each card shows avatar with client initials, client name, location type, date/time",
+        "Service name appears below client info, price displayed on right in serif font",
+        "REFUSER button uses dark styling and triggers fade-out animation followed by card removal",
+        "ACCEPTER button uses sand styling and adds green border with '✓ ACCEPTÉ' label",
+        "Counter updates when requests are accepted",
+        "Empty state shows centered checkmark circle with 'TOUT EST CALME' text",
+        "2 hardcoded demo booking requests are displayed initially"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Implement RADAR tab content to display incoming booking requests from AppContext as cards with avatar showing client initials, client name, location type (domicile/studio), formatted date/time, service name below client info, price in serif font on right, REFUSER button with dark styling triggering fade-out animation and card removal from state, ACCEPTER button with btn-sand styling adding green border with '✓ ACCEPTÉ' label and updating counter, empty state showing centered checkmark circle icon with 'TOUT EST CALME' message when no requests remain"
+        },
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Add incomingBookingRequests array to state containing 2 hardcoded demo booking requests with client name, location type, date/time, service name, price fields, add acceptBookingRequest and refuseBookingRequest methods to modify request status and update counter"
+        }
+      ]
+    },
+    {
+      "id": "REQ-65",
+      "summary": "Implement WALLET tab with balance card, escrow card, and transaction history",
+      "acceptanceCriteria": [
+        "WALLET tab displays balance card with 'SOLDE TOTAL ↗' label and '245.–' in Inter 900 52px",
+        "VIREMENT and ANALYTICS buttons are present and styled appropriately",
+        "Escrow card shows ⏳ icon with 'En attente de prestation' text and '60.–' amount",
+        "Transaction history displays three hardcoded entries: Sarah L. +120.–, Marc D. +45.–, Sophie M. +80.–"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Implement WALLET tab content with balance card displaying 'SOLDE TOTAL ↗' label and '245.–' amount styled in Inter 900 52px font, VIREMENT and ANALYTICS buttons with appropriate styling, escrow card showing ⏳ icon with 'En attente de prestation' text and '60.–' amount, transaction history list displaying three hardcoded entries (Sarah L. +120.–, Marc D. +45.–, Sophie M. +80.–) with proper typography and spacing"
+        }
+      ]
+    },
+    {
+      "id": "REQ-66",
+      "summary": "Implement PORTFOLIO tab with empty state and published studio view",
+      "acceptanceCriteria": [
+        "PORTFOLIO tab shows empty state with descriptive message and 'CRÉER MON STUDIO' button",
+        "Clicking 'CRÉER MON STUDIO' navigates to Builder screen",
+        "After studio publication, displays studio name with cover photo",
+        "Published state shows list of configured services",
+        "Modifier and Partager buttons are displayed in published state"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Implement PORTFOLIO tab content with conditional rendering: empty state showing descriptive message and 'CRÉER MON STUDIO' button that calls navigateToBuilder method, published state displaying studio name, cover photo from AppContext publishedStudio data, list of configured services with names and pricing, Modifier button calling navigateToBuilder with edit mode, Partager button for sharing functionality"
+        },
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Add publishedStudio state object to store studio configuration including name, cover photo reference, services array, add navigateToBuilder method to transition to Builder screen"
+        }
+      ]
+    },
+    {
+      "id": "REQ-67",
+      "summary": "Create Builder multi-step form with 4 steps for studio configuration",
+      "acceptanceCriteria": [
+        "Step 1 includes fields for artist name, category dropdown (Barber/Coiffure/Esthétique/Massage), city, phone, and bio textarea",
+        "Step 2 includes JE ME DÉPLACE and AU STUDIO checkboxes allowing both to be selected",
+        "When AU STUDIO is selected in Step 2, studio address and GPS coordinates (latitude/longitude) fields become required",
+        "Step 3 includes service name field, dual pricing inputs for 🏠 Domicile and ✂️ Studio, duration field, and add service button for multiple services",
+        "Step 4 displays days of week with toggleable time slots for availability configuration",
+        "Builder includes PUBLIER button on final step"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Builder.tsx",
+          "operation": "modify",
+          "description": "Expand Builder component to implement complete 4-step wizard: Step 1 with artist name input, category dropdown (Barber/Coiffure/Esthétique/Massage options), city input, phone input, bio textarea; Step 2 Logistics with JE ME DÉPLACE and AU STUDIO checkboxes allowing both selections, conditional studio address and GPS coordinates (latitude/longitude) fields that become required when AU STUDIO is checked; Step 3 Services with service name input, dual pricing fields labeled 🏠 Domicile and ✂️ Studio, duration input, add service button to create multiple service entries; Step 4 Availability with days of week grid and toggleable time slots for each day; PUBLIER button on final step that calls navigateToSubscription method to proceed to subscription screen"
+        },
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Add builderData state object to store form data across all 4 steps including artist name, category, city, phone, bio, service modes (JE ME DÉPLACE, AU STUDIO), studio address, GPS coordinates, services array with name/domicilePricing/studioPricing/duration fields, availability schedule, add navigateToSubscription method for Builder to subscription screen transition"
+        }
+      ]
+    },
+    {
+      "id": "REQ-68",
+      "summary": "Create subscription screen with pricing and publication flow",
+      "acceptanceCriteria": [
+        "Subscription screen displays 'OFFRE DE LANCEMENT' badge prominently",
+        "Pricing shows 'GRATUIT le premier mois, puis 199 CHF/an'",
+        "List of advantages displayed with green checkmark icons",
+        "'COMMENCER GRATUITEMENT' button triggers studio publication",
+        "After publication, navigates back to NexusOS PORTFOLIO tab",
+        "PORTFOLIO tab now displays published studio data",
+        "Toast notification with '🚀 Studio en ligne!' message appears and auto-dismisses"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Subscription.tsx",
+          "operation": "create",
+          "description": "Create Subscription screen component displaying 'OFFRE DE LANCEMENT' badge at top, pricing section showing 'GRATUIT le premier mois, puis 199 CHF/an' in prominent typography, list of advantages with green checkmark icons (✓), 'COMMENCER GRATUITEMENT' button styled with btn-sand that calls publishStudio method from AppContext to save builderData to publishedStudio state, navigate back to NexusOS screen with PORTFOLIO tab active, and trigger toast notification with '🚀 Studio en ligne!' message"
+        },
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Add subscription screen state and navigateToSubscription method, add publishStudio method that copies builderData to publishedStudio state, sets active NexusOS tab to PORTFOLIO, navigates to NexusOS screen, and triggers success toast notification"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add Subscription screen to router with conditional rendering based on AppContext screen state, apply slide-left transition animation when navigating from Builder to Subscription, apply slide-right transition when navigating back from Subscription to NexusOS"
+        }
+      ]
+    },
+    {
+      "id": "REQ-69",
+      "summary": "Add published studio to Explorer provider list with full data integration",
+      "acceptanceCriteria": [
+        "Published studio from Builder appears in Explorer provider list",
+        "Studio includes all configured data: name, category, services with pricing, location modes",
+        "Studio includes GPS coordinates for geolocation filtering",
+        "Studio respects configured availability when showing booking time slots",
+        "Studio is filterable by category, mode, and city filters in Explorer",
+        "Studio appears in geolocation-based distance sorting when applicable"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Update publishStudio method to add published studio to providers array with complete data structure including id, name, category, services array with pricing, location modes (domicile/studio booleans), GPS coordinates (latitude/longitude), availability schedule, city, phone, bio, ensuring it integrates with existing provider data format used by Explorer component"
+        },
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Verify Explorer component correctly filters and displays dynamically added providers from AppContext providers array, ensure category filter includes published studio category, mode filter respects studio's configured service modes, city filter matches published studio city, geolocation distance calculation uses published studio GPS coordinates"
+        },
+        {
+          "path": "frontend/src/components/BookingDate.tsx",
+          "operation": "modify",
+          "description": "Update time slot generation to respect provider's configured availability schedule from Builder Step 4, filter available slots based on days and time ranges set in provider's availability configuration"
+        }
+      ]
+    },
+    {
+      "id": "REQ-70",
+      "summary": "Implement AGENDA tab with weekly calendar view and slot blocking",
+      "acceptanceCriteria": [
+        "AGENDA tab displays weekly calendar with days Monday through Sunday",
+        "Time slots from 09h to 19h are shown for each day",
+        "Clicking a time slot toggles between available state (sand background) and blocked state (red dim background)",
+        "Previous week and next week navigation buttons allow browsing different weeks",
+        "Blocked time slots are stored in provider's agenda configuration"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Implement AGENDA tab content with weekly calendar view showing Monday through Sunday columns, time slots from 09h to 19h displayed as rows, clickable slots that toggle between available state (sand background) and blocked state (red dim background with opacity), previous/next week navigation buttons to browse different weeks using date offset, blocked slots stored in AppContext agendaBlockedSlots state"
+        },
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Add agendaBlockedSlots state as Map or array storing blocked time slots with day of week and time identifiers, add toggleAgendaSlot method to add/remove slots from blocked list, add currentAgendaWeek state to track displayed week offset for navigation"
+        }
+      ]
+    },
+    {
+      "id": "REQ-71",
+      "summary": "Filter blocked time slots from BookingDate component based on provider agenda configuration",
+      "acceptanceCriteria": [
+        "BookingDate component reads provider's agenda configuration from AppContext",
+        "Time slots marked as blocked in AGENDA tab do not appear in available slots",
+        "Filtering applies to specific days and times based on provider's settings",
+        "Only available time slots are displayed to clients during booking flow"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BookingDate.tsx",
+          "operation": "modify",
+          "description": "Add filtering logic to check selectedProvider's agendaBlockedSlots from AppContext when generating available time slots, exclude any slots matching blocked day of week and time from the displayed options, ensure blocked slots are filtered in addition to existing past time and provider availability filters"
+        }
+      ]
+    },
+    {
+      "id": "REQ-72",
+      "summary": "Make NEXUS logo clickable throughout application to navigate back to Splash screen",
+      "acceptanceCriteria": [
+        "NEXUS logo in Explorer header is clickable and navigates to Splash",
+        "NEXUS logo in NexusOS header is clickable and navigates to Splash",
+        "NEXUS logo in all booking flow screens is clickable and navigates to Splash",
+        "Click triggers appropriate screen transition animation"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Wrap NEXUS logo element in clickable handler that calls navigateToSplash method from AppContext with backward transition animation"
+        },
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Wrap NEXUS logo element in clickable handler that calls navigateToSplash method from AppContext with backward transition animation"
+        },
+        {
+          "path": "frontend/src/components/BookingLocation.tsx",
+          "operation": "modify",
+          "description": "Wrap NEXUS logo element in clickable handler that calls navigateToSplash method from AppContext with backward transition animation"
+        },
+        {
+          "path": "frontend/src/components/BookingDate.tsx",
+          "operation": "modify",
+          "description": "Wrap NEXUS logo element in clickable handler that calls navigateToSplash method from AppContext with backward transition animation"
+        },
+        {
+          "path": "frontend/src/components/BookingContact.tsx",
+          "operation": "modify",
+          "description": "Wrap NEXUS logo element in clickable handler that calls navigateToSplash method from AppContext with backward transition animation"
+        },
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Add navigateToSplash method to handle navigation from any screen back to Splash with backward transition animation"
+        }
+      ]
+    },
+    {
+      "id": "REQ-73",
+      "summary": "Enhance BookingDate to visually disable past dates and time slots",
+      "acceptanceCriteria": [
+        "Past dates are visually disabled with opacity 0.3 and cursor not-allowed",
+        "For current date, time slots that have passed are visually disabled",
+        "Real-time comparison uses current Date() to determine elapsed times",
+        "Past dates and times are not selectable",
+        "Visual feedback clearly indicates unavailable past slots"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BookingDate.tsx",
+          "operation": "modify",
+          "description": "Add real-time date comparison using new Date() to identify past dates and elapsed time slots for current date, apply opacity 0.3 and cursor not-allowed CSS styles to past date buttons and past time slot buttons, disable click handlers for past dates and times to prevent selection, ensure visual distinction between past unavailable slots and provider-blocked unavailable slots"
+        }
+      ]
+    },
+    {
+      "id": "REQ-74",
+      "summary": "Fix AU STUDIO availability bug in BookingLocation component",
+      "acceptanceCriteria": [
+        "BookingLocation component checks if provider has configured studio address and GPS coordinates",
+        "AU STUDIO option is enabled when studio address and GPS are present in provider data",
+        "AU STUDIO option shows 'Non disponible' only when studio is not configured",
+        "Proper validation of studio configuration before displaying availability"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BookingLocation.tsx",
+          "operation": "modify",
+          "description": "Update AU STUDIO option availability logic to check if selectedProvider has non-empty studioAddress field and valid GPS coordinates (latitude and longitude), enable AU STUDIO option and remove 'Non disponible' label when studio configuration is present, only show 'Non disponible' when studio address or GPS coordinates are missing or invalid"
+        }
+      ]
+    },
+    {
+      "id": "REQ-75",
+      "summary": "Implement geolocation filter '📍 Autour de moi' in Explorer with distance sorting",
+      "acceptanceCriteria": [
+        "Explorer includes '📍 Autour de moi' filter pill",
+        "Clicking filter requests user's geolocation via navigator.geolocation",
+        "Calculates distance to each provider using existing Haversine utility function",
+        "Sorts provider list by calculated distance in ascending order",
+        "Displays distance in 'à X km' format on each provider card when filter is active",
+        "Handles geolocation permission denial gracefully"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Add '📍 Autour de moi' filter pill to filter section, implement click handler to request user geolocation via navigator.geolocation API with error handling for permission denial, calculate distance from user coordinates to each provider's GPS coordinates using existing haversine utility function from frontend/src/utils/haversine.ts, sort filtered providers by calculated distance in ascending order, display 'à X km' format on provider cards when geolocation filter is active, store user coordinates and geolocation active state in component state"
+        }
+      ]
+    },
+    {
+      "id": "REQ-76",
+      "summary": "Update AppContext to support new screens and extended provider data structure",
+      "acceptanceCriteria": [
+        "AppContext includes Builder screen state with navigation function",
+        "AppContext includes subscription screen state with navigation function",
+        "Provider data structure extended to store studio address and GPS coordinates",
+        "Provider data structure includes availability schedule and blocked time slots",
+        "Pro authentication session state tracks logged-in pro user",
+        "Navigation functions support all new screens with proper transitions"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Add Builder screen type to screen state enum, add Subscription screen type to screen state enum, add navigateToBuilder and navigateToSubscription navigation methods with forward/backward transition support, extend Provider type interface to include studioAddress string, gpsCoordinates object with latitude/longitude numbers, availabilitySchedule object mapping days to time ranges, agendaBlockedSlots array, add proSession state object to track authenticated professional user with email field, add builderData state for storing form data across Builder steps, add publishedStudio state for storing completed studio configuration"
+        }
+      ]
+    },
+    {
+      "id": "REQ-77",
+      "summary": "Update App.tsx router to include Builder and Subscription screens with transitions",
+      "acceptanceCriteria": [
+        "App.tsx router includes Builder screen rendering",
+        "App.tsx router includes subscription screen rendering",
+        "Screen transitions use existing slide-left/slide-right animations",
+        "Transitions maintain consistent 300ms duration",
+        "Navigation direction (forward/backward) determines animation direction"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add conditional rendering for Builder screen in ScreenRouter based on AppContext screen state, add conditional rendering for Subscription screen in ScreenRouter based on AppContext screen state, apply slide-left animation class for forward transitions to Builder and Subscription screens, apply slide-right animation class for backward transitions from these screens, ensure 300ms duration matches existing screen transition timing"
+        }
+      ]
+    }
+  ]
+}

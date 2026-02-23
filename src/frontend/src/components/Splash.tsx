@@ -37,7 +37,7 @@ const Splash: React.FC = () => {
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(10, 10, 10, 0.4)',
+          background: 'rgba(10, 10, 10, 0.5)',
         }}
       />
 
@@ -54,7 +54,7 @@ const Splash: React.FC = () => {
             marginBottom: '6px',
           }}
         >
-          NEXUS<span style={{ color: '#6b7dff' }}>.</span>
+          NEXUS
         </div>
         <div
           style={{
@@ -63,15 +63,24 @@ const Splash: React.FC = () => {
             fontSize: '18px',
             color: 'rgba(255, 255, 255, 0.55)',
             marginBottom: '40px',
+            lineHeight: 1.6,
           }}
         >
-          Connect.
+          Votre réseau beauté & bien-être
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          <button className="btn-white" onClick={() => setCurrentScreen('explorer')}>
+          <button
+            className="btn-sand"
+            onClick={() => setCurrentScreen('explorer')}
+          >
             EXPLORER
           </button>
-          <button className="btn-dark">ESPACE PRO</button>
+          <button
+            className="btn-outline-white"
+            onClick={() => setCurrentScreen('proLogin')}
+          >
+            ESPACE PRO
+          </button>
         </div>
       </div>
     </div>

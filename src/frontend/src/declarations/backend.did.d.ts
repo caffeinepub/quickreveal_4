@@ -30,7 +30,31 @@ export interface Service {
   'name' : string,
   'price' : bigint,
 }
+export interface ShoppingItem {
+  'productName' : string,
+  'currency' : string,
+  'quantity' : bigint,
+  'priceInCents' : bigint,
+  'productDescription' : string,
+}
+export interface StripeConfiguration {
+  'allowedCountries' : Array<string>,
+  'secretKey' : string,
+}
+export type StripeSessionStatus = {
+    'completed' : { 'userPrincipal' : [] | [string], 'response' : string }
+  } |
+  { 'failed' : { 'error' : string } };
 export type Time = bigint;
+export interface TransformationInput {
+  'context' : Uint8Array,
+  'response' : http_request_result,
+}
+export interface TransformationOutput {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
+}
 export interface UserProfile {
   'name' : string,
   'email' : string,
@@ -39,12 +63,51 @@ export interface UserProfile {
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
+export interface _CaffeineStorageCreateCertificateResult {
+  'method' : string,
+  'blob_hash' : string,
+}
+export interface _CaffeineStorageRefillInformation {
+  'proposed_top_up_amount' : [] | [bigint],
+}
+export interface _CaffeineStorageRefillResult {
+  'success' : [] | [boolean],
+  'topped_up_amount' : [] | [bigint],
+}
+export interface http_header { 'value' : string, 'name' : string }
+export interface http_request_result {
+  'status' : bigint,
+  'body' : Uint8Array,
+  'headers' : Array<http_header>,
+}
 export interface _SERVICE {
+  '_caffeineStorageBlobIsLive' : ActorMethod<[Uint8Array], boolean>,
+  '_caffeineStorageBlobsToDelete' : ActorMethod<[], Array<Uint8Array>>,
+  '_caffeineStorageConfirmBlobDeletion' : ActorMethod<
+    [Array<Uint8Array>],
+    undefined
+  >,
+  '_caffeineStorageCreateCertificate' : ActorMethod<
+    [string],
+    _CaffeineStorageCreateCertificateResult
+  >,
+  '_caffeineStorageRefillCashier' : ActorMethod<
+    [[] | [_CaffeineStorageRefillInformation]],
+    _CaffeineStorageRefillResult
+  >,
+  '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
   'addCrib' : ActorMethod<[string, string, bigint], undefined>,
   'addService' : ActorMethod<[string, string, bigint, bigint], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'cancelReservation' : ActorMethod<[Principal, string], undefined>,
+  /**
+   * / Creates Stripe checkout session.
+   */
+  'createCheckoutSession' : ActorMethod<
+    [Array<ShoppingItem>, string, string],
+    string
+  >,
   'getAllCribs' : ActorMethod<[], Array<BabyCribView>>,
   'getAllReservations' : ActorMethod<[], Array<Reservation>>,
   'getAvailableServices' : ActorMethod<[], Array<Service>>,
@@ -52,15 +115,31 @@ export interface _SERVICE {
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getCrib' : ActorMethod<[string], BabyCribView>,
   'getLoyaltyPoints' : ActorMethod<[Principal], bigint>,
+  /**
+   * / Gets Stripe session status.
+   */
+  'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'getUserReservations' : ActorMethod<[Principal], Array<Reservation>>,
   'initializeCribs' : ActorMethod<[], undefined>,
   'initializeServices' : ActorMethod<[], undefined>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  /**
+   * / Checks if Stripe is configured.
+   */
+  'isStripeConfigured' : ActorMethod<[], boolean>,
   'removeCrib' : ActorMethod<[string], undefined>,
   'reserveCrib' : ActorMethod<[Principal, string, string, Time], string>,
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
+  /**
+   * / Sets Stripe configuration (admin only)
+   */
+  'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
   'spendLoyaltyPoints' : ActorMethod<[Principal, bigint], undefined>,
+  /**
+   * / Transform query (used internally).
+   */
+  'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];

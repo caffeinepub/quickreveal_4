@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Types
 export interface Service {
@@ -7,6 +7,26 @@ export interface Service {
   priceStudio: number | null;
   priceDomicile: number | null;
   duration: string;
+  photos?: string[];
+}
+
+export interface Subscription {
+  status: 'none' | 'trial' | 'active' | 'cancelled';
+  trialEndsAt?: number | null;
+  nextBillingDate?: number | null;
+  paymentMethod?: {
+    cardLast4: string;
+    cardExpiry: string;
+  } | null;
+}
+
+export interface Review {
+  id: string;
+  providerId: string;
+  clientName: string;
+  rating: number;
+  comment: string;
+  date: number;
 }
 
 export interface Provider {
@@ -14,7 +34,7 @@ export interface Provider {
   name: string;
   category: string;
   categoryLabel: string;
-  city: string;
+  city: string | string[];
   modes: string[];
   bio: string;
   priceFrom: number;
@@ -27,6 +47,12 @@ export interface Provider {
   studioLng?: number;
   blockedSlots?: Array<{ date: string; time: string }>;
   availability?: { [day: string]: string[] };
+  coverPhoto?: string | null;
+  gallery?: string[];
+  subscription?: Subscription;
+  rating?: number;
+  reviewCount?: number;
+  reviews?: Review[];
 }
 
 export interface BookingFormData {
@@ -76,7 +102,7 @@ export interface ClientReservation {
 export interface PublishedStudio {
   name: string;
   category: string;
-  city: string;
+  city: string | string[];
   phone: string;
   bio: string;
   modes: string[];
@@ -88,9 +114,21 @@ export interface PublishedStudio {
     priceDomicile: number | null;
     priceStudio: number | null;
     duration: string;
+    photos?: string[];
   }>;
   availability: { [day: string]: string[] };
   coverPhotoUrl: string;
+  coverPhoto?: string | null;
+  gallery?: string[];
+}
+
+export interface QuoteData {
+  size: string;
+  complexity: string;
+  color: string;
+  style: string;
+  calculatedPrice: number;
+  serviceDescription: string;
 }
 
 export type ScreenType =
@@ -127,6 +165,8 @@ interface AppState {
   publishedStudio: PublishedStudio | null;
   activeNexusTab: 'radar' | 'wallet' | 'portfolio' | 'agenda';
   currentAgendaWeekOffset: number;
+  quoteData: QuoteData | null;
+  userRole: 'artist' | 'client' | null;
   setCurrentScreen: (screen: ScreenType) => void;
   setSelectedCategory: (category: string) => void;
   setSelectedMode: (mode: string) => void;
@@ -136,6 +176,7 @@ interface AppState {
   setSelectedLocation: (location: 'domicile' | 'studio' | null) => void;
   setSelectedDateTime: (dateTime: SelectedDateTime | null) => void;
   setBookingFormData: (data: BookingFormData) => void;
+  setQuoteData: (data: QuoteData | null) => void;
   goToSplash: () => void;
   goToExplorer: () => void;
   goToClientLogin: () => void;
@@ -154,8 +195,13 @@ interface AppState {
   updateProviderStudio: (address: string, lat: number, lng: number) => void;
   toggleAgendaSlot: (date: string, time: string) => void;
   publishStudio: (studio: PublishedStudio) => void;
+  unpublishProvider: () => void;
   setActiveNexusTab: (tab: 'radar' | 'wallet' | 'portfolio' | 'agenda') => void;
   setCurrentAgendaWeekOffset: (offset: number) => void;
+  updateSubscription: (subscription: Subscription) => void;
+  cancelSubscription: () => void;
+  submitReview: (providerId: string, clientName: string, rating: number, comment: string) => void;
+  calculateAverageRating: (providerId: string) => number;
 }
 
 const AppContext = createContext<AppState | undefined>(undefined);
@@ -165,12 +211,12 @@ const INITIAL_PROVIDERS: Provider[] = [
   {
     id: 'p1',
     name: 'JULIEN ROSSI',
-    category: 'coiffure',
-    categoryLabel: 'Coiffure',
-    city: 'Lausanne',
+    category: 'barber',
+    categoryLabel: 'Barber',
+    city: ['Lausanne', 'Genève'],
     modes: ['domicile', 'salon'],
-    bio: "L'art du rasage royal. Une précision chirurgicale pour une élite exigeante.",
-    priceFrom: 40,
+    bio: "Coupe et taille de barbe avec précision. Style classique et moderne.",
+    priceFrom: 45,
     coverPhotoUrl: '/assets/generated/provider-julien-rossi.dim_800x600.png',
     lat: 46.5197,
     lng: 6.6323,
@@ -180,44 +226,34 @@ const INITIAL_PROVIDERS: Provider[] = [
     services: [
       {
         id: 's1',
-        name: 'Coupe & Barbe (Domicile)',
-        priceStudio: null,
+        name: 'Coupe homme',
+        priceStudio: 45,
         priceDomicile: 60,
-        duration: '60 min',
+        duration: '45 min',
       },
       {
         id: 's2',
-        name: 'Coupe Studio',
-        priceStudio: 40,
-        priceDomicile: null,
-        duration: '45 min',
-      },
-      {
-        id: 's3',
-        name: 'Dégradé Supreme',
-        priceStudio: 50,
-        priceDomicile: 60,
-        duration: '45 min',
-      },
-      {
-        id: 's4',
-        name: 'Barbe Sculptée',
+        name: 'Barbe',
         priceStudio: 30,
-        priceDomicile: null,
-        duration: '20 min',
+        priceDomicile: 40,
+        duration: '30 min',
       },
     ],
     blockedSlots: [],
+    subscription: { status: 'active' },
+    rating: 4.8,
+    reviewCount: 127,
+    reviews: [],
   },
   {
     id: 'p2',
     name: 'MAGESTE LABS',
     category: 'coiffure',
     categoryLabel: 'Coiffure',
-    city: 'Payerne',
+    city: ['Payerne'],
     modes: ['salon'],
-    bio: "L'art du rasage royal. Une précision chirurgicale pour une élite exigeante.",
-    priceFrom: 30,
+    bio: "Salon de coiffure moderne. Coupes tendances et colorations.",
+    priceFrom: 60,
     coverPhotoUrl: '/assets/generated/provider-mageste-labs.dim_800x600.png',
     lat: 46.8119,
     lng: 6.9378,
@@ -226,39 +262,66 @@ const INITIAL_PROVIDERS: Provider[] = [
     studioLng: 6.9378,
     services: [
       {
-        id: 's5',
-        name: 'Dégradé Supreme',
-        priceStudio: 50,
-        priceDomicile: null,
-        duration: '45 min',
-      },
-      {
-        id: 's6',
-        name: 'Barbe Sculptée',
-        priceStudio: 30,
-        priceDomicile: null,
-        duration: '20 min',
-      },
-      {
-        id: 's7',
-        name: 'Rituel Royal',
+        id: 's3',
+        name: 'Coupe femme',
         priceStudio: 60,
         priceDomicile: null,
-        duration: '75 min',
+        duration: '60 min',
+      },
+      {
+        id: 's4',
+        name: 'Coloration',
+        priceStudio: 120,
+        priceDomicile: null,
+        duration: '2h',
       },
     ],
     blockedSlots: [],
+    subscription: { status: 'active' },
+    rating: 4.9,
+    reviewCount: 89,
+    reviews: [],
   },
   {
     id: 'p3',
     name: 'SOPHIANE HAIR',
-    category: 'barber',
-    categoryLabel: 'Barber',
-    city: 'Genève',
+    category: 'coiffure',
+    categoryLabel: 'Coiffure',
+    city: ['Lausanne'],
     modes: ['domicile', 'salon'],
-    bio: "Coupe, couleur et soin. L'excellence capillaire à domicile ou en salon.",
-    priceFrom: 55,
+    bio: "Coiffure à domicile ou en salon. Spécialiste des cheveux afro et texturés.",
+    priceFrom: 50,
     coverPhotoUrl: '/assets/generated/provider-sophiane-hair.dim_800x600.png',
+    lat: 46.5197,
+    lng: 6.6323,
+    studioAddress: 'Rue du Simplon 8, 1006 Lausanne',
+    studioLat: 46.5197,
+    studioLng: 6.6323,
+    services: [
+      {
+        id: 's5',
+        name: 'Coupe + Brushing',
+        priceStudio: 50,
+        priceDomicile: 70,
+        duration: '90 min',
+      },
+    ],
+    blockedSlots: [],
+    subscription: { status: 'active' },
+    rating: 4.7,
+    reviewCount: 64,
+    reviews: [],
+  },
+  {
+    id: 'p4',
+    name: 'LUCIE ESTHETICS',
+    category: 'esthétique',
+    categoryLabel: 'Esthétique',
+    city: ['Genève'],
+    modes: ['salon'],
+    bio: "Soins du visage et épilation. Produits bio et naturels.",
+    priceFrom: 40,
+    coverPhotoUrl: '/assets/generated/provider-lucie-esthetics.dim_800x600.png',
     lat: 46.2044,
     lng: 6.1432,
     studioAddress: 'Rue du Rhône 45, 1204 Genève',
@@ -266,138 +329,99 @@ const INITIAL_PROVIDERS: Provider[] = [
     studioLng: 6.1432,
     services: [
       {
-        id: 's8',
-        name: 'Coupe femme',
-        priceStudio: 55,
-        priceDomicile: 75,
+        id: 's6',
+        name: 'Soin visage',
+        priceStudio: 80,
+        priceDomicile: null,
         duration: '60 min',
       },
       {
-        id: 's9',
-        name: 'Coloration',
-        priceStudio: 90,
-        priceDomicile: 110,
-        duration: '2h',
-      },
-      {
-        id: 's10',
-        name: 'Brushing',
-        priceStudio: 35,
-        priceDomicile: 50,
-        duration: '45 min',
+        id: 's7',
+        name: 'Épilation sourcils',
+        priceStudio: 25,
+        priceDomicile: null,
+        duration: '20 min',
       },
     ],
     blockedSlots: [],
-  },
-  {
-    id: 'p4',
-    name: 'LUCIE ESTHETICS',
-    category: 'esthetique',
-    categoryLabel: 'Esthétique',
-    city: 'Lausanne',
-    modes: ['domicile', 'salon'],
-    bio: "Soins visage & corps d'exception. Produits biologiques, résultats visibles.",
-    priceFrom: 60,
-    coverPhotoUrl: '/assets/generated/provider-lucie-esthetics.dim_800x600.png',
-    lat: 46.5225,
-    lng: 6.6356,
-    studioAddress: 'Place de la Palud 8, 1003 Lausanne',
-    studioLat: 46.5225,
-    studioLng: 6.6356,
-    services: [
-      {
-        id: 's11',
-        name: 'Soin visage signature',
-        priceStudio: 65,
-        priceDomicile: 85,
-        duration: '90 min',
-      },
-      {
-        id: 's12',
-        name: 'Épilation complète',
-        priceStudio: 55,
-        priceDomicile: 70,
-        duration: '60 min',
-      },
-      {
-        id: 's13',
-        name: 'Manucure Gel',
-        priceStudio: 40,
-        priceDomicile: 55,
-        duration: '60 min',
-      },
-    ],
-    blockedSlots: [],
+    subscription: { status: 'active' },
+    rating: 4.9,
+    reviewCount: 112,
+    reviews: [],
   },
   {
     id: 'p5',
     name: 'ZEN TOUCH',
     category: 'massage',
     categoryLabel: 'Massage',
-    city: 'Genève',
-    modes: ['domicile'],
-    bio: 'Massage thérapeutique et bien-être. Je me déplace dans tout le canton.',
-    priceFrom: 80,
+    city: ['Lausanne', 'Genève'],
+    modes: ['domicile', 'salon'],
+    bio: "Massages relaxants et thérapeutiques. Déplacement à domicile possible.",
+    priceFrom: 90,
     coverPhotoUrl: '/assets/generated/provider-zen-touch.dim_800x600.png',
-    lat: 46.2017,
-    lng: 6.1466,
+    lat: 46.5197,
+    lng: 6.6323,
+    studioAddress: 'Avenue de la Gare 22, 1003 Lausanne',
+    studioLat: 46.5197,
+    studioLng: 6.6323,
     services: [
       {
-        id: 's14',
-        name: 'Massage relaxant 60min',
-        priceStudio: null,
-        priceDomicile: 90,
+        id: 's8',
+        name: 'Massage relaxant',
+        priceStudio: 90,
+        priceDomicile: 110,
         duration: '60 min',
       },
       {
-        id: 's15',
-        name: 'Massage deep tissue',
-        priceStudio: null,
-        priceDomicile: 110,
+        id: 's9',
+        name: 'Massage thérapeutique',
+        priceStudio: 120,
+        priceDomicile: 140,
         duration: '90 min',
-      },
-      {
-        id: 's16',
-        name: 'Reflexologie',
-        priceStudio: null,
-        priceDomicile: 75,
-        duration: '45 min',
       },
     ],
     blockedSlots: [],
+    subscription: { status: 'active' },
+    rating: 4.8,
+    reviewCount: 95,
+    reviews: [],
   },
   {
     id: 'p6',
     name: 'NOURA BEAUTY',
     category: 'onglerie',
     categoryLabel: 'Onglerie',
-    city: 'Lausanne',
+    city: ['Payerne'],
     modes: ['salon'],
-    bio: 'Votre sanctuaire de bien-être. Rituels ancestraux pour une détente absolue.',
-    priceFrom: 70,
+    bio: "Pose d'ongles et nail art. Manucure et pédicure.",
+    priceFrom: 35,
     coverPhotoUrl: '/assets/generated/provider-noura-beauty.dim_800x600.png',
-    lat: 46.5191,
-    lng: 6.6335,
-    studioAddress: 'Avenue de la Gare 22, 1003 Lausanne',
-    studioLat: 46.5191,
-    studioLng: 6.6335,
+    lat: 46.8119,
+    lng: 6.9378,
+    studioAddress: 'Rue de la Plaine 14, 1530 Payerne',
+    studioLat: 46.8119,
+    studioLng: 6.9378,
     services: [
       {
-        id: 's17',
-        name: 'Hammam Royal',
-        priceStudio: 95,
+        id: 's10',
+        name: 'Manucure',
+        priceStudio: 35,
+        priceDomicile: null,
+        duration: '45 min',
+      },
+      {
+        id: 's11',
+        name: 'Pose gel',
+        priceStudio: 70,
         priceDomicile: null,
         duration: '90 min',
       },
-      {
-        id: 's18',
-        name: 'Gommage corps',
-        priceStudio: 70,
-        priceDomicile: null,
-        duration: '60 min',
-      },
     ],
     blockedSlots: [],
+    subscription: { status: 'active' },
+    rating: 4.7,
+    reviewCount: 78,
+    reviews: [],
   },
 ];
 
@@ -406,7 +430,7 @@ const INITIAL_BOOKING_REQUESTS: BookingRequest[] = [
   {
     id: 'br1',
     clientName: 'Sophie Martin',
-    service: 'Coupe & Barbe',
+    service: 'Coupe homme',
     date: '2026-02-25',
     time: '14:00',
     location: 'Domicile',
@@ -416,11 +440,11 @@ const INITIAL_BOOKING_REQUESTS: BookingRequest[] = [
   {
     id: 'br2',
     clientName: 'Marc Dubois',
-    service: 'Dégradé Supreme',
+    service: 'Barbe',
     date: '2026-02-26',
     time: '10:30',
     location: 'Studio',
-    price: 50,
+    price: 30,
     status: 'pending',
   },
 ];
@@ -432,7 +456,7 @@ const INITIAL_CLIENT_RESERVATIONS: ClientReservation[] = [
     providerName: 'JULIEN ROSSI',
     providerPhone: '+41 79 123 45 67',
     providerAddress: 'Rue de Bourg 12, 1003 Lausanne',
-    service: 'Coupe Studio',
+    service: 'Coupe homme',
     date: '2026-02-28',
     time: '15:00',
     location: 'Studio',
@@ -454,7 +478,10 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     phone: '',
     address: '',
   });
-  const [providers, setProviders] = useState<Provider[]>(INITIAL_PROVIDERS);
+  const [providers, setProviders] = useState<Provider[]>(() => {
+    const stored = localStorage.getItem('nexus_platform_v1_providers');
+    return stored ? JSON.parse(stored) : INITIAL_PROVIDERS;
+  });
   const [isClientAuthenticated, setIsClientAuthenticated] = useState(false);
   const [isProAuthenticated, setIsProAuthenticated] = useState(false);
   const [clientSession, setClientSession] = useState<ClientSession | null>(null);
@@ -465,9 +492,38 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
   const [clientReservations, setClientReservations] = useState<ClientReservation[]>(
     INITIAL_CLIENT_RESERVATIONS
   );
-  const [publishedStudio, setPublishedStudio] = useState<PublishedStudio | null>(null);
+  const [publishedStudio, setPublishedStudio] = useState<PublishedStudio | null>(() => {
+    const stored = localStorage.getItem('nexus_platform_v1_published_studio');
+    return stored ? JSON.parse(stored) : null;
+  });
   const [activeNexusTab, setActiveNexusTab] = useState<'radar' | 'wallet' | 'portfolio' | 'agenda'>('radar');
   const [currentAgendaWeekOffset, setCurrentAgendaWeekOffset] = useState(0);
+  const [quoteData, setQuoteData] = useState<QuoteData | null>(null);
+  const [userRole, setUserRole] = useState<'artist' | 'client' | null>(() => {
+    const stored = localStorage.getItem('nexus_platform_v1_user_role');
+    return stored as 'artist' | 'client' | null;
+  });
+
+  // Persist providers to localStorage
+  useEffect(() => {
+    localStorage.setItem('nexus_platform_v1_providers', JSON.stringify(providers));
+  }, [providers]);
+
+  // Persist published studio to localStorage
+  useEffect(() => {
+    if (publishedStudio) {
+      localStorage.setItem('nexus_platform_v1_published_studio', JSON.stringify(publishedStudio));
+    }
+  }, [publishedStudio]);
+
+  // Persist user role
+  useEffect(() => {
+    if (userRole) {
+      localStorage.setItem('nexus_platform_v1_user_role', userRole);
+    } else {
+      localStorage.removeItem('nexus_platform_v1_user_role');
+    }
+  }, [userRole]);
 
   const goToSplash = () => setCurrentScreen('splash');
   const goToExplorer = () => setCurrentScreen('explorer');
@@ -481,23 +537,29 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
   const loginClient = (phone: string) => {
     setIsClientAuthenticated(true);
     setClientSession({ phone, isAuthenticated: true });
+    setUserRole('client');
+    goToClientDashboard();
   };
 
   const logoutClient = () => {
     setIsClientAuthenticated(false);
     setClientSession(null);
-    setCurrentScreen('splash');
+    setUserRole(null);
+    goToSplash();
   };
 
   const loginPro = (email: string) => {
     setIsProAuthenticated(true);
     setProSession({ email, isAuthenticated: true });
+    setUserRole('artist');
+    goToNexusOS();
   };
 
   const logoutPro = () => {
     setIsProAuthenticated(false);
     setProSession(null);
-    setCurrentScreen('splash');
+    setUserRole(null);
+    goToSplash();
   };
 
   const acceptBookingRequest = (id: string) => {
@@ -507,7 +569,9 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   const refuseBookingRequest = (id: string) => {
-    setBookingRequests((prev) => prev.filter((req) => req.id !== id));
+    setBookingRequests((prev) =>
+      prev.map((req) => (req.id === id ? { ...req, status: 'refused' as const } : req))
+    );
   };
 
   const cancelClientReservation = (id: string) => {
@@ -515,17 +579,13 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
   };
 
   const updateProviderStudio = (address: string, lat: number, lng: number) => {
-    if (selectedProvider) {
-      const updatedProvider = {
-        ...selectedProvider,
+    if (publishedStudio) {
+      setPublishedStudio({
+        ...publishedStudio,
         studioAddress: address,
         studioLat: lat,
         studioLng: lng,
-      };
-      setProviders((prev) =>
-        prev.map((p) => (p.id === selectedProvider.id ? updatedProvider : p))
-      );
-      setSelectedProvider(updatedProvider);
+      });
     }
   };
 
@@ -536,64 +596,112 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
         (slot) => slot.date === date && slot.time === time
       );
 
-      let updatedSlots;
       if (existingIndex >= 0) {
-        // Remove slot (unblock)
-        updatedSlots = blockedSlots.filter((_, idx) => idx !== existingIndex);
+        blockedSlots.splice(existingIndex, 1);
       } else {
-        // Add slot (block)
-        updatedSlots = [...blockedSlots, { date, time }];
+        blockedSlots.push({ date, time });
       }
 
-      const updatedProvider = {
-        ...selectedProvider,
-        blockedSlots: updatedSlots,
-      };
-
-      setProviders((prev) =>
-        prev.map((p) => (p.id === selectedProvider.id ? updatedProvider : p))
-      );
-      setSelectedProvider(updatedProvider);
+      setSelectedProvider({ ...selectedProvider, blockedSlots });
     }
   };
 
   const publishStudio = (studio: PublishedStudio) => {
     setPublishedStudio(studio);
-    
-    // Add published studio to providers list
     const newProvider: Provider = {
       id: `p${Date.now()}`,
       name: studio.name,
-      category: studio.category.toLowerCase(),
+      category: studio.category,
       categoryLabel: studio.category,
       city: studio.city,
       modes: studio.modes,
       bio: studio.bio,
       priceFrom: Math.min(
         ...studio.services
-          .map(s => [s.priceDomicile, s.priceStudio])
+          .map((s) => [s.priceStudio, s.priceDomicile])
           .flat()
           .filter((p): p is number => p !== null)
       ),
       coverPhotoUrl: studio.coverPhotoUrl,
+      services: studio.services.map((s, i) => ({ ...s, id: `s${Date.now()}_${i}` })),
       lat: studio.studioLat || 46.5197,
       lng: studio.studioLng || 6.6323,
       studioAddress: studio.studioAddress,
       studioLat: studio.studioLat,
       studioLng: studio.studioLng,
-      services: studio.services.map((s, idx) => ({
-        id: `s${Date.now()}_${idx}`,
-        name: s.name,
-        priceStudio: s.priceStudio,
-        priceDomicile: s.priceDomicile,
-        duration: s.duration,
-      })),
       blockedSlots: [],
       availability: studio.availability,
+      coverPhoto: studio.coverPhoto,
+      gallery: studio.gallery,
+      subscription: { status: 'active' },
+      rating: 5.0,
+      reviewCount: 0,
+      reviews: [],
+    };
+    setProviders((prev) => [...prev, newProvider]);
+  };
+
+  const unpublishProvider = () => {
+    if (publishedStudio) {
+      setProviders((prev) => prev.filter((p) => p.name !== publishedStudio.name));
+      setPublishedStudio(null);
+      localStorage.removeItem('nexus_platform_v1_published_studio');
+    }
+  };
+
+  const updateSubscription = (subscription: Subscription) => {
+    if (publishedStudio) {
+      setPublishedStudio({ ...publishedStudio });
+    }
+    if (selectedProvider) {
+      setSelectedProvider({ ...selectedProvider, subscription });
+    }
+  };
+
+  const cancelSubscription = () => {
+    if (publishedStudio) {
+      setPublishedStudio({ ...publishedStudio });
+    }
+    if (selectedProvider) {
+      setSelectedProvider({
+        ...selectedProvider,
+        subscription: { status: 'cancelled' },
+      });
+    }
+  };
+
+  const submitReview = (providerId: string, clientName: string, rating: number, comment: string) => {
+    const newReview: Review = {
+      id: `r${Date.now()}`,
+      providerId,
+      clientName,
+      rating,
+      comment,
+      date: Date.now(),
     };
 
-    setProviders((prev) => [...prev, newProvider]);
-    setSelectedProvider(newProvider);
+    setProviders((prev) =>
+      prev.map((p) => {
+        if (p.id === providerId) {
+          const reviews = [...(p.reviews || []), newReview];
+          const avgRating = reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length;
+          return {
+            ...p,
+            reviews,
+            rating: Math.round(avgRating * 10) / 10,
+            reviewCount: reviews.length,
+          };
+        }
+        return p;
+      })
+    );
+  };
+
+  const calculateAverageRating = (providerId: string): number => {
+    const provider = providers.find((p) => p.id === providerId);
+    if (!provider || !provider.reviews || provider.reviews.length === 0) return 0;
+    const sum = provider.reviews.reduce((acc, r) => acc + r.rating, 0);
+    return Math.round((sum / provider.reviews.length) * 10) / 10;
   };
 
   const value: AppState = {
@@ -616,6 +724,8 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     publishedStudio,
     activeNexusTab,
     currentAgendaWeekOffset,
+    quoteData,
+    userRole,
     setCurrentScreen,
     setSelectedCategory,
     setSelectedMode,
@@ -625,6 +735,7 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     setSelectedLocation,
     setSelectedDateTime,
     setBookingFormData,
+    setQuoteData,
     goToSplash,
     goToExplorer,
     goToClientLogin,
@@ -643,14 +754,19 @@ export const AppContextProvider: React.FC<{ children: ReactNode }> = ({ children
     updateProviderStudio,
     toggleAgendaSlot,
     publishStudio,
+    unpublishProvider,
     setActiveNexusTab,
     setCurrentAgendaWeekOffset,
+    updateSubscription,
+    cancelSubscription,
+    submitReview,
+    calculateAverageRating,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
 };
 
-export const useAppContext = (): AppState => {
+export const useAppContext = () => {
   const context = useContext(AppContext);
   if (!context) {
     throw new Error('useAppContext must be used within AppContextProvider');

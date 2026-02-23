@@ -1,18 +1,18 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 9,
-  "summary": "NEXUS - Application mobile-first de réservation de prestataires beauté/bien-être pour la Suisse romande. Refonte complète en React/TypeScript avec design system dark (#0a0a0a), accent sand (#E8D5B0), typographie Inter 900 + Playfair Display italic. Sprint 1 complété : écrans 1-6 (Splash → Explorer → Fiche → Booking flow) avec données hardcodées (6 prestataires), géolocalisation (navigator.geolocation + Haversine), filtre ville (Lausanne/Genève/Zurich/Paris), blocage créneaux passés, navigation logo cliquable, toggle MODE PRO ⇄ MODE CLIENT. Sprint 2 en cours : authentification simulée frontend (client OTP 4 chiffres, pro email/mdp hardcodé pro@nexus.ch / nexus2025), NEXUS OS complet avec 4 onglets (RADAR demandes Accept/Refuse, WALLET solde/séquestre/historique, PORTFOLIO état vide → Builder 4 étapes → Écran abonnement → Publication, AGENDA créneaux dispo/bloqués), Builder avec adresse GPS obligatoire si Studio, dashboard client (réservations/annulation). Tout hardcodé frontend, pas de backend Motoko pour Sprint 2.",
+  "projectStateVersion": 23,
+  "summary": "NEXUS Platform - Refonte complète en plateforme ultra-premium pour studios tatouage/branding. Stack Caffeine (Motoko + React/TypeScript + Tailwind). Fusion de deux concepts : page accueil premium (hero percutant, offre 39 CHF/mois, témoignages) + espace studio ultra-avancé (profil complet photo couverture 1200x400, logo, galerie portfolio min 3 photos, système réservation calendrier interactif FullCalendar, générateur devis dynamique, avis/notations) + module Explorer (grille artistes, filtres avancés catégorie/ville/note/disponibilité). Design système mondial : palette #0A0A0A #F5F5F7 #D4AF37, typo Inter/Darker Grotesque, glassmorphism, micro-interactions, animations scroll reveal/parallax, curseur personnalisé, compteurs animés, responsive parfait. Tarification unifiée : 39 CHF/mois (mise en avant) avec option annuelle 390 CHF. Fonctionnalités avancées : upload drag & drop avec cadrage intelligent, calendrier disponibilités temps réel, authentification client/pro localStorage, dashboard analytics Chart.js, notifications simulées. Suppression ancien code pour refonte totale.",
   "architectural_notes": [
-    "Refonte complète : suppression totale de AppV1.jsx et ancien code React",
     "Architecture React + TypeScript pure avec composants modulaires pour chaque écran (Splash, Explorer, Fiche, Booking flow)",
     "Design system dark theme : fond #0a0a0a, accent sand #E8D5B0, typographie Inter 900 (titres uppercase) + Playfair Display italic (accroches)",
     "CSS-in-JS inline ou fichier global (zéro Tailwind, zéro UI library) avec Google Fonts uniquement comme dépendance externe",
     "Transitions fluides entre écrans (slide horizontal ou fade) pour expérience native mobile-first",
     "État global géré avec useState/useContext React (pas de localStorage pour ce sprint)",
     "Données hardcodées : 6 prestataires avec services, tarifs double (domicile/studio), modes, bio, photos",
-    "Sprint 1 scope : écrans 1-6 (Splash → Explorer → Fiche prestataire → Booking lieu/date/coord)",
     "Priorité absolue : fidélité visuelle pixel-perfect au design system fourni",
-    "Sprint 2 en cours : NEXUS OS complet avec 4 onglets, Builder 4 étapes avec écran abonnement, géolocalisation Haversine, blocage créneaux passés"
+    "Refonte complète totale : suppression de tout l'ancien code React (AppV1, NEXUS OS 4 onglets, Builder) pour architecture nouvelle",
+    "Stack Caffeine standard : Motoko backend + React/TypeScript frontend + Tailwind CSS pour styling complet",
+    "Design système mondial : #0A0A0A noir profond, #F5F5F7 blanc cassé, #D4AF37 or, #B87333 cuivre, typographie Inter/Poppins + Darker Grotesque/Clash Display"
   ],
   "known_issues": [],
   "isFixRequest": false,
@@ -496,172 +496,662 @@
         "REQ-77"
       ],
       "version": 1
+    },
+    {
+      "id": "feature-replace-the-espace-pro-element-in-frontend-src-components-splash-tsx-with-a-proper-html-button-element-that-includes-onclick-navigate-pro-login-event-handler-userselect-none-to-prevent-text-selection-cursor-pointer-for-clickable-cursor-webkittaphighlightcolor-transparent-to-remove-ios-tap-highlight-and-all-existing-visual-styles-background-1a1a1a-border-1px-solid-rgba-255-255-255-0-15-borderradius-999px-padding-18px-24px-fontsize-13px-fontweight-800-letterspacing-0-12em-texttransform-uppercase-color-ffffff-fontfamily-inter-sans-serif",
+      "title": "Replace the ESPACE PRO element in frontend/src/components/Splash.tsx with a proper HTML <button> element that includes onClick={() => navigate('pro-login')} event handler, userSelect: 'none' to prevent text selection, cursor: 'pointer' for clickable cursor, WebkitTapHighlightColor: 'transparent' to remove iOS tap highlight, and all existing visual styles (background #1a1a1a, border 1px solid rgba(255,255,255,0.15), borderRadius 999px, padding 18px 24px, fontSize 13px, fontWeight 800, letterSpacing 0.12em, textTransform uppercase, color #ffffff, fontFamily Inter sans-serif)",
+      "reqIds": [
+        "REQ-78"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-cover-photo-upload-field-to-builder-step-1-informations-with-drag-drop-support-file-input-converting-to-base64-preview-display-showing-recommended-1200x400px-format-and-validation-for-image-file-types-jpg-png-webp",
+      "title": "Add cover photo upload field to Builder Step 1 (Informations) with drag & drop support, file input converting to base64, preview display showing recommended 1200x400px format, and validation for image file types (jpg, png, webp)",
+      "reqIds": [
+        "REQ-79"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-multiple-photo-upload-1-5-images-to-builder-step-3-services-for-each-service-with-drag-drop-support-base64-conversion-preview-thumbnails-drag-to-reorder-functionality-using-native-html5-drag-api-and-delete-button-for-each-photo",
+      "title": "Add multiple photo upload (1-5 images) to Builder Step 3 (Services) for each service with drag & drop support, base64 conversion, preview thumbnails, drag-to-reorder functionality using native HTML5 drag API, and delete button for each photo",
+      "reqIds": [
+        "REQ-80"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-gallery-section-to-builder-new-step-or-integrated-in-informations-allowing-upload-of-multiple-independent-work-photos-drag-drop-base64-conversion-reorderable-thumbnails-delete-functionality-that-display-in-provider-s-portfolio-separate-from-service-specific-photos",
+      "title": "Add Gallery section to Builder (new step or integrated in Informations) allowing upload of multiple independent work photos (drag & drop, base64 conversion, reorderable thumbnails, delete functionality) that display in provider's portfolio separate from service-specific photos",
+      "reqIds": [
+        "REQ-81"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-progress-indicator-to-builder-multi-step-form-showing-current-step-1-4-2-4-etc-as-visual-progress-bar-or-step-dots-at-top-of-screen-with-step-labels-informations-logistique-prestations-disponibilit-s-abonnement",
+      "title": "Add progress indicator to Builder multi-step form showing current step (1/4, 2/4, etc.) as visual progress bar or step dots at top of screen with step labels (Informations, Logistique, Prestations, Disponibilités, Abonnement)",
+      "reqIds": [
+        "REQ-84"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-integrate-simulated-stripe-payment-form-cardelement-in-subscription-screen-with-card-number-expiry-cvc-input-fields-styled-to-match-nexus-design-system-validation-messages-and-disclaimer-text-aucun-d-bit-aujourd-hui-votre-abonnement-d-butera-apr-s-30-jours-d-essai-vous-pouvez-annuler-tout-moment-pendant-l-essai-displayed-below-form",
+      "title": "Integrate simulated Stripe payment form (CardElement) in subscription screen with card number, expiry, CVC input fields styled to match NEXUS design system, validation messages, and disclaimer text 'Aucun débit aujourd'hui. Votre abonnement débutera après 30 jours d'essai. Vous pouvez annuler à tout moment pendant l'essai.' displayed below form",
+      "reqIds": [
+        "REQ-87"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-valider-et-publier-button-to-subscription-screen-that-validates-payment-form-inputs-stores-simulated-payment-data-card-last-4-digits-expiry-in-localstorage-with-subscription-status-trial-calculates-trial-end-date-current-date-30-days-publishes-studio-to-explorer-provider-list-navigates-to-nexusos-portfolio-tab-and-displays-studio-en-ligne-success-toast",
+      "title": "Add 'VALIDER ET PUBLIER' button to subscription screen that validates payment form inputs, stores simulated payment data (card last 4 digits, expiry) in localStorage with subscription status 'trial', calculates trial end date (current date + 30 days), publishes studio to Explorer provider list, navigates to NexusOS PORTFOLIO tab, and displays '🚀 Studio en ligne!' success toast",
+      "reqIds": [
+        "REQ-88"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-subscription-cancellation-flow-triggered-by-annuler-abonnement-button-that-displays-confirmation-modal-with-warning-text-tes-vous-s-r-de-vouloir-annuler-votre-abonnement-votre-studio-sera-d-sactiv-la-fin-de-la-p-riode-en-cours-confirmer-button-that-updates-subscription-status-to-cancelled-removes-studio-from-explorer-provider-list-navigates-back-to-portfolio-tab-showing-empty-state-and-displays-abonnement-annul-toast",
+      "title": "Implement subscription cancellation flow triggered by 'ANNULER ABONNEMENT' button that displays confirmation modal with warning text 'Êtes-vous sûr de vouloir annuler votre abonnement? Votre studio sera désactivé à la fin de la période en cours.', CONFIRMER button that updates subscription status to 'cancelled', removes studio from Explorer provider list, navigates back to PORTFOLIO tab showing empty state, and displays '❌ Abonnement annulé' toast",
+      "reqIds": [
+        "REQ-90"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-appcontext-provider-data-structure-to-include-new-fields-coverphoto-base64-string-gallery-array-of-base64-strings-services-array-enhanced-with-photos-field-array-of-base64-strings-subscriptionstatus-none-trial-active-cancelled-trialendsat-date-null-nextbillingdate-date-null-paymentmethod-object-with-cardlast4-and-cardexpiry",
+      "title": "Update AppContext provider data structure to include new fields: coverPhoto (base64 string), gallery (array of base64 strings), services array enhanced with photos field (array of base64 strings), subscriptionStatus ('none' | 'trial' | 'active' | 'cancelled'), trialEndsAt (Date | null), nextBillingDate (Date | null), paymentMethod (object with cardLast4 and cardExpiry)",
+      "reqIds": [
+        "REQ-91"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-explorer-screen-provider-filtering-logic-to-only-display-providers-with-active-subscription-status-trial-or-active-excluding-providers-with-status-none-or-cancelled-ensuring-newly-published-studios-from-builder-appear-immediately-after-subscription-validation",
+      "title": "Update Explorer screen provider filtering logic to only display providers with active subscription (status 'trial' or 'active'), excluding providers with status 'none' or 'cancelled', ensuring newly published studios from Builder appear immediately after subscription validation",
+      "reqIds": [
+        "REQ-92"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-responsive-mobile-optimization-to-all-photo-upload-interfaces-drag-drop-zones-thumbnail-grids-photo-reordering-ensuring-touch-friendly-interactions-proper-sizing-on-mobile-devices-and-fallback-to-file-picker-when-drag-api-not-supported",
+      "title": "Add responsive mobile optimization to all photo upload interfaces (drag & drop zones, thumbnail grids, photo reordering) ensuring touch-friendly interactions, proper sizing on mobile devices, and fallback to file picker when drag API not supported",
+      "reqIds": [
+        "REQ-94"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-localstorage-persistence-for-all-photo-data-cover-photo-service-photos-gallery-with-compression-strategy-to-avoid-localstorage-size-limits-5-10mb-potentially-using-image-quality-reduction-or-external-storage-simulation-for-large-image-sets",
+      "title": "Implement localStorage persistence for all photo data (cover photo, service photos, gallery) with compression strategy to avoid localStorage size limits (5-10MB), potentially using image quality reduction or external storage simulation for large image sets",
+      "reqIds": [
+        "REQ-95"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-builder-step-1-informations-into-a-premium-branding-studio-with-cover-photo-upload-1200x400-drag-drop-base64-conversion-real-time-preview-with-une-belle-photo-de-couverture-augmente-vos-chances-de-r-servation-de-40-suggestion-text-square-logo-upload-field-with-preview-gallery-section-for-work-ambiance-photos-minimum-3-photos-required-drag-drop-reorderable-thumbnails-delete-functionality-badges-and-certifications-section-with-pre-defined-selectable-options-expert-certifi-meilleur-artisan-2024-plus-autre-certification-free-text-field-social-media-fields-for-instagram-tiktok-facebook-with-corresponding-icons-video-presentation-field-youtube-link-or-upload-and-aper-u-button-in-top-right-that-opens-full-screen-modal-showing-real-time-preview-of-how-the-professional-profile-will-appear-to-clients",
+      "title": "Refactor Builder Step 1 (INFORMATIONS) into a premium branding studio with cover photo upload (1200x400, drag & drop, base64 conversion, real-time preview with 'Une belle photo de couverture augmente vos chances de réservation de 40%' suggestion text), square logo upload field with preview, gallery section for work ambiance photos (minimum 3 photos required, drag & drop, reorderable thumbnails, delete functionality), badges and certifications section with pre-defined selectable options (Expert certifié, Meilleur artisan 2024) plus 'Autre certification' free text field, social media fields for Instagram/TikTok/Facebook with corresponding icons, video presentation field (YouTube link or upload), and '👁️ APERÇU' button in top-right that opens full-screen modal showing real-time preview of how the professional profile will appear to clients",
+      "reqIds": [
+        "REQ-96"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-builder-step-3-prestations-into-a-visual-product-catalog-with-elegant-modern-cards-for-each-service-displaying-uploaded-photos-service-name-pricing-with-toggle-between-single-price-or-price-range-duration-selector-short-description-max-150-characters-optional-populaire-or-nouveau-badges-activatable-options-and-variants-configuration-e-g-shampoing-premium-5-chf-service-categorization-coupes-couleurs-soins-drag-drop-reordering-of-services-in-the-list-service-photo-gallery-up-to-5-images-per-service-with-drag-drop-and-reorder-functionality-mandatory-main-image-with-red-green-validation-indicator-showing-completion-status-and-real-time-preview-card-that-updates-as-user-modifies-service-details",
+      "title": "Refactor Builder Step 3 (PRESTATIONS) into a visual product catalog with elegant modern cards for each service displaying uploaded photos, service name, pricing (with toggle between single price or price range), duration selector, short description (max 150 characters), optional Populaire or Nouveau badges (activatable), options and variants configuration (e.g., 'Shampoing premium +5 CHF'), service categorization (Coupes, Couleurs, Soins), drag & drop reordering of services in the list, service photo gallery up to 5 images per service with drag & drop and reorder functionality, mandatory main image with red/green validation indicator showing completion status, and real-time preview card that updates as user modifies service details",
+      "reqIds": [
+        "REQ-97"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-builder-step-2-logistique-with-visual-radius-simulator-showing-interactive-slider-from-0-50-km-with-graphical-representation-of-expanding-circle-around-a-location-icon-manual-address-input-field-for-base-location-with-validation-differentiated-schedule-configuration-allowing-different-hours-per-service-type-e-g-home-service-available-only-certain-days-and-urgency-last-minute-option-with-configurable-price-supplement",
+      "title": "Enhance Builder Step 2 (LOGISTIQUE) with visual radius simulator showing interactive slider from 0-50 km with graphical representation of expanding circle around a location icon, manual address input field for base location with validation, differentiated schedule configuration allowing different hours per service type (e.g., home service available only certain days), and urgency/last-minute option with configurable price supplement",
+      "reqIds": [
+        "REQ-98"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-luxury-design-system-throughout-builder-interface-with-modern-cards-featuring-subtle-shadows-and-elevation-effects-fluid-micro-interactions-on-hover-and-transitions-300ms-duration-visual-progress-bar-at-top-of-screen-showing-current-step-with-labels-informations-logistique-prestations-disponibilit-s-abonnement-contextual-tooltips-on-each-functionality-explaining-requirements-and-best-practices-personalized-encouraging-messages-appearing-contextually-e-g-excellent-choix-cette-photo-mettra-en-valeur-votre-talent-when-uploading-quality-photos-maintaining-current-theme-0a0a0a-background-e8d5b0-accent-and-typography-inter-900-playfair-display-italic",
+      "title": "Implement luxury design system throughout Builder interface with modern cards featuring subtle shadows and elevation effects, fluid micro-interactions on hover and transitions (300ms duration), visual progress bar at top of screen showing current step with labels (Informations, Logistique, Prestations, Disponibilités, Abonnement), contextual tooltips on each functionality explaining requirements and best practices, personalized encouraging messages appearing contextually (e.g., 'Excellent choix ! Cette photo mettra en valeur votre talent' when uploading quality photos), maintaining current theme (#0a0a0a background, #E8D5B0 accent) and typography (Inter 900 + Playfair Display italic)",
+      "reqIds": [
+        "REQ-99"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-real-time-preview-modal-component-that-opens-when-aper-u-button-is-clicked-displaying-professional-profile-exactly-as-it-will-appear-to-clients-in-explorer-and-providerdetail-screens-with-live-updates-reflecting-all-changes-made-in-builder-form-fields-cover-photo-logo-gallery-services-with-photos-pricing-bio-social-media-links-styled-identically-to-actual-client-facing-screens-with-same-layout-typography-and-design-system-tokens-and-includes-close-button-to-return-to-builder-editing",
+      "title": "Create real-time preview modal component that opens when '👁️ APERÇU' button is clicked, displaying professional profile exactly as it will appear to clients in Explorer and ProviderDetail screens, with live updates reflecting all changes made in Builder form fields (cover photo, logo, gallery, services with photos, pricing, bio, social media links), styled identically to actual client-facing screens with same layout, typography, and design system tokens, and includes close button to return to Builder editing",
+      "reqIds": [
+        "REQ-101"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-service-image-upload-validation-that-prevents-adding-or-saving-a-service-without-a-main-image-displaying-red-validation-indicator-on-service-cards-missing-main-photo-green-indicator-when-main-photo-is-present-and-blocking-progression-to-next-builder-step-if-any-service-lacks-a-main-image-with-user-friendly-error-message-explaining-requirement",
+      "title": "Implement service image upload validation that prevents adding or saving a service without a main image, displaying red validation indicator on service cards missing main photo, green indicator when main photo is present, and blocking progression to next Builder step if any service lacks a main image with user-friendly error message explaining requirement",
+      "reqIds": [
+        "REQ-102"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-drag-and-drop-reordering-functionality-to-service-list-in-builder-step-3-prestations-allowing-providers-to-click-and-drag-service-cards-vertically-to-change-display-order-with-visual-feedback-during-drag-lifted-shadow-opacity-change-drop-zone-indicators-showing-where-service-will-be-placed-and-immediate-state-update-reflecting-new-order-that-persists-to-appcontext-and-displays-in-preview-modal-and-final-published-profile",
+      "title": "Add drag-and-drop reordering functionality to service list in Builder Step 3 (PRESTATIONS) allowing providers to click and drag service cards vertically to change display order, with visual feedback during drag (lifted shadow, opacity change), drop zone indicators showing where service will be placed, and immediate state update reflecting new order that persists to AppContext and displays in preview modal and final published profile",
+      "reqIds": [
+        "REQ-103"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-radius-simulator-component-in-builder-step-2-logistique-with-fluid-slider-control-from-0-50-km-displaying-current-value-graphical-representation-showing-expanding-contracting-circle-around-central-location-icon-that-updates-in-real-time-as-slider-moves-visual-styling-matching-nexus-design-system-with-sand-accent-color-for-slider-track-and-handle-and-clean-modern-appearance-with-subtle-shadows",
+      "title": "Create radius simulator component in Builder Step 2 (LOGISTIQUE) with fluid slider control from 0-50 km displaying current value, graphical representation showing expanding/contracting circle around central location icon that updates in real-time as slider moves, visual styling matching NEXUS design system with sand accent color for slider track and handle, and clean modern appearance with subtle shadows",
+      "reqIds": [
+        "REQ-104"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-contextual-tooltips-throughout-builder-interface-appearing-on-hover-tap-for-key-form-fields-explaining-requirements-and-best-practices-with-messages-like-format-recommand-1200x400px-for-cover-photo-minimum-3-photos-pour-une-galerie-attractive-for-gallery-une-description-courte-et-impactante-augmente-vos-r-servations-for-service-descriptions-styled-with-dark-background-white-text-subtle-shadow-and-positioned-intelligently-to-avoid-obscuring-form-fields",
+      "title": "Implement contextual tooltips throughout Builder interface appearing on hover/tap for key form fields, explaining requirements and best practices with messages like 'Format recommandé 1200x400px' for cover photo, 'Minimum 3 photos pour une galerie attractive' for gallery, 'Une description courte et impactante augmente vos réservations' for service descriptions, styled with dark background, white text, subtle shadow, and positioned intelligently to avoid obscuring form fields",
+      "reqIds": [
+        "REQ-105"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-personalized-encouraging-messages-that-appear-contextually-throughout-builder-based-on-user-actions-such-as-excellent-choix-cette-photo-mettra-en-valeur-votre-talent-when-uploading-quality-photos-parfait-votre-catalogue-est-tr-s-attractif-when-completing-services-with-multiple-photos-bravo-votre-studio-est-presque-pr-t-when-reaching-final-step-displayed-as-subtle-toast-notifications-or-inline-messages-with-positive-styling-green-accent-checkmark-icon-auto-dismissing-after-3-4-seconds",
+      "title": "Implement personalized encouraging messages that appear contextually throughout Builder based on user actions, such as 'Excellent choix ! Cette photo mettra en valeur votre talent' when uploading quality photos, 'Parfait ! Votre catalogue est très attractif' when completing services with multiple photos, 'Bravo ! Votre studio est presque prêt' when reaching final step, displayed as subtle toast notifications or inline messages with positive styling (green accent, checkmark icon), auto-dismissing after 3-4 seconds",
+      "reqIds": [
+        "REQ-106"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-reusable-imageuploader-component-frontend-src-components-imageuploader-tsx-with-typescript-interface-accepting-props-aspectratio-string-format-3-1-or-1-1-storagekey-string-for-localstorage-persistence-onchange-optional-callback-function-component-manages-internal-state-imagedata-null-or-object-with-base64-and-cropparams-isediting-boolean-to-control-modal-visibility-implements-drag-drop-file-upload-with-hidden-file-input-visual-drop-zone-with-hover-states-and-ondrop-event-handler-uses-useeffect-to-load-existing-image-data-from-localstorage-on-component-mount-displays-preview-of-uploaded-image-with-applied-cropping-ajuster-le-cadrage-button-to-open-editor-modal-and-delete-button-to-remove-image",
+      "title": "Create reusable ImageUploader component (frontend/src/components/ImageUploader.tsx) with TypeScript interface accepting props: aspectRatio (string format '3:1' or '1:1'), storageKey (string for localStorage persistence), onChange (optional callback function). Component manages internal state: imageData (null or object with base64 and cropParams), isEditing (boolean to control modal visibility). Implements drag & drop file upload with hidden file input, visual drop zone with hover states, and onDrop event handler. Uses useEffect to load existing image data from localStorage on component mount. Displays preview of uploaded image with applied cropping, 'Ajuster le cadrage' button to open editor modal, and delete button to remove image.",
+      "reqIds": [
+        "REQ-107"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-define-typescript-interface-cropparams-in-frontend-src-types-cropping-ts-with-properties-scale-number-representing-zoom-factor-1-original-size-offsetx-number-representing-percentage-offset-from-50-to-50-offsety-number-representing-percentage-offset-from-50-to-50-imagebase64-string-containing-base64-encoded-image-originalwidth-number-in-pixels-originalheight-number-in-pixels-this-interface-ensures-consistent-typing-across-all-cropping-related-components-and-functions",
+      "title": "Define TypeScript interface CropParams in frontend/src/types/cropping.ts with properties: scale (number representing zoom factor, 1 = original size), offsetX (number representing percentage offset from -50 to 50), offsetY (number representing percentage offset from -50 to 50), imageBase64 (string containing base64 encoded image), originalWidth (number in pixels), originalHeight (number in pixels). This interface ensures consistent typing across all cropping-related components and functions.",
+      "reqIds": [
+        "REQ-108"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-croppingmodal-component-frontend-src-components-croppingmodal-tsx-that-opens-when-ajuster-le-cadrage-button-is-clicked-modal-displays-with-fixed-position-overlay-dark-semi-transparent-background-contains-two-canvas-elements-large-canvas-showing-original-image-with-real-time-transformation-preview-using-current-scale-and-offset-values-and-small-canvas-showing-final-cropped-result-at-target-dimensions-implements-mouse-touch-event-handlers-for-dragging-updates-offsetx-offsety-percentages-and-range-slider-for-zoom-control-updates-scale-from-1-0-to-3-0-includes-valider-button-that-saves-cropparams-and-closes-modal-and-annuler-button-that-discards-changes-and-closes-modal-without-saving",
+      "title": "Create CroppingModal component (frontend/src/components/CroppingModal.tsx) that opens when 'Ajuster le cadrage' button is clicked. Modal displays with fixed position overlay (dark semi-transparent background). Contains two canvas elements: large canvas showing original image with real-time transformation preview using current scale and offset values, and small canvas showing final cropped result at target dimensions. Implements mouse/touch event handlers for dragging (updates offsetX/offsetY percentages) and range slider for zoom control (updates scale from 1.0 to 3.0). Includes 'Valider' button that saves cropParams and closes modal, and 'Annuler' button that discards changes and closes modal without saving.",
+      "reqIds": [
+        "REQ-109"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-image-display-method-using-overflow-hidden-container-technique-create-image-frame-div-with-fixed-dimensions-based-on-aspect-ratio-e-g-width-100-height-200px-for-cover-photo-overflow-hidden-and-position-relative-inside-container-render-img-element-with-position-absolute-top-left-50-and-css-transform-property-combining-translate-50-50-to-center-baseline-scale-scale-for-zoom-and-translate-offsetx-offsety-for-position-offset-set-img-width-height-to-auto-with-maxwidth-maxheight-none-to-allow-natural-sizing-this-technique-ensures-responsive-and-consistent-cropping-across-all-screen-sizes-using-percentage-based-offsets",
+      "title": "Implement image display method using overflow hidden container technique. Create image frame div with fixed dimensions based on aspect ratio (e.g., width 100%, height 200px for cover photo), overflow hidden, and position relative. Inside container, render img element with position absolute, top/left 50%, and CSS transform property combining: translate(-50%, -50%) to center baseline, scale(${scale}) for zoom, and translate(${offsetX}%, ${offsetY}%) for position offset. Set img width/height to auto with maxWidth/maxHeight none to allow natural sizing. This technique ensures responsive and consistent cropping across all screen sizes using percentage-based offsets.",
+      "reqIds": [
+        "REQ-110"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-file-upload-validation-in-imageuploader-component-check-uploaded-file-mime-type-against-allowed-types-image-jpeg-image-png-image-webp-validate-file-size-does-not-exceed-5-mb-5242880-bytes-use-filereader-api-to-convert-valid-file-to-base64-string-display-elegant-error-messages-using-toast-notifications-for-invalid-file-types-or-oversized-files-if-image-dimensions-are-too-small-to-fill-target-aspect-ratio-even-at-scale-1-show-warning-message-but-allow-upload-to-proceed-user-can-adjust-with-cropping-store-original-image-dimensions-width-and-height-along-with-base64-data-for-cropping-calculations",
+      "title": "Implement file upload validation in ImageUploader component. Check uploaded file MIME type against allowed types: image/jpeg, image/png, image/webp. Validate file size does not exceed 5 MB (5242880 bytes). Use FileReader API to convert valid file to base64 string. Display elegant error messages using toast notifications for invalid file types or oversized files. If image dimensions are too small to fill target aspect ratio even at scale 1, show warning message but allow upload to proceed (user can adjust with cropping). Store original image dimensions (width and height) along with base64 data for cropping calculations.",
+      "reqIds": [
+        "REQ-111"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-existing-service-photo-upload-in-builder-step-3-prestations-with-servicephotoupload-component-that-uses-imageuploader-for-each-service-photo-each-service-requires-exactly-1-main-photo-mandatory-with-red-green-validation-indicator-showing-completion-status-additionally-allow-up-to-4-supplementary-photos-per-service-total-5-photos-maximum-all-service-photos-use-aspectratio-1-1-for-square-format-service-photos-use-storagekey-pattern-nexus-service-serviceid-photo-index-implement-drag-and-drop-reordering-for-the-photo-gallery-within-each-service-card-display-validation-error-preventing-progression-to-next-step-if-any-service-lacks-a-main-photo",
+      "title": "Replace existing service photo upload in Builder Step 3 (PRESTATIONS) with ServicePhotoUpload component that uses ImageUploader for each service photo. Each service requires exactly 1 main photo (mandatory) with red/green validation indicator showing completion status. Additionally allow up to 4 supplementary photos per service (total 5 photos maximum). All service photos use aspectRatio='1:1' for square format. Service photos use storageKey pattern 'nexus_service_{serviceId}_photo_{index}'. Implement drag-and-drop reordering for the photo gallery within each service card. Display validation error preventing progression to next step if any service lacks a main photo.",
+      "reqIds": [
+        "REQ-113"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-localstorage-persistence-for-all-cropping-data-when-user-validates-cropping-in-croppingmodal-save-complete-cropparams-object-to-localstorage-using-the-storagekey-provided-to-imageuploader-component-cropparams-stored-as-json-string-containing-scale-offsetx-offsety-imagebase64-originalwidth-originalheight-on-component-mount-imageuploader-loads-existing-cropparams-from-localstorage-and-applies-transformation-to-display-preview-implement-image-compression-strategy-to-avoid-localstorage-size-limits-if-total-localstorage-usage-exceeds-8-mb-reduce-image-quality-for-new-uploads-using-canvas-todataurl-with-quality-parameter-0-85-for-jpeg-display-warning-toast-if-compression-applied-clear-cropping-data-from-localstorage-when-user-deletes-image",
+      "title": "Implement localStorage persistence for all cropping data. When user validates cropping in CroppingModal, save complete CropParams object to localStorage using the storageKey provided to ImageUploader component. CropParams stored as JSON string containing scale, offsetX, offsetY, imageBase64, originalWidth, originalHeight. On component mount, ImageUploader loads existing CropParams from localStorage and applies transformation to display preview. Implement image compression strategy to avoid localStorage size limits: if total localStorage usage exceeds 8 MB, reduce image quality for new uploads using canvas toDataURL with quality parameter 0.85 for JPEG. Display warning toast if compression applied. Clear cropping data from localStorage when user deletes image.",
+      "reqIds": [
+        "REQ-114"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-mobile-responsive-optimizations-to-all-image-upload-interfaces-ensure-drag-drop-zones-have-touch-friendly-minimum-dimensions-minimum-120px-height-on-mobile-make-thumbnail-grids-use-css-grid-with-auto-fit-minmax-for-responsive-columns-implement-touch-event-handlers-touchstart-touchmove-touchend-for-photo-reordering-on-mobile-devices-provide-fallback-to-native-file-picker-when-html5-drag-api-not-supported-or-on-mobile-browsers-use-pointer-events-instead-of-mouse-events-where-possible-for-better-touch-compatibility-ensure-cropping-modal-adapts-to-mobile-viewport-with-adjusted-canvas-sizes-and-touch-optimized-drag-controls-test-all-image-operations-on-devices-with-small-screens-320px-width-minimum",
+      "title": "Add mobile responsive optimizations to all image upload interfaces. Ensure drag-drop zones have touch-friendly minimum dimensions (minimum 120px height on mobile). Make thumbnail grids use CSS grid with auto-fit/minmax for responsive columns. Implement touch event handlers (touchstart, touchmove, touchend) for photo reordering on mobile devices. Provide fallback to native file picker when HTML5 drag API not supported or on mobile browsers. Use pointer events instead of mouse events where possible for better touch compatibility. Ensure cropping modal adapts to mobile viewport with adjusted canvas sizes and touch-optimized drag controls. Test all image operations on devices with small screens (320px width minimum).",
+      "reqIds": [
+        "REQ-115"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-premium-landing-page-component-frontend-src-components-landingpage-tsx-with-hero-section-featuring-bold-headline-nexus-la-plateforme-professionnelle-la-plus-avanc-e-pour-les-studios-de-cr-ation-subheadline-d-veloppez-votre-activit-avec-des-outils-sur-mesure-une-visibilit-maximale-et-un-design-d-exception-using-inter-for-body-text-and-darker-grotesque-or-clash-display-for-headlines-with-fluid-clamp-sizing",
+      "title": "Create premium landing page component (frontend/src/components/LandingPage.tsx) with hero section featuring bold headline 'NEXUS – La plateforme professionnelle la plus avancée pour les studios de création', subheadline 'Développez votre activité avec des outils sur-mesure, une visibilité maximale et un design d'exception', using Inter for body text and Darker Grotesque or Clash Display for headlines with fluid clamp() sizing",
+      "reqIds": [
+        "REQ-116"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-pricing-showcase-in-landing-page-highlighting-39-chf-mois-monthly-subscription-with-nouveau-badge-display-annual-option-390-chf-saving-2-months-as-comparison-use-gold-accent-color-d4af37-or-copper-b87333-for-badge-and-pricing-emphasis-animate-price-reveal-with-counting-animation",
+      "title": "Implement pricing showcase in landing page highlighting 39 CHF/mois monthly subscription with 'Nouveau' badge, display annual option 390 CHF (saving 2 months) as comparison, use gold accent color #D4AF37 or copper #B87333 for badge and pricing emphasis, animate price reveal with counting animation",
+      "reqIds": [
+        "REQ-117"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-comprehensive-features-list-section-in-landing-page-with-green-checkmark-icons-displaying-visibilit-maximale-dans-l-explorer-nexus-intelligent-search-engine-advanced-filters-gestion-d-agenda-intuitive-drag-drop-calendar-sync-paiements-s-curis-s-stripe-integration-transaction-history-notifications-en-temps-r-el-browser-push-sms-email-reminders-support-prioritaire-7j-7-live-chat-with-auto-responses-analytics-d-taill-s-interactive-chart-js-dashboards-views-bookings-revenue-tracking-each-feature-with-hover-effect-revealing-additional-detail",
+      "title": "Create comprehensive features list section in landing page with green checkmark icons displaying: 'Visibilité maximale dans l'Explorer NEXUS' (intelligent search engine, advanced filters), 'Gestion d'agenda intuitive' (drag-drop, calendar sync), 'Paiements sécurisés' (Stripe integration, transaction history), 'Notifications en temps réel' (browser push, SMS/email reminders), 'Support prioritaire 7j/7' (live chat with auto-responses), 'Analytics détaillés' (interactive Chart.js dashboards, views/bookings/revenue tracking), each feature with hover effect revealing additional detail",
+      "reqIds": [
+        "REQ-118"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-commencer-gratuitement-call-to-action-button-in-landing-page-with-prominent-styling-using-sand-accent-or-gold-gradient-button-displays-30-jours-d-essai-sans-carte-bancaire-subtext-implement-glow-effect-on-hover-click-animation-with-scale-transform-button-navigates-to-builder-screen-to-start-studio-creation",
+      "title": "Add 'COMMENCER GRATUITEMENT' call-to-action button in landing page with prominent styling using sand accent or gold gradient, button displays '30 jours d'essai, sans carte bancaire' subtext, implement glow effect on hover, click animation with scale transform, button navigates to Builder screen to start studio creation",
+      "reqIds": [
+        "REQ-119"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-testimonials-carousel-in-landing-page-displaying-client-reviews-with-customer-photos-5-star-ratings-testimonial-text-customer-name-and-studio-type-carousel-auto-advances-every-5-seconds-with-manual-navigation-arrows-smooth-fade-transition-between-testimonials-responsive-grid-showing-1-testimonial-on-mobile-2-on-tablet-3-on-desktop",
+      "title": "Implement testimonials carousel in landing page displaying client reviews with customer photos, 5-star ratings, testimonial text, customer name and studio type, carousel auto-advances every 5 seconds with manual navigation arrows, smooth fade transition between testimonials, responsive grid showing 1 testimonial on mobile, 2 on tablet, 3 on desktop",
+      "reqIds": [
+        "REQ-120"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-builder-step-1-to-create-premium-branding-studio-with-category-selector-expanded-to-include-tatouage-piercing-branding-illustration-options-previously-limited-to-beauty-services-multi-select-city-tags-allowing-multiple-locations-replacing-single-city-field-maintain-existing-cover-photo-upload-1200x400-logo-upload-gallery-minimum-3-photos-badges-certifications-social-media-fields-video-presentation-and-preview-button-functionality",
+      "title": "Refactor Builder Step 1 to create premium branding studio with category selector expanded to include Tatouage, Piercing, Branding, Illustration options (previously limited to beauty services), multi-select city tags allowing multiple locations (replacing single city field), maintain existing cover photo upload 1200x400, logo upload, gallery minimum 3 photos, badges/certifications, social media fields, video presentation, and preview button functionality",
+      "reqIds": [
+        "REQ-121"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-dual-dashboard-system-with-artist-dashboard-manage-photos-availability-schedule-quotes-view-booking-requests-and-client-dashboard-view-booking-history-submit-reviews-track-upcoming-appointments-implement-localstorage-based-authentication-flow-with-separate-login-flows-for-artists-email-password-and-clients-phone-otp-dashboard-displays-role-specific-navigation-and-content",
+      "title": "Create dual dashboard system with artist dashboard (manage photos, availability schedule, quotes, view booking requests) and client dashboard (view booking history, submit reviews, track upcoming appointments), implement localStorage-based authentication flow with separate login flows for artists (email/password) and clients (phone/OTP), dashboard displays role-specific navigation and content",
+      "reqIds": [
+        "REQ-124"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-comprehensive-review-system-with-interactive-star-rating-component-1-5-stars-clickable-multi-line-comment-textarea-with-500-character-limit-review-submission-validation-requiring-both-rating-and-comment-calculate-and-display-average-rating-on-provider-profile-with-total-review-count-reviews-display-with-client-name-date-rating-and-comment-text-sort-reviews-by-date-descending",
+      "title": "Implement comprehensive review system with interactive star rating component (1-5 stars clickable), multi-line comment textarea with 500 character limit, review submission validation requiring both rating and comment, calculate and display average rating on provider profile with total review count, reviews display with client name, date, rating, and comment text, sort reviews by date descending",
+      "reqIds": [
+        "REQ-125"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-dynamic-quote-generator-component-with-interactive-sliders-for-tattoo-service-size-small-medium-large-extra-large-complexity-level-simple-moderate-detailed-intricate-color-options-black-gray-color-full-color-style-selector-traditional-realism-geometric-etc-real-time-price-calculation-displaying-updated-total-with-smooth-counting-animation-price-breakdown-showing-base-cost-plus-adjustments-r-server-sur-cette-base-button-that-navigates-to-booking-form-with-quote-details-pre-filled-service-description-calculated-price-selected-options",
+      "title": "Create dynamic quote generator component with interactive sliders for tattoo/service size (small/medium/large/extra-large), complexity level (simple/moderate/detailed/intricate), color options (black-gray/color/full-color), style selector (traditional/realism/geometric/etc.), real-time price calculation displaying updated total with smooth counting animation, price breakdown showing base cost plus adjustments, 'Réserver sur cette base' button that navigates to booking form with quote details pre-filled (service description, calculated price, selected options)",
+      "reqIds": [
+        "REQ-126"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-world-class-design-system-with-color-palette-using-deep-black-0a0a0a-background-off-white-f5f5f7-text-gold-d4af37-or-copper-b87333-accents-subtle-gradients-black-to-anthracite-gray-apply-glassmorphism-with-backdrop-filter-blur-to-all-cards-modals-and-menus-use-css-variables-for-consistent-theming-across-all-components",
+      "title": "Implement world-class design system with color palette using deep black #0A0A0A background, off-white #F5F5F7 text, gold #D4AF37 or copper #B87333 accents, subtle gradients (black to anthracite gray), apply glassmorphism with backdrop-filter blur to all cards, modals, and menus, use CSS variables for consistent theming across all components",
+      "reqIds": [
+        "REQ-128"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-comprehensive-micro-interactions-system-buttons-with-glow-effect-on-hover-using-box-shadow-page-transitions-with-fade-in-and-slight-offset-animation-300ms-duration-custom-cursor-for-desktop-with-trailing-dot-effect-using-javascript-image-hover-effects-with-smooth-zoom-scale-1-05-and-information-overlay-fade-in-all-transitions-use-cubic-bezier-easing-for-natural-movement",
+      "title": "Implement comprehensive micro-interactions system: buttons with glow effect on hover using box-shadow, page transitions with fade-in and slight offset animation (300ms duration), custom cursor for desktop with trailing dot effect using JavaScript, image hover effects with smooth zoom scale(1.05) and information overlay fade-in, all transitions use cubic-bezier easing for natural movement",
+      "reqIds": [
+        "REQ-129"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-scroll-triggered-animations-using-intersection-observer-api-elements-fade-in-with-staggered-delay-100ms-between-elements-as-they-enter-viewport-apply-slight-upward-translation-translatey-20px-to-0-on-reveal-add-subtle-parallax-effect-to-background-images-with-transform-translatey-based-on-scroll-position-0-5x-scroll-speed-apply-animations-to-hero-sections-feature-cards-testimonials-and-portfolio-images",
+      "title": "Implement scroll-triggered animations using Intersection Observer API: elements fade in with staggered delay (100ms between elements) as they enter viewport, apply slight upward translation (translateY(20px) to 0) on reveal, add subtle parallax effect to background images with transform translateY based on scroll position (0.5x scroll speed), apply animations to hero sections, feature cards, testimonials, and portfolio images",
+      "reqIds": [
+        "REQ-130"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-responsive-navigation-system-with-main-menu-containing-accueil-explorer-tarifs-connexion-links-with-distinct-styling-implement-animated-hamburger-menu-for-mobile-with-smooth-slide-in-sidebar-navigation-300ms-transition-sidebar-includes-same-navigation-links-with-larger-touch-friendly-sizing-breadcrumb-navigation-component-displays-on-all-interior-pages-showing-navigation-path-internal-studio-dashboard-uses-retractable-sidebar-with-icons-and-labels-smooth-transition-between-collapsed-icons-only-and-expanded-icons-text-states",
+      "title": "Create responsive navigation system with main menu containing Accueil, Explorer, Tarifs, Connexion links with distinct styling, implement animated hamburger menu for mobile with smooth slide-in sidebar navigation (300ms transition), sidebar includes same navigation links with larger touch-friendly sizing, breadcrumb navigation component displays on all interior pages showing navigation path, internal studio dashboard uses retractable sidebar with icons and labels, smooth transition between collapsed (icons only) and expanded (icons + text) states",
+      "reqIds": [
+        "REQ-131"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-simulated-real-time-notification-system-displaying-browser-push-notifications-using-notification-api-with-permission-request-toast-notifications-for-booking-confirmations-new-reviews-payment-receipts-appointment-reminders-implement-notification-center-icon-in-header-showing-unread-count-badge-clicking-icon-opens-dropdown-with-notification-list-last-10-notifications-each-notification-displays-icon-message-timestamp-and-action-button-where-applicable-mark-notifications-as-read-on-interaction",
+      "title": "Create simulated real-time notification system displaying browser push notifications (using Notification API with permission request), toast notifications for booking confirmations, new reviews, payment receipts, appointment reminders, implement notification center icon in header showing unread count badge, clicking icon opens dropdown with notification list (last 10 notifications), each notification displays icon, message, timestamp, and action button where applicable, mark notifications as read on interaction",
+      "reqIds": [
+        "REQ-133"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-simulated-priority-support-chat-interface-accessible-via-floating-button-in-bottom-right-corner-displaying-support-7j-7-clicking-opens-chat-modal-with-message-history-and-input-field-auto-respond-with-simulated-support-messages-after-2-second-delay-providing-context-aware-answers-based-on-keyword-detection-booking-payment-technical-account-include-quick-action-buttons-for-common-requests-reset-password-cancel-booking-technical-issue-display-quipe-en-ligne-status-indicator-with-green-dot",
+      "title": "Implement simulated priority support chat interface accessible via floating button in bottom-right corner displaying 'Support 7j/7', clicking opens chat modal with message history and input field, auto-respond with simulated support messages after 2-second delay providing context-aware answers based on keyword detection (booking/payment/technical/account), include quick action buttons for common requests (Reset password/Cancel booking/Technical issue), display 'Équipe en ligne' status indicator with green dot",
+      "reqIds": [
+        "REQ-134"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-subscription-screen-to-display-monthly-pricing-39-chf-mois-with-annual-option-390-chf-shown-as-comparison-replace-old-199-chf-an-pricing-update-offre-de-lancement-badge-messaging-modify-advantages-list-to-emphasize-monthly-flexibility-adjust-trial-messaging-to-reflect-30-day-free-trial-then-39-chf-mois-billing-ensure-all-pricing-references-throughout-application-updated-to-39-chf-mois-standard",
+      "title": "Update subscription screen to display monthly pricing 39 CHF/mois with annual option 390 CHF shown as comparison (replace old 199 CHF/an pricing), update 'OFFRE DE LANCEMENT' badge messaging, modify advantages list to emphasize monthly flexibility, adjust trial messaging to reflect 30-day free trial then 39 CHF/mois billing, ensure all pricing references throughout application updated to 39 CHF/mois standard",
+      "reqIds": [
+        "REQ-135"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-image-containers-use-fixed-dimensions-with-overflow-hidden-apply-object-fit-cover-and-object-position-center-to-all-img-elements-for-consistent-framing-cover-photos-use-height-300px-or-1200x400px-aspect-ratio-containers-logo-images-use-width-120px-height-120px-with-border-radius-50-portfolio-gallery-images-use-square-containers-with-consistent-aspect-ratio-implement-lazy-loading-for-all-images-using-loading-lazy-attribute-or-intersection-observer",
+      "title": "Ensure all image containers use fixed dimensions with overflow:hidden, apply object-fit:cover and object-position:center to all img elements for consistent framing, cover photos use height:300px or 1200x400px aspect ratio containers, logo images use width:120px height:120px with border-radius:50%, portfolio gallery images use square containers with consistent aspect ratio, implement lazy loading for all images using loading='lazy' attribute or Intersection Observer",
+      "reqIds": [
+        "REQ-136"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-appcontext-navigation-to-include-landing-screen-state-as-new-initial-screen-replacing-or-preceding-current-splash-add-navigation-functions-for-landing-explorer-landing-pro-login-landing-builder-for-commencer-gratuitement-cta-update-app-tsx-screenrouter-to-render-landingpage-component-when-currentscreen-is-landing-ensure-smooth-transitions-between-landing-and-other-screens-using-existing-300ms-slide-fade-animations",
+      "title": "Update AppContext navigation to include 'landing' screen state as new initial screen (replacing or preceding current splash), add navigation functions for landing -> explorer, landing -> pro-login, landing -> builder (for 'COMMENCER GRATUITEMENT' CTA), update App.tsx ScreenRouter to render LandingPage component when currentScreen is 'landing', ensure smooth transitions between landing and other screens using existing 300ms slide/fade animations",
+      "reqIds": [
+        "REQ-137"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-localstorage-based-data-persistence-architecture-using-nexus-platform-v1-key-prefix-for-all-data-storage-store-provider-studios-profiles-services-availability-reviews-user-accounts-artist-and-client-credentials-bookings-quotes-analytics-data-in-structured-json-format-implement-data-migration-function-to-handle-schema-updates-add-clear-data-utility-for-development-testing-ensure-data-persists-across-browser-sessions-and-page-refreshes",
+      "title": "Implement localStorage-based data persistence architecture using 'nexus_platform_v1' key prefix for all data storage, store provider studios (profiles, services, availability, reviews), user accounts (artist and client credentials), bookings, quotes, analytics data in structured JSON format, implement data migration function to handle schema updates, add clear data utility for development/testing, ensure data persists across browser sessions and page refreshes",
+      "reqIds": [
+        "REQ-138"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-premium-landing-page-hero-section-with-bold-headline-nexus-la-plateforme-professionnelle-la-plus-avanc-e-pour-les-studios-de-cr-ation-subheadline-d-veloppez-votre-activit-avec-des-outils-sur-mesure-une-visibilit-maximale-et-un-design-d-exception-using-darker-grotesque-for-headlines-with-fluid-clamp-sizing-32px-72px-inter-for-body-text-dark-background-with-subtle-gradient-overlay-and-hero-background-image-with-parallax-scrolling-effect",
+      "title": "Create premium landing page hero section with bold headline 'NEXUS – La plateforme professionnelle la plus avancée pour les studios de création', subheadline 'Développez votre activité avec des outils sur-mesure, une visibilité maximale et un design d'exception', using Darker Grotesque for headlines with fluid clamp() sizing (32px-72px), Inter for body text, dark background with subtle gradient overlay, and hero background image with parallax scrolling effect",
+      "reqIds": [
+        "REQ-139"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-pricing-showcase-section-in-landing-page-with-monthly-option-39-chf-mois-prominently-displayed-with-nouveau-badge-in-gold-d4af37-annual-option-390-chf-shown-as-comparison-with-2-mois-offerts-label-use-counting-animation-for-price-reveal-on-scroll-into-view-style-pricing-cards-with-glassmorphism-effect-and-gold-accent-borders-on-hover",
+      "title": "Implement pricing showcase section in landing page with monthly option 39 CHF/mois prominently displayed with 'Nouveau' badge in gold #D4AF37, annual option 390 CHF shown as comparison with '2 mois offerts' label, use counting animation for price reveal on scroll into view, style pricing cards with glassmorphism effect and gold accent borders on hover",
+      "reqIds": [
+        "REQ-140"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-comprehensive-features-list-section-with-green-checkmark-icons-displaying-six-key-features-visibilit-maximale-dans-l-explorer-nexus-with-subtitle-about-intelligent-search-and-filters-gestion-d-agenda-intuitive-with-drag-drop-calendar-sync-paiements-s-curis-s-with-stripe-integration-mention-notifications-en-temps-r-el-with-push-sms-email-support-prioritaire-7j-7-with-live-chat-analytics-d-taill-s-with-chart-js-dashboards-each-feature-card-displays-on-hover-with-additional-detail-overlay-and-smooth-scale-transform",
+      "title": "Create comprehensive features list section with green checkmark icons displaying six key features: 'Visibilité maximale dans l'Explorer NEXUS' with subtitle about intelligent search and filters, 'Gestion d'agenda intuitive' with drag-drop calendar sync, 'Paiements sécurisés' with Stripe integration mention, 'Notifications en temps réel' with push/SMS/email, 'Support prioritaire 7j/7' with live chat, 'Analytics détaillés' with Chart.js dashboards. Each feature card displays on hover with additional detail overlay and smooth scale transform",
+      "reqIds": [
+        "REQ-141"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-commencer-gratuitement-call-to-action-button-in-landing-page-with-prominent-styling-using-gold-gradient-background-d4af37-to-b87333-subtext-displaying-30-jours-d-essai-sans-carte-bancaire-implement-glow-effect-on-hover-using-box-shadow-scale-transform-animation-1-0-to-1-05-on-click-button-navigates-to-builder-screen-when-clicked-to-start-studio-creation-flow",
+      "title": "Add 'COMMENCER GRATUITEMENT' call-to-action button in landing page with prominent styling using gold gradient background (#D4AF37 to #B87333), subtext displaying '30 jours d'essai, sans carte bancaire', implement glow effect on hover using box-shadow, scale transform animation (1.0 to 1.05) on click, button navigates to Builder screen when clicked to start studio creation flow",
+      "reqIds": [
+        "REQ-142"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-testimonials-carousel-in-landing-page-displaying-client-reviews-with-customer-photos-circular-80x80px-5-star-rating-display-using-gold-stars-testimonial-text-max-200-characters-customer-name-and-studio-type-label-carousel-auto-advances-every-5-seconds-with-smooth-fade-transition-includes-manual-navigation-arrows-left-right-responsive-grid-showing-1-testimonial-on-mobile-2-on-tablet-3-on-desktop",
+      "title": "Implement testimonials carousel in landing page displaying client reviews with customer photos (circular 80x80px), 5-star rating display using gold stars, testimonial text (max 200 characters), customer name and studio type label. Carousel auto-advances every 5 seconds with smooth fade transition, includes manual navigation arrows (left/right), responsive grid showing 1 testimonial on mobile, 2 on tablet, 3 on desktop",
+      "reqIds": [
+        "REQ-143"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-builder-step-1-to-create-premium-branding-studio-with-expanded-category-selector-including-tatouage-piercing-branding-illustration-options-replacing-limited-beauty-service-categories-implement-multi-select-city-tags-allowing-multiple-locations-instead-of-single-city-field-maintain-existing-cover-photo-upload-1200x400px-with-imageuploader-component-square-logo-upload-150x150px-with-imageuploader-gallery-section-requiring-minimum-3-photos-with-galleryphotoupload-component-supporting-drag-to-reorder",
+      "title": "Refactor Builder Step 1 to create premium branding studio with expanded category selector including Tatouage, Piercing, Branding, Illustration options (replacing limited beauty service categories), implement multi-select city tags allowing multiple locations instead of single city field, maintain existing cover photo upload 1200x400px with ImageUploader component, square logo upload 150x150px with ImageUploader, gallery section requiring minimum 3 photos with GalleryPhotoUpload component supporting drag-to-reorder",
+      "reqIds": [
+        "REQ-144"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-dynamic-quote-generator-component-with-interactive-range-sliders-for-tattoo-service-parameters-size-selector-petit-moyen-grand-extra-grand-with-visual-icon-representation-complexity-level-simple-mod-r-d-taill-complexe-affecting-price-multiplier-color-options-noir-gris-couleur-couleur-compl-te-with-additional-cost-style-selector-dropdown-traditionnel-r-alisme-g-om-trique-etc-real-time-price-calculation-displaying-updated-total-with-smooth-counting-animation-using-usecountinganimation-hook-price-breakdown-card-showing-base-cost-plus-adjustments-for-each-option-r-server-sur-cette-base-button-navigating-to-booking-form-with-quote-details-pre-filled-including-service-description-calculated-price-and-all-selected-options",
+      "title": "Create dynamic quote generator component with interactive range sliders for tattoo/service parameters: size selector (petit/moyen/grand/extra-grand) with visual icon representation, complexity level (simple/modéré/détaillé/complexe) affecting price multiplier, color options (noir-gris/couleur/couleur complète) with additional cost, style selector dropdown (traditionnel/réalisme/géométrique/etc.), real-time price calculation displaying updated total with smooth counting animation using useCountingAnimation hook, price breakdown card showing base cost plus adjustments for each option, 'Réserver sur cette base' button navigating to booking form with quote details pre-filled including service description, calculated price, and all selected options",
+      "reqIds": [
+        "REQ-147"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-comprehensive-micro-interactions-system-throughout-application-all-buttons-display-glow-effect-on-hover-using-box-shadow-with-gold-color-page-transitions-between-screens-use-fade-in-animation-with-slight-upward-translation-translatey-20px-to-0-over-300ms-duration-with-cubic-bezier-0-4-0-0-2-1-easing-custom-cursor-for-desktop-viewport-showing-main-dot-cursor-with-trailing-circle-effect-using-javascript-mouse-position-tracking-image-hover-effects-with-smooth-zoom-scale-1-05-transform-and-information-overlay-fade-in-revealing-title-description-with-dark-gradient-background",
+      "title": "Implement comprehensive micro-interactions system throughout application: all buttons display glow effect on hover using box-shadow with gold color, page transitions between screens use fade-in animation with slight upward translation (translateY(20px) to 0) over 300ms duration with cubic-bezier(0.4, 0, 0.2, 1) easing, custom cursor for desktop viewport showing main dot cursor with trailing circle effect using JavaScript mouse position tracking, image hover effects with smooth zoom scale(1.05) transform and information overlay fade-in revealing title/description with dark gradient background",
+      "reqIds": [
+        "REQ-150"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-scroll-triggered-animations-using-intersection-observer-api-elements-fade-in-with-opacity-0-to-1-transition-and-staggered-delay-100ms-increment-between-sibling-elements-as-they-enter-viewport-with-20-threshold-apply-slight-upward-translation-translatey-20px-to-0-on-reveal-add-subtle-parallax-effect-to-hero-background-images-with-transform-translatey-based-on-scroll-position-at-0-5x-scroll-speed-slower-than-scroll-apply-counting-animations-to-statistics-numbers-when-they-enter-viewport-apply-animations-to-hero-sections-feature-cards-testimonials-carousel-and-portfolio-gallery-images",
+      "title": "Implement scroll-triggered animations using Intersection Observer API: elements fade in with opacity 0 to 1 transition and staggered delay (100ms increment between sibling elements) as they enter viewport with 20% threshold, apply slight upward translation (translateY(20px) to 0) on reveal, add subtle parallax effect to hero background images with transform translateY based on scroll position at 0.5x scroll speed (slower than scroll), apply counting animations to statistics numbers when they enter viewport, apply animations to hero sections, feature cards, testimonials carousel, and portfolio gallery images",
+      "reqIds": [
+        "REQ-151"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-responsive-navigation-system-with-main-menu-header-containing-navigation-links-accueil-explorer-tarifs-connexion-with-distinct-button-styling-and-hover-effects-implement-animated-hamburger-menu-icon-for-mobile-viewport-that-toggles-smooth-slide-in-sidebar-navigation-from-left-with-300ms-transition-and-dark-overlay-backdrop-sidebar-includes-same-navigation-links-with-larger-touch-friendly-sizing-minimum-48px-height-internal-studio-dashboard-uses-retractable-sidebar-with-icon-only-collapsed-state-60px-width-and-expanded-state-240px-width-showing-icons-plus-text-labels-with-smooth-transition-between-states-triggered-by-toggle-button",
+      "title": "Create responsive navigation system with main menu header containing navigation links (Accueil/Explorer/Tarifs/Connexion) with distinct button styling and hover effects, implement animated hamburger menu icon for mobile viewport that toggles smooth slide-in sidebar navigation from left with 300ms transition and dark overlay backdrop, sidebar includes same navigation links with larger touch-friendly sizing (minimum 48px height), internal studio dashboard uses retractable sidebar with icon-only collapsed state (60px width) and expanded state (240px width) showing icons plus text labels with smooth transition between states triggered by toggle button",
+      "reqIds": [
+        "REQ-152"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-image-containers-throughout-application-use-fixed-dimensions-with-overflow-hidden-apply-object-fit-cover-and-object-position-center-to-all-img-elements-for-consistent-framing-without-distortion-cover-photos-use-height-300px-on-cards-or-1200x400px-aspect-ratio-containers-on-detail-pages-logo-images-use-width-120px-height-120px-with-border-radius-50-for-circular-display-portfolio-gallery-images-use-square-containers-1-1-aspect-ratio-with-consistent-sizing-implement-lazy-loading-for-all-images-using-loading-lazy-attribute-or-intersection-observer-api-for-images-below-fold",
+      "title": "Ensure all image containers throughout application use fixed dimensions with overflow:hidden, apply object-fit:cover and object-position:center to all img elements for consistent framing without distortion, cover photos use height:300px on cards or 1200x400px aspect ratio containers on detail pages, logo images use width:120px height:120px with border-radius:50% for circular display, portfolio gallery images use square containers (1:1 aspect ratio) with consistent sizing, implement lazy loading for all images using loading='lazy' attribute or Intersection Observer API for images below fold",
+      "reqIds": [
+        "REQ-153"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-appcontext-navigation-to-set-landing-as-initial-screen-state-replacing-splash-add-navigation-functions-for-landing-explorer-triggered-by-header-link-landing-pro-login-triggered-by-connexion-link-landing-builder-triggered-by-commencer-gratuitement-button-update-app-tsx-screenrouter-to-render-landingpage-component-when-currentscreen-is-landing-ensure-smooth-transitions-between-landing-and-other-screens-using-existing-300ms-slide-fade-animation-system-with-proper-forward-backward-direction-handling",
+      "title": "Update AppContext navigation to set 'landing' as initial screen state (replacing 'splash'), add navigation functions for landing -> explorer (triggered by header link), landing -> pro-login (triggered by 'Connexion' link), landing -> builder (triggered by 'COMMENCER GRATUITEMENT' button), update App.tsx ScreenRouter to render LandingPage component when currentScreen is 'landing', ensure smooth transitions between landing and other screens using existing 300ms slide/fade animation system with proper forward/backward direction handling",
+      "reqIds": [
+        "REQ-154"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-comprehensive-review-system-with-interactive-star-rating-component-displaying-5-clickable-stars-1-5-rating-multi-line-comment-textarea-with-500-character-limit-and-character-counter-review-submission-validation-requiring-both-rating-minimum-1-star-and-comment-minimum-10-characters-calculate-and-display-average-rating-on-provider-profile-card-and-detail-page-with-gold-star-icons-and-total-review-count-format-4-8-24-avis-reviews-list-displays-with-client-name-initials-in-circular-avatar-submission-date-formatted-as-il-y-a-x-jours-star-rating-visual-and-comment-text-sort-reviews-by-date-descending-newest-first",
+      "title": "Implement comprehensive review system with interactive star rating component displaying 5 clickable stars (1-5 rating), multi-line comment textarea with 500 character limit and character counter, review submission validation requiring both rating (minimum 1 star) and comment (minimum 10 characters), calculate and display average rating on provider profile card and detail page with gold star icons and total review count format '4.8 (24 avis)', reviews list displays with client name initials in circular avatar, submission date formatted as 'Il y a X jours', star rating visual, and comment text, sort reviews by date descending (newest first)",
+      "reqIds": [
+        "REQ-155"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-subscription-screen-pricing-to-prominently-display-monthly-option-39-chf-mois-with-nouveau-badge-in-gold-show-annual-option-390-chf-as-comparison-with-label-conomisez-2-mois-update-offre-de-lancement-badge-messaging-to-emphasize-monthly-flexibility-modify-advantages-list-to-include-r-siliation-flexible-and-facturation-mensuelle-adjust-trial-messaging-to-clearly-state-30-jours-d-essai-gratuit-puis-39-chf-mois-with-option-to-passer-l-offre-annuelle-390-chf-et-conomiser-ensure-all-pricing-references-throughout-application-landing-page-subscription-screen-dashboard-consistently-display-39-chf-mois-as-standard-monthly-rate",
+      "title": "Update subscription screen pricing to prominently display monthly option 39 CHF/mois with 'Nouveau' badge in gold, show annual option 390 CHF as comparison with label 'Économisez 2 mois', update 'OFFRE DE LANCEMENT' badge messaging to emphasize monthly flexibility, modify advantages list to include 'Résiliation flexible' and 'Facturation mensuelle', adjust trial messaging to clearly state '30 jours d'essai gratuit, puis 39 CHF/mois' with option to 'Passer à l'offre annuelle (390 CHF) et économiser', ensure all pricing references throughout application (landing page, subscription screen, dashboard) consistently display 39 CHF/mois as standard monthly rate",
+      "reqIds": [
+        "REQ-156"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restore-splash-screen-as-initial-landing-screen-with-simple-nexus-logo-text-based-playfair-display-italic-hero-background-photo-with-dark-overlay-tagline-in-playfair-display-italic-and-two-rounded-full-buttons-explorer-sand-e8d5b0-background-and-espace-pro-white-outline-replacing-current-landingpage-component-as-default-initial-screen",
+      "title": "Restore Splash screen as initial landing screen with simple NEXUS logo (text-based, Playfair Display italic), hero background photo with dark overlay, tagline in Playfair Display italic, and two rounded-full buttons: 'EXPLORER' (sand #E8D5B0 background) and 'ESPACE PRO' (white outline), replacing current LandingPage component as default initial screen",
+      "reqIds": [
+        "REQ-157"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-restore-exact-version-8-color-palette-throughout-entire-application-background-0a0a0a-deep-black-primary-accent-e8d5b0-sand-text-white-ffffff-muted-text-9ca3af-replacing-all-gold-d4af37-and-copper-b87333-colors-from-version-10",
+      "title": "Restore exact Version 8 color palette throughout entire application: background #0a0a0a (deep black), primary accent #E8D5B0 (sand), text white #FFFFFF, muted text #9CA3AF, replacing all gold #D4AF37 and copper #B87333 colors from Version 10",
+      "reqIds": [
+        "REQ-158"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-maintain-builder-4-step-form-step-1-artist-name-category-dropdown-for-barber-coiffure-esth-tique-massage-tatouage-piercing-branding-illustration-multi-city-selector-phone-bio-cover-photo-1200x400-logo-gallery-minimum-3-photos-step-2-logistics-je-me-d-place-au-studio-checkboxes-conditional-studio-address-and-gps-coordinates-radius-simulator-step-3-services-service-name-dual-pricing-duration-multiple-services-service-photos-with-mandatory-main-photo-step-4-availability-weekly-calendar-with-toggleable-time-slots",
+      "title": "Maintain Builder 4-step form: Step 1 (artist name, category dropdown for Barber/Coiffure/Esthétique/Massage/Tatouage/Piercing/Branding/Illustration, multi-city selector, phone, bio, cover photo 1200x400, logo, gallery minimum 3 photos), Step 2 Logistics (JE ME DÉPLACE/AU STUDIO checkboxes, conditional studio address and GPS coordinates, radius simulator), Step 3 Services (service name, dual pricing, duration, multiple services, service photos with mandatory main photo), Step 4 Availability (weekly calendar with toggleable time slots)",
+      "reqIds": [
+        "REQ-162"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-fluid-micro-interactions-to-all-interactive-elements-buttons-display-subtle-glow-effect-on-hover-using-box-shadow-with-sand-e8d5b0-color-scale-transform-1-0-to-1-02-on-press-smooth-300ms-transitions-with-cubic-bezier-0-4-0-0-2-1-easing",
+      "title": "Add fluid micro-interactions to all interactive elements: buttons display subtle glow effect on hover (using box-shadow with sand #E8D5B0 color), scale transform (1.0 to 1.02) on press, smooth 300ms transitions with cubic-bezier(0.4, 0, 0.2, 1) easing",
+      "reqIds": [
+        "REQ-163"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-elegant-page-transition-animations-between-all-screens-fade-in-with-opacity-0-to-1-transition-over-300ms-slight-upward-translation-translatey-20px-to-0-proper-forward-backward-direction-handling-based-on-navigation-context",
+      "title": "Implement elegant page transition animations between all screens: fade-in with opacity 0 to 1 transition over 300ms, slight upward translation (translateY(20px) to 0), proper forward/backward direction handling based on navigation context",
+      "reqIds": [
+        "REQ-164"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-all-form-inputs-with-refined-styling-subtle-focus-glow-effect-with-sand-e8d5b0-color-smooth-border-color-transitions-placeholder-text-animations-proper-error-state-styling-with-red-accent-and-shake-animation-on-validation-failure",
+      "title": "Enhance all form inputs with refined styling: subtle focus glow effect with sand #E8D5B0 color, smooth border color transitions, placeholder text animations, proper error state styling with red accent and shake animation on validation failure",
+      "reqIds": [
+        "REQ-166"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-smooth-card-hover-effects-throughout-application-subtle-lift-with-box-shadow-elevation-increase-scale-transform-1-0-to-1-02-border-glow-with-sand-e8d5b0-color-300ms-transition-duration-for-addictive-interaction-feel",
+      "title": "Add smooth card hover effects throughout application: subtle lift with box-shadow elevation increase, scale transform (1.0 to 1.02), border glow with sand #E8D5B0 color, 300ms transition duration for addictive interaction feel",
+      "reqIds": [
+        "REQ-167"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-loading-state-animations-with-elegant-spinners-or-skeleton-screens-use-sand-e8d5b0-accent-color-for-loading-indicators-smooth-pulse-animations-for-skeleton-screens-display-during-data-fetching-or-image-uploads",
+      "title": "Implement loading state animations with elegant spinners or skeleton screens: use sand #E8D5B0 accent color for loading indicators, smooth pulse animations for skeleton screens, display during data fetching or image uploads",
+      "reqIds": [
+        "REQ-168"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-subtle-success-feedback-animations-checkmark-icon-scale-in-animation-with-elastic-easing-when-actions-succeed-toast-notifications-slide-in-from-top-with-bounce-effect-use-green-accent-for-success-states-maintaining-overall-dark-theme",
+      "title": "Add subtle success feedback animations: checkmark icon scale-in animation with elastic easing when actions succeed, toast notifications slide in from top with bounce effect, use green accent for success states maintaining overall dark theme",
+      "reqIds": [
+        "REQ-169"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-enhance-navigation-flow-between-screens-to-be-completely-friction-free-ensure-back-buttons-work-consistently-maintain-scroll-position-where-appropriate-preload-next-screen-data-to-eliminate-loading-delays-add-subtle-navigation-breadcrumbs-for-complex-flows",
+      "title": "Enhance navigation flow between screens to be completely friction-free: ensure back buttons work consistently, maintain scroll position where appropriate, preload next screen data to eliminate loading delays, add subtle navigation breadcrumbs for complex flows",
+      "reqIds": [
+        "REQ-170"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-polish-image-displays-with-refined-presentation-ensure-all-images-use-object-fit-cover-with-proper-aspect-ratios-add-subtle-border-radius-to-image-containers-implement-smooth-fade-in-on-image-load-display-elegant-placeholder-during-loading-with-sand-e8d5b0-shimmer-effect",
+      "title": "Polish image displays with refined presentation: ensure all images use object-fit cover with proper aspect ratios, add subtle border radius to image containers, implement smooth fade-in on image load, display elegant placeholder during loading with sand #E8D5B0 shimmer effect",
+      "reqIds": [
+        "REQ-171"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refine-typography-hierarchy-with-improved-readability-ensure-proper-font-weight-contrast-between-headings-inter-900-uppercase-for-provider-names-and-body-text-playfair-display-italic-for-descriptions-optimal-line-heights-1-6-for-body-1-2-for-headings-proper-letter-spacing-for-uppercase-text-0-12em",
+      "title": "Refine typography hierarchy with improved readability: ensure proper font weight contrast between headings (Inter 900 uppercase for provider names) and body text (Playfair Display italic for descriptions), optimal line heights (1.6 for body, 1.2 for headings), proper letter spacing for uppercase text (0.12em)",
+      "reqIds": [
+        "REQ-172"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-remove-landingpage-component-completely-and-all-associated-premium-landing-page-features-pricing-showcase-testimonials-carousel-features-list-hero-section-with-parallax-ensuring-splash-screen-is-the-default-initial-screen-without-option-to-navigate-to-landing-page",
+      "title": "Remove LandingPage component completely and all associated premium landing page features (pricing showcase, testimonials carousel, features list, hero section with parallax), ensuring Splash screen is the default initial screen without option to navigate to landing page",
+      "reqIds": [
+        "REQ-173"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-update-subscription-screen-to-display-original-version-8-pricing-gratuit-le-premier-mois-puis-199-chf-an-not-39-chf-mois-remove-all-references-to-monthly-39-chf-pricing-and-annual-390-chf-option-throughout-application",
+      "title": "Update subscription screen to display original Version 8 pricing: 'GRATUIT le premier mois, puis 199 CHF/an' (not 39 CHF/mois), remove all references to monthly 39 CHF pricing and annual 390 CHF option throughout application",
+      "reqIds": [
+        "REQ-174"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-ensure-all-version-8-core-functionalities-are-preserved-and-working-client-authentication-phone-otp-pro-authentication-email-password-with-demo-account-pro-nexus-ch-geolocation-filtering-with-distance-calculation-provider-filtering-by-category-mode-city-booking-request-management-in-radar-tab-blocked-time-slots-filtering-in-calendar-localstorage-persistence-for-all-data",
+      "title": "Ensure all Version 8 core functionalities are preserved and working: client authentication (phone + OTP), pro authentication (email/password with demo account pro@nexus.ch), geolocation filtering with distance calculation, provider filtering by category/mode/city, booking request management in RADAR tab, blocked time slots filtering in calendar, localStorage persistence for all data",
+      "reqIds": [
+        "REQ-175"
+      ],
+      "version": 1
     }
   ],
   "new_feature_requests": [
     {
-      "id": "AR-13",
-      "summary": "Créer écran Splash NEXUS avec hero photo, logo stylisé, boutons Explorer/Espace Pro, animations fluides",
+      "id": "AR-3",
+      "summary": "Ensure Explorer screen displays exactly 6 hardcoded providers (Julien Rossi - Coiffure domicile, Mageste Labs - Coiffure salon, Sophiane Hair - Barber domicile/salon, Lucie Esthetics - Esthétique domicile, Zen Touch - Massage domicile, Noura Beauty - Onglerie salon) with category filter pills (Tous/Coiffure/Barber/Esthétique/Massage/Onglerie), mode filter pills (Tous/Domicile/Salon), city selector, geolocation filter, and provider cards grid",
       "reqIds": [
-        "REQ-13"
+        "REQ-159"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-14",
-      "summary": "Créer écran Explorer avec filtres catégorie/mode, liste 6 prestataires hardcodés, cards avec cover photo gradient, compteur résultats",
+      "id": "AR-4",
+      "summary": "Restore NEXUS OS screen with exactly 4 tabs: RADAR (incoming booking requests with ACCEPTER/REFUSER buttons), WALLET (balance display, escrow, transaction history), PORTFOLIO (studio management with 'Créer mon studio' button), AGENDA (weekly calendar with toggleable time slots)",
       "reqIds": [
-        "REQ-14"
+        "REQ-160"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-15",
-      "summary": "Créer écran Fiche prestataire avec hero cover, bio, liste prestations, sélection service, double tarification domicile/studio",
+      "id": "AR-5",
+      "summary": "Preserve complete booking flow with screens: BookingLocation (location choice with dynamic pricing), BookingDate (4-day calendar with time slots filtering past times and blocked slots), BookingContact (form with name, phone, conditional address, validation, success toast)",
       "reqIds": [
-        "REQ-15"
+        "REQ-161"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-16",
-      "summary": "Créer écran Booking - Lieu avec choix domicile/studio, récap prestation, mise à jour prix dynamique selon lieu",
+      "id": "AR-9",
+      "summary": "Add staggered reveal animations to list items and cards: elements fade in with 100ms delay increment between siblings as they appear, using opacity 0 to 1 transition with slight upward translation (translateY(20px) to 0)",
       "reqIds": [
-        "REQ-16"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-17",
-      "summary": "Créer écran Booking - Date avec sélecteur jour (4 pills), sélecteur heure (grid 3 colonnes), gestion état sélection",
-      "reqIds": [
-        "REQ-17"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-18",
-      "summary": "Créer écran Booking - Coordonnées avec formulaire validation (nom/téléphone/adresse conditionnelle), confirmation réservation, toast succès",
-      "reqIds": [
-        "REQ-18"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-19",
-      "summary": "Implémenter système de transitions fluides entre écrans (slide horizontal ou fade) pour expérience native",
-      "reqIds": [
-        "REQ-19"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-20",
-      "summary": "Créer design system global avec tokens couleurs (#0a0a0a, #E8D5B0, etc.), typographie (Inter/Playfair Display), composants réutilisables (btn-white, btn-sand, btn-dark, cards, fields)",
-      "reqIds": [
-        "REQ-20"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-21",
-      "summary": "Configurer Google Fonts (Playfair Display + Inter) et structure CSS globale (CSS-in-JS inline ou fichier global, pas de Tailwind)",
-      "reqIds": [
-        "REQ-21"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-22",
-      "summary": "Créer contexte React pour gestion état global (prestataires, filtres, sélections booking) avec useState/useContext",
-      "reqIds": [
-        "REQ-22"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-23",
-      "summary": "Hardcoder les 6 prestataires (Julien Rossi, Mageste Labs, Sophiane Hair, Lucie Esthetics, Zen Touch, Noura Beauty) avec services, tarifs, modes",
-      "reqIds": [
-        "REQ-23"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-36",
-      "summary": "Update frontend/src/main.tsx to remove Tailwind-related setup and ensure QueryClient and InternetIdentityProvider remain configured while rendering the new App component",
-      "reqIds": [
-        "REQ-36"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-37",
-      "summary": "Navigation : Logo NEXUS cliquable retour Splash depuis Explorer et NEXUS OS, flèche ← header Explorer, toggle ⇄ MODE PRO / ⇄ MODE CLIENT entre Explorer et NEXUS OS",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-38",
-      "summary": "Géolocalisation : Filtre 📍 Autour de moi avec navigator.geolocation + calcul Haversine, sélecteur ville (Lausanne/Genève/Zurich/Paris/Tous), affichage distance 'à X km' sur cards, coordonnées GPS hardcodées pour 6 prestataires",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-39",
-      "summary": "Blocage créneaux passés : Désactiver visuellement (opacity 0.3, cursor not-allowed) jours passés et heures écoulées du jour actuel dans booking Date/Heure avec comparaison new Date()",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-40",
-      "summary": "Authentification client : Connexion par téléphone → OTP 4 chiffres simulé affiché dans toast → accès dashboard client, validation locale frontend uniquement",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-41",
-      "summary": "Dashboard client : Écran avec réservations en cours, historique, infos pro (nom/téléphone/adresse), possibilité annuler demande en attente, accessible via icône 👤 dans Explorer",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-42",
-      "summary": "Authentification pro : Connexion email + mot de passe validée contre liste hardcodée (pro@nexus.ch / nexus2025), validation locale frontend uniquement, accès à NEXUS OS",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-43",
-      "summary": "NEXUS OS complet : Remplacement total ancien espace pro, 4 onglets fixes RADAR (demandes entrantes Accept/Refuse), WALLET (solde/séquestre/historique), PORTFOLIO (état vide → bouton Créer mon studio → Builder), AGENDA (créneaux disponibles/bloqués)",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-44",
-      "summary": "Builder avec adresse GPS : Étape Logistique si mode AU STUDIO ou mixte, saisie adresse complète + coordonnées GPS du studio obligatoires, fix bug 'Non disponible' pour permettre réservations studio si configuré",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-45",
-      "summary": "Agenda pro : 4ème onglet 📅 AGENDA dans NEXUS OS, vue semaine avec créneaux cliquables, marquer disponible (vert) ou bloqué (rouge), créneaux bloqués masqués dans booking flow client",
-      "reqIds": [],
-      "status": "pending"
-    },
-    {
-      "id": "AR-54",
-      "summary": "Filter blocked time slots from BookingDate component availability based on provider's agenda configuration set in NexusOS AGENDA tab, preventing clients from selecting time slots that the provider has marked as blocked",
-      "reqIds": [
-        "REQ-71"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-56",
-      "summary": "Enhance BookingDate component to visually disable all past dates and past time slots for the current date by applying opacity 0.3 and cursor not-allowed styles, comparing against real-time current Date() to ensure elapsed hours on today are grayed out",
-      "reqIds": [
-        "REQ-73"
+        "REQ-165"
       ],
       "status": "pending"
     }

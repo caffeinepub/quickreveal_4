@@ -1,350 +1,583 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Implement complete NEXUS OS professional space with authentication, dashboard tabs, and builder workflow",
+  "title": "Restore Version 8 with Modern Polish and Micro-interactions",
   "requirements": [
     {
-      "id": "REQ-63",
-      "summary": "Create ProLogin screen authentication flow with hardcoded demo credentials and navigation to NexusOS",
+      "id": "REQ-157",
+      "summary": "Restore Splash screen as initial landing screen with NEXUS logo, hero background, and two navigation buttons",
       "acceptanceCriteria": [
-        "ProLogin screen displays NEXUS OS logo with subtitle 'MODE PROFESSIONNEL'",
-        "Email and password fields use dark theme matching design system",
-        "SE CONNECTER button uses btn-sand styling",
-        "Invalid credentials trigger red toast with message 'Identifiants incorrects'",
-        "Valid credentials (pro@nexus.ch / nexus2025) navigate to NexusOS dashboard with transition animation"
+        "Splash screen displays as first screen on app load",
+        "NEXUS logo uses Playfair Display italic font",
+        "EXPLORER button has sand #E8D5B0 background",
+        "ESPACE PRO button has white outline styling",
+        "Buttons are rounded-full shape",
+        "Hero background photo has dark overlay"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ProLogin.tsx",
+          "path": "frontend/src/components/Splash.tsx",
           "operation": "modify",
-          "description": "Update ProLogin component to add subtitle 'MODE PROFESSIONNEL' below logo, implement credential validation against hardcoded demo account (pro@nexus.ch / nexus2025), display red toast notification with message 'Identifiants incorrects' for invalid credentials, and navigate to NexusOS screen upon successful authentication using AppContext navigation method"
+          "description": "Update Splash component to use exact Version 8 design: NEXUS logo in Playfair Display italic, hero background image from frontend/public/assets/generated/splash-hero.dim_1920x1080.png with dark overlay, EXPLORER button with sand #E8D5B0 background, ESPACE PRO button with white outline, both buttons rounded-full"
         },
         {
-          "path": "frontend/src/context/AppContext.tsx",
+          "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add proSession state to track authenticated professional user session, add navigateToNexusOS method to handle navigation from ProLogin to NexusOS screen with forward transition animation"
+          "description": "Set Splash as the default initial screen, remove any routing to LandingPage, ensure app loads directly to Splash screen on first visit"
         }
       ]
     },
     {
-      "id": "REQ-64",
-      "summary": "Implement RADAR tab showing incoming booking request cards with accept/refuse actions and empty state",
+      "id": "REQ-158",
+      "summary": "Restore exact Version 8 color palette throughout entire application",
       "acceptanceCriteria": [
-        "RADAR tab displays list of incoming booking requests as cards",
-        "Each card shows avatar with client initials, client name, location type, date/time",
-        "Service name appears below client info, price displayed on right in serif font",
-        "REFUSER button uses dark styling and triggers fade-out animation followed by card removal",
-        "ACCEPTER button uses sand styling and adds green border with '✓ ACCEPTÉ' label",
-        "Counter updates when requests are accepted",
-        "Empty state shows centered checkmark circle with 'TOUT EST CALME' text",
-        "2 hardcoded demo booking requests are displayed initially"
+        "All backgrounds use #0a0a0a",
+        "All accent colors use #E8D5B0 sand",
+        "Primary text uses #FFFFFF white",
+        "Secondary text uses #9CA3AF gray",
+        "No gold #D4AF37 or copper #B87333 colors remain"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Replace all color variables to match Version 8 palette: set background to #0a0a0a deep black, primary accent to #E8D5B0 sand, text white to #FFFFFF, muted text to #9CA3AF. Remove all references to gold #D4AF37 and copper #B87333"
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Update Tailwind theme colors to Version 8 palette: background #0a0a0a, accent #E8D5B0, ensure no gold or copper colors remain in theme configuration"
+        }
+      ]
+    },
+    {
+      "id": "REQ-159",
+      "summary": "Ensure Explorer screen displays exactly 6 hardcoded providers with category, mode, city filters and geolocation",
+      "acceptanceCriteria": [
+        "Explorer displays 6 hardcoded providers",
+        "Category filters work correctly",
+        "Mode filters (Domicile/Salon) work correctly",
+        "City selector filters providers",
+        "Geolocation filter sorts by distance",
+        "Provider cards show cover photo, name, category badge"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Verify 6 hardcoded providers are present (Julien Rossi, Mageste Labs, Sophiane Hair, Lucie Esthetics, Zen Touch, Noura Beauty) with correct categories, modes, cities. Ensure category filter pills work (Tous/Coiffure/Barber/Esthétique/Massage/Onglerie), mode filters work (Tous/Domicile/Salon), city selector filters correctly, geolocation sorts by distance. Use generated provider images from frontend/public/assets/generated/ with correct dimensions"
+        }
+      ]
+    },
+    {
+      "id": "REQ-160",
+      "summary": "Restore NEXUS OS screen with exactly 4 tabs: RADAR, WALLET, PORTFOLIO, AGENDA",
+      "acceptanceCriteria": [
+        "NEXUS OS displays 4 tabs: RADAR, WALLET, PORTFOLIO, AGENDA",
+        "RADAR shows booking requests with action buttons",
+        "WALLET displays balance and transactions",
+        "PORTFOLIO allows studio creation",
+        "AGENDA shows weekly calendar with time slot toggling"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/NexusOS.tsx",
           "operation": "modify",
-          "description": "Implement RADAR tab content to display incoming booking requests from AppContext as cards with avatar showing client initials, client name, location type (domicile/studio), formatted date/time, service name below client info, price in serif font on right, REFUSER button with dark styling triggering fade-out animation and card removal from state, ACCEPTER button with btn-sand styling adding green border with '✓ ACCEPTÉ' label and updating counter, empty state showing centered checkmark circle icon with 'TOUT EST CALME' message when no requests remain"
-        },
-        {
-          "path": "frontend/src/context/AppContext.tsx",
-          "operation": "modify",
-          "description": "Add incomingBookingRequests array to state containing 2 hardcoded demo booking requests with client name, location type, date/time, service name, price fields, add acceptBookingRequest and refuseBookingRequest methods to modify request status and update counter"
+          "description": "Restore exact Version 8 tab structure: RADAR (incoming booking requests with ACCEPTER/REFUSER buttons), WALLET (balance display, escrow, transaction history), PORTFOLIO (studio management with 'Créer mon studio' button), AGENDA (weekly calendar with toggleable time slots). Ensure all tabs use Version 8 color palette"
         }
       ]
     },
     {
-      "id": "REQ-65",
-      "summary": "Implement WALLET tab with balance card, escrow card, and transaction history",
+      "id": "REQ-161",
+      "summary": "Preserve complete booking flow with location, date, and contact screens",
       "acceptanceCriteria": [
-        "WALLET tab displays balance card with 'SOLDE TOTAL ↗' label and '245.–' in Inter 900 52px",
-        "VIREMENT and ANALYTICS buttons are present and styled appropriately",
-        "Escrow card shows ⏳ icon with 'En attente de prestation' text and '60.–' amount",
-        "Transaction history displays three hardcoded entries: Sarah L. +120.–, Marc D. +45.–, Sophie M. +80.–"
+        "BookingLocation displays location options with pricing",
+        "BookingDate shows next 4 days with available time slots",
+        "Past dates and times are disabled",
+        "Provider blocked slots are filtered out",
+        "BookingContact validates all required fields",
+        "Success toast displays after confirmation"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/NexusOS.tsx",
+          "path": "frontend/src/components/BookingLocation.tsx",
           "operation": "modify",
-          "description": "Implement WALLET tab content with balance card displaying 'SOLDE TOTAL ↗' label and '245.–' amount styled in Inter 900 52px font, VIREMENT and ANALYTICS buttons with appropriate styling, escrow card showing ⏳ icon with 'En attente de prestation' text and '60.–' amount, transaction history list displaying three hardcoded entries (Sarah L. +120.–, Marc D. +45.–, Sophie M. +80.–) with proper typography and spacing"
-        }
-      ]
-    },
-    {
-      "id": "REQ-66",
-      "summary": "Implement PORTFOLIO tab with empty state and published studio view",
-      "acceptanceCriteria": [
-        "PORTFOLIO tab shows empty state with descriptive message and 'CRÉER MON STUDIO' button",
-        "Clicking 'CRÉER MON STUDIO' navigates to Builder screen",
-        "After studio publication, displays studio name with cover photo",
-        "Published state shows list of configured services",
-        "Modifier and Partager buttons are displayed in published state"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/NexusOS.tsx",
-          "operation": "modify",
-          "description": "Implement PORTFOLIO tab content with conditional rendering: empty state showing descriptive message and 'CRÉER MON STUDIO' button that calls navigateToBuilder method, published state displaying studio name, cover photo from AppContext publishedStudio data, list of configured services with names and pricing, Modifier button calling navigateToBuilder with edit mode, Partager button for sharing functionality"
+          "description": "Verify BookingLocation component displays location choices with dynamic pricing using Version 8 color palette (#E8D5B0 for accents)"
         },
         {
-          "path": "frontend/src/context/AppContext.tsx",
+          "path": "frontend/src/components/BookingDate.tsx",
           "operation": "modify",
-          "description": "Add publishedStudio state object to store studio configuration including name, cover photo reference, services array, add navigateToBuilder method to transition to Builder screen"
+          "description": "Verify BookingDate shows 4-day calendar with time slots, filters past times and blocked slots, uses Version 8 styling"
+        },
+        {
+          "path": "frontend/src/components/BookingContact.tsx",
+          "operation": "modify",
+          "description": "Verify BookingContact form validates name, phone, conditional address, displays success toast with Version 8 styling after confirmation"
         }
       ]
     },
     {
-      "id": "REQ-67",
-      "summary": "Create Builder multi-step form with 4 steps for studio configuration",
+      "id": "REQ-162",
+      "summary": "Maintain Builder 4-step form for studio profile creation",
       "acceptanceCriteria": [
-        "Step 1 includes fields for artist name, category dropdown (Barber/Coiffure/Esthétique/Massage), city, phone, and bio textarea",
-        "Step 2 includes JE ME DÉPLACE and AU STUDIO checkboxes allowing both to be selected",
-        "When AU STUDIO is selected in Step 2, studio address and GPS coordinates (latitude/longitude) fields become required",
-        "Step 3 includes service name field, dual pricing inputs for 🏠 Domicile and ✂️ Studio, duration field, and add service button for multiple services",
-        "Step 4 displays days of week with toggleable time slots for availability configuration",
-        "Builder includes PUBLIER button on final step"
+        "Builder has 4 steps with progress indicator",
+        "Step 1 collects profile information and photos",
+        "Step 2 configures logistics and service area",
+        "Step 3 manages service catalog with photos",
+        "Step 4 sets availability schedule",
+        "Cannot progress without completing required fields"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/Builder.tsx",
           "operation": "modify",
-          "description": "Expand Builder component to implement complete 4-step wizard: Step 1 with artist name input, category dropdown (Barber/Coiffure/Esthétique/Massage options), city input, phone input, bio textarea; Step 2 Logistics with JE ME DÉPLACE and AU STUDIO checkboxes allowing both selections, conditional studio address and GPS coordinates (latitude/longitude) fields that become required when AU STUDIO is checked; Step 3 Services with service name input, dual pricing fields labeled 🏠 Domicile and ✂️ Studio, duration input, add service button to create multiple service entries; Step 4 Availability with days of week grid and toggleable time slots for each day; PUBLIER button on final step that calls navigateToSubscription method to proceed to subscription screen"
+          "description": "Verify Builder 4-step form maintains all functionality: Step 1 (artist name, category dropdown, multi-city, phone, bio, cover photo, logo, gallery minimum 3 photos), Step 2 Logistics (JE ME DÉPLACE/AU STUDIO checkboxes, conditional studio address/GPS, radius simulator), Step 3 Services (name, dual pricing, duration, multiple services, service photos with mandatory main photo), Step 4 Availability (weekly calendar with toggleable time slots). Apply Version 8 color palette throughout"
         },
         {
-          "path": "frontend/src/context/AppContext.tsx",
+          "path": "frontend/src/components/BuilderProgress.tsx",
           "operation": "modify",
-          "description": "Add builderData state object to store form data across all 4 steps including artist name, category, city, phone, bio, service modes (JE ME DÉPLACE, AU STUDIO), studio address, GPS coordinates, services array with name/domicilePricing/studioPricing/duration fields, availability schedule, add navigateToSubscription method for Builder to subscription screen transition"
+          "description": "Update progress indicator styling to use Version 8 color palette (#E8D5B0 sand for active/completed steps)"
         }
       ]
     },
     {
-      "id": "REQ-68",
-      "summary": "Create subscription screen with pricing and publication flow",
+      "id": "REQ-163",
+      "summary": "Add fluid micro-interactions to all interactive elements with hover glow and scale effects",
       "acceptanceCriteria": [
-        "Subscription screen displays 'OFFRE DE LANCEMENT' badge prominently",
-        "Pricing shows 'GRATUIT le premier mois, puis 199 CHF/an'",
-        "List of advantages displayed with green checkmark icons",
-        "'COMMENCER GRATUITEMENT' button triggers studio publication",
-        "After publication, navigates back to NexusOS PORTFOLIO tab",
-        "PORTFOLIO tab now displays published studio data",
-        "Toast notification with '🚀 Studio en ligne!' message appears and auto-dismisses"
+        "All buttons have hover glow effect with sand color",
+        "Buttons scale slightly on press",
+        "All transitions use 300ms duration",
+        "Easing uses cubic-bezier for natural movement"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Subscription.tsx",
-          "operation": "create",
-          "description": "Create Subscription screen component displaying 'OFFRE DE LANCEMENT' badge at top, pricing section showing 'GRATUIT le premier mois, puis 199 CHF/an' in prominent typography, list of advantages with green checkmark icons (✓), 'COMMENCER GRATUITEMENT' button styled with btn-sand that calls publishStudio method from AppContext to save builderData to publishedStudio state, navigate back to NexusOS screen with PORTFOLIO tab active, and trigger toast notification with '🚀 Studio en ligne!' message"
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add global button micro-interaction styles: hover glow effect using box-shadow with sand #E8D5B0 color, scale transform (1.0 to 1.02) on press, smooth 300ms transitions with cubic-bezier(0.4, 0, 0.2, 1) easing. Apply to all button classes throughout the application"
         },
         {
-          "path": "frontend/src/context/AppContext.tsx",
+          "path": "frontend/src/components/Splash.tsx",
           "operation": "modify",
-          "description": "Add subscription screen state and navigateToSubscription method, add publishStudio method that copies builderData to publishedStudio state, sets active NexusOS tab to PORTFOLIO, navigates to NexusOS screen, and triggers success toast notification"
-        },
-        {
-          "path": "frontend/src/App.tsx",
-          "operation": "modify",
-          "description": "Add Subscription screen to router with conditional rendering based on AppContext screen state, apply slide-left transition animation when navigating from Builder to Subscription, apply slide-right transition when navigating back from Subscription to NexusOS"
-        }
-      ]
-    },
-    {
-      "id": "REQ-69",
-      "summary": "Add published studio to Explorer provider list with full data integration",
-      "acceptanceCriteria": [
-        "Published studio from Builder appears in Explorer provider list",
-        "Studio includes all configured data: name, category, services with pricing, location modes",
-        "Studio includes GPS coordinates for geolocation filtering",
-        "Studio respects configured availability when showing booking time slots",
-        "Studio is filterable by category, mode, and city filters in Explorer",
-        "Studio appears in geolocation-based distance sorting when applicable"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/context/AppContext.tsx",
-          "operation": "modify",
-          "description": "Update publishStudio method to add published studio to providers array with complete data structure including id, name, category, services array with pricing, location modes (domicile/studio booleans), GPS coordinates (latitude/longitude), availability schedule, city, phone, bio, ensuring it integrates with existing provider data format used by Explorer component"
+          "description": "Apply micro-interactions to EXPLORER and ESPACE PRO buttons: hover glow with sand color, scale on press, 300ms transitions"
         },
         {
           "path": "frontend/src/components/Explorer.tsx",
           "operation": "modify",
-          "description": "Verify Explorer component correctly filters and displays dynamically added providers from AppContext providers array, ensure category filter includes published studio category, mode filter respects studio's configured service modes, city filter matches published studio city, geolocation distance calculation uses published studio GPS coordinates"
-        },
-        {
-          "path": "frontend/src/components/BookingDate.tsx",
-          "operation": "modify",
-          "description": "Update time slot generation to respect provider's configured availability schedule from Builder Step 4, filter available slots based on days and time ranges set in provider's availability configuration"
-        }
-      ]
-    },
-    {
-      "id": "REQ-70",
-      "summary": "Implement AGENDA tab with weekly calendar view and slot blocking",
-      "acceptanceCriteria": [
-        "AGENDA tab displays weekly calendar with days Monday through Sunday",
-        "Time slots from 09h to 19h are shown for each day",
-        "Clicking a time slot toggles between available state (sand background) and blocked state (red dim background)",
-        "Previous week and next week navigation buttons allow browsing different weeks",
-        "Blocked time slots are stored in provider's agenda configuration"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/NexusOS.tsx",
-          "operation": "modify",
-          "description": "Implement AGENDA tab content with weekly calendar view showing Monday through Sunday columns, time slots from 09h to 19h displayed as rows, clickable slots that toggle between available state (sand background) and blocked state (red dim background with opacity), previous/next week navigation buttons to browse different weeks using date offset, blocked slots stored in AppContext agendaBlockedSlots state"
-        },
-        {
-          "path": "frontend/src/context/AppContext.tsx",
-          "operation": "modify",
-          "description": "Add agendaBlockedSlots state as Map or array storing blocked time slots with day of week and time identifiers, add toggleAgendaSlot method to add/remove slots from blocked list, add currentAgendaWeek state to track displayed week offset for navigation"
-        }
-      ]
-    },
-    {
-      "id": "REQ-71",
-      "summary": "Filter blocked time slots from BookingDate component based on provider agenda configuration",
-      "acceptanceCriteria": [
-        "BookingDate component reads provider's agenda configuration from AppContext",
-        "Time slots marked as blocked in AGENDA tab do not appear in available slots",
-        "Filtering applies to specific days and times based on provider's settings",
-        "Only available time slots are displayed to clients during booking flow"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/BookingDate.tsx",
-          "operation": "modify",
-          "description": "Add filtering logic to check selectedProvider's agendaBlockedSlots from AppContext when generating available time slots, exclude any slots matching blocked day of week and time from the displayed options, ensure blocked slots are filtered in addition to existing past time and provider availability filters"
-        }
-      ]
-    },
-    {
-      "id": "REQ-72",
-      "summary": "Make NEXUS logo clickable throughout application to navigate back to Splash screen",
-      "acceptanceCriteria": [
-        "NEXUS logo in Explorer header is clickable and navigates to Splash",
-        "NEXUS logo in NexusOS header is clickable and navigates to Splash",
-        "NEXUS logo in all booking flow screens is clickable and navigates to Splash",
-        "Click triggers appropriate screen transition animation"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Explorer.tsx",
-          "operation": "modify",
-          "description": "Wrap NEXUS logo element in clickable handler that calls navigateToSplash method from AppContext with backward transition animation"
+          "description": "Apply micro-interactions to filter pills and provider cards: hover glow, subtle scale, 300ms transitions"
         },
         {
           "path": "frontend/src/components/NexusOS.tsx",
           "operation": "modify",
-          "description": "Wrap NEXUS logo element in clickable handler that calls navigateToSplash method from AppContext with backward transition animation"
+          "description": "Apply micro-interactions to tab buttons, action buttons (ACCEPTER/REFUSER), and interactive elements with hover glow and scale effects"
         },
         {
           "path": "frontend/src/components/BookingLocation.tsx",
           "operation": "modify",
-          "description": "Wrap NEXUS logo element in clickable handler that calls navigateToSplash method from AppContext with backward transition animation"
+          "description": "Apply micro-interactions to location option cards and continue button with hover glow and scale"
         },
         {
           "path": "frontend/src/components/BookingDate.tsx",
           "operation": "modify",
-          "description": "Wrap NEXUS logo element in clickable handler that calls navigateToSplash method from AppContext with backward transition animation"
+          "description": "Apply micro-interactions to date selector and time slot buttons with hover glow and scale effects"
         },
         {
           "path": "frontend/src/components/BookingContact.tsx",
           "operation": "modify",
-          "description": "Wrap NEXUS logo element in clickable handler that calls navigateToSplash method from AppContext with backward transition animation"
+          "description": "Apply micro-interactions to submit button with hover glow and scale effect"
         },
         {
-          "path": "frontend/src/context/AppContext.tsx",
+          "path": "frontend/src/components/Builder.tsx",
           "operation": "modify",
-          "description": "Add navigateToSplash method to handle navigation from any screen back to Splash with backward transition animation"
+          "description": "Apply micro-interactions to all Builder form buttons (next, back, submit) with hover glow and scale"
         }
       ]
     },
     {
-      "id": "REQ-73",
-      "summary": "Enhance BookingDate to visually disable past dates and time slots",
+      "id": "REQ-164",
+      "summary": "Implement elegant page transition animations between all screens",
       "acceptanceCriteria": [
-        "Past dates are visually disabled with opacity 0.3 and cursor not-allowed",
-        "For current date, time slots that have passed are visually disabled",
-        "Real-time comparison uses current Date() to determine elapsed times",
-        "Past dates and times are not selectable",
-        "Visual feedback clearly indicates unavailable past slots"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/BookingDate.tsx",
-          "operation": "modify",
-          "description": "Add real-time date comparison using new Date() to identify past dates and elapsed time slots for current date, apply opacity 0.3 and cursor not-allowed CSS styles to past date buttons and past time slot buttons, disable click handlers for past dates and times to prevent selection, ensure visual distinction between past unavailable slots and provider-blocked unavailable slots"
-        }
-      ]
-    },
-    {
-      "id": "REQ-74",
-      "summary": "Fix AU STUDIO availability bug in BookingLocation component",
-      "acceptanceCriteria": [
-        "BookingLocation component checks if provider has configured studio address and GPS coordinates",
-        "AU STUDIO option is enabled when studio address and GPS are present in provider data",
-        "AU STUDIO option shows 'Non disponible' only when studio is not configured",
-        "Proper validation of studio configuration before displaying availability"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/BookingLocation.tsx",
-          "operation": "modify",
-          "description": "Update AU STUDIO option availability logic to check if selectedProvider has non-empty studioAddress field and valid GPS coordinates (latitude and longitude), enable AU STUDIO option and remove 'Non disponible' label when studio configuration is present, only show 'Non disponible' when studio address or GPS coordinates are missing or invalid"
-        }
-      ]
-    },
-    {
-      "id": "REQ-75",
-      "summary": "Implement geolocation filter '📍 Autour de moi' in Explorer with distance sorting",
-      "acceptanceCriteria": [
-        "Explorer includes '📍 Autour de moi' filter pill",
-        "Clicking filter requests user's geolocation via navigator.geolocation",
-        "Calculates distance to each provider using existing Haversine utility function",
-        "Sorts provider list by calculated distance in ascending order",
-        "Displays distance in 'à X km' format on each provider card when filter is active",
-        "Handles geolocation permission denial gracefully"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/Explorer.tsx",
-          "operation": "modify",
-          "description": "Add '📍 Autour de moi' filter pill to filter section, implement click handler to request user geolocation via navigator.geolocation API with error handling for permission denial, calculate distance from user coordinates to each provider's GPS coordinates using existing haversine utility function from frontend/src/utils/haversine.ts, sort filtered providers by calculated distance in ascending order, display 'à X km' format on provider cards when geolocation filter is active, store user coordinates and geolocation active state in component state"
-        }
-      ]
-    },
-    {
-      "id": "REQ-76",
-      "summary": "Update AppContext to support new screens and extended provider data structure",
-      "acceptanceCriteria": [
-        "AppContext includes Builder screen state with navigation function",
-        "AppContext includes subscription screen state with navigation function",
-        "Provider data structure extended to store studio address and GPS coordinates",
-        "Provider data structure includes availability schedule and blocked time slots",
-        "Pro authentication session state tracks logged-in pro user",
-        "Navigation functions support all new screens with proper transitions"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/context/AppContext.tsx",
-          "operation": "modify",
-          "description": "Add Builder screen type to screen state enum, add Subscription screen type to screen state enum, add navigateToBuilder and navigateToSubscription navigation methods with forward/backward transition support, extend Provider type interface to include studioAddress string, gpsCoordinates object with latitude/longitude numbers, availabilitySchedule object mapping days to time ranges, agendaBlockedSlots array, add proSession state object to track authenticated professional user with email field, add builderData state for storing form data across Builder steps, add publishedStudio state for storing completed studio configuration"
-        }
-      ]
-    },
-    {
-      "id": "REQ-77",
-      "summary": "Update App.tsx router to include Builder and Subscription screens with transitions",
-      "acceptanceCriteria": [
-        "App.tsx router includes Builder screen rendering",
-        "App.tsx router includes subscription screen rendering",
-        "Screen transitions use existing slide-left/slide-right animations",
-        "Transitions maintain consistent 300ms duration",
-        "Navigation direction (forward/backward) determines animation direction"
+        "All screen transitions fade in smoothly",
+        "Screens slide up slightly during transition",
+        "Transitions take 300ms",
+        "Forward navigation direction differs from backward"
       ],
       "file_operations": [
         {
           "path": "frontend/src/App.tsx",
           "operation": "modify",
-          "description": "Add conditional rendering for Builder screen in ScreenRouter based on AppContext screen state, add conditional rendering for Subscription screen in ScreenRouter based on AppContext screen state, apply slide-left animation class for forward transitions to Builder and Subscription screens, apply slide-right animation class for backward transitions from these screens, ensure 300ms duration matches existing screen transition timing"
+          "description": "Enhance ScreenRouter transition animations: fade-in with opacity 0 to 1 over 300ms, slight upward translation (translateY(20px) to 0), proper forward/backward direction handling based on navigation context. Ensure smooth transitions between all screen types"
+        },
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add or update CSS animation classes for screen transitions: fade-in with translateY animation, 300ms duration, cubic-bezier easing. Ensure forward and backward transitions have distinct visual directions"
+        }
+      ]
+    },
+    {
+      "id": "REQ-165",
+      "summary": "Add staggered reveal animations to list items and cards",
+      "acceptanceCriteria": [
+        "List items appear with staggered timing",
+        "Each item delays 100ms after previous",
+        "Items fade in and slide up",
+        "Effect applies to provider cards, service lists, booking requests"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Add staggered reveal animations to provider cards: fade in with opacity 0 to 1, slight upward translation (translateY(20px) to 0), 100ms delay increment between siblings, total animation duration 300ms"
+        },
+        {
+          "path": "frontend/src/components/ProviderDetail.tsx",
+          "operation": "modify",
+          "description": "Add staggered reveal animations to service list items: fade in with translateY, 100ms stagger delay between services"
+        },
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Add staggered reveal animations to booking request cards in RADAR tab: fade in with translateY, 100ms stagger delay"
+        },
+        {
+          "path": "frontend/src/components/ClientDashboard.tsx",
+          "operation": "modify",
+          "description": "Add staggered reveal animations to reservation cards: fade in with translateY, 100ms stagger delay between items"
+        }
+      ]
+    },
+    {
+      "id": "REQ-166",
+      "summary": "Enhance all form inputs with refined styling and focus effects",
+      "acceptanceCriteria": [
+        "Input fields have focus glow with sand color",
+        "Border transitions are smooth",
+        "Placeholder text animates subtly",
+        "Error states display with red color and shake",
+        "All form inputs have consistent styling"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add enhanced form input styling: subtle focus glow with sand #E8D5B0 color, smooth border color transitions (300ms), placeholder text subtle animation, error state styling with red accent and shake animation on validation failure. Apply to all input, textarea, select elements"
+        },
+        {
+          "path": "frontend/src/components/BookingContact.tsx",
+          "operation": "modify",
+          "description": "Apply enhanced form input styles and ensure error states trigger shake animation on validation failure"
+        },
+        {
+          "path": "frontend/src/components/ProLogin.tsx",
+          "operation": "modify",
+          "description": "Apply enhanced form input styles with focus glow and error state animations"
+        },
+        {
+          "path": "frontend/src/components/ClientLogin.tsx",
+          "operation": "modify",
+          "description": "Apply enhanced form input styles for phone number and OTP inputs with focus glow effects"
+        },
+        {
+          "path": "frontend/src/components/Builder.tsx",
+          "operation": "modify",
+          "description": "Apply enhanced form input styles throughout all Builder steps, ensure consistent focus glow and error handling"
+        }
+      ]
+    },
+    {
+      "id": "REQ-167",
+      "summary": "Add smooth card hover effects throughout application",
+      "acceptanceCriteria": [
+        "Provider cards lift on hover",
+        "Service cards have hover effects",
+        "Booking request cards respond to hover",
+        "All cards use consistent hover styling",
+        "Hover effects feel smooth and natural"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add global card hover effect styles: subtle lift with box-shadow elevation increase, scale transform (1.0 to 1.02), border glow with sand #E8D5B0 color, 300ms transition duration. Create reusable card hover classes"
+        },
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Apply card hover effects to provider cards: lift, scale, border glow with sand color"
+        },
+        {
+          "path": "frontend/src/components/ProviderDetail.tsx",
+          "operation": "modify",
+          "description": "Apply card hover effects to service cards with lift, scale, and glow"
+        },
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Apply card hover effects to booking request cards in RADAR tab with consistent styling"
+        },
+        {
+          "path": "frontend/src/components/BookingLocation.tsx",
+          "operation": "modify",
+          "description": "Apply card hover effects to location option cards with lift and glow"
+        }
+      ]
+    },
+    {
+      "id": "REQ-168",
+      "summary": "Implement loading state animations with elegant spinners or skeleton screens",
+      "acceptanceCriteria": [
+        "Loading states show elegant animations",
+        "Spinners use sand accent color",
+        "Skeleton screens pulse smoothly",
+        "Loading states appear during async operations"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add loading state animation styles: elegant spinner using sand #E8D5B0 accent color, smooth pulse animations for skeleton screens. Create reusable loading animation classes"
+        },
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Add loading state with skeleton screens or spinner during provider data fetching, use sand accent color for loading indicators"
+        },
+        {
+          "path": "frontend/src/components/ProviderDetail.tsx",
+          "operation": "modify",
+          "description": "Add loading state for provider details and services with elegant animation"
+        },
+        {
+          "path": "frontend/src/components/ImageUploader.tsx",
+          "operation": "modify",
+          "description": "Add loading state animation during image upload with sand-colored spinner"
+        }
+      ]
+    },
+    {
+      "id": "REQ-169",
+      "summary": "Add subtle success feedback animations with checkmarks and toasts",
+      "acceptanceCriteria": [
+        "Success checkmarks animate with elastic easing",
+        "Toast notifications have bounce entrance",
+        "Success states use green accent color",
+        "Animations feel satisfying and complete"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add success feedback animation styles: checkmark icon scale-in with elastic easing, toast notification slide-in from top with bounce effect, green accent for success states while maintaining overall dark theme"
+        },
+        {
+          "path": "frontend/src/components/BookingContact.tsx",
+          "operation": "modify",
+          "description": "Enhance success toast animation with checkmark scale-in (elastic easing) and bounce entrance effect when booking confirmation succeeds"
+        },
+        {
+          "path": "frontend/src/components/Builder.tsx",
+          "operation": "modify",
+          "description": "Add success animation with checkmark when studio profile is successfully published"
+        }
+      ]
+    },
+    {
+      "id": "REQ-170",
+      "summary": "Enhance navigation flow to be completely friction-free",
+      "acceptanceCriteria": [
+        "Back buttons navigate correctly on all screens",
+        "Scroll position preserved when appropriate",
+        "No noticeable loading delays between screens",
+        "Complex flows display breadcrumbs",
+        "Navigation feels instant and predictable"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Enhance ScreenRouter navigation: ensure back buttons work consistently across all screen types, maintain scroll position where appropriate, implement data preloading to eliminate loading delays, add subtle navigation breadcrumbs for complex flows (booking flow, builder flow)"
+        },
+        {
+          "path": "frontend/src/components/BookingLocation.tsx",
+          "operation": "modify",
+          "description": "Ensure back button navigation works correctly, maintain state for seamless flow"
+        },
+        {
+          "path": "frontend/src/components/BookingDate.tsx",
+          "operation": "modify",
+          "description": "Ensure back button navigation works correctly, preload available slots to eliminate delays"
+        },
+        {
+          "path": "frontend/src/components/BookingContact.tsx",
+          "operation": "modify",
+          "description": "Ensure back button navigation works correctly, maintain form state if user navigates back"
+        },
+        {
+          "path": "frontend/src/components/Builder.tsx",
+          "operation": "modify",
+          "description": "Enhance Builder navigation between steps to be friction-free, maintain form state when navigating back, show clear progress breadcrumbs"
+        }
+      ]
+    },
+    {
+      "id": "REQ-171",
+      "summary": "Polish image displays with refined presentation and loading effects",
+      "acceptanceCriteria": [
+        "All images maintain proper aspect ratios",
+        "Images have subtle rounded corners",
+        "Images fade in smoothly when loaded",
+        "Loading placeholders show shimmer effect",
+        "No layout shift during image loading"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Add refined image display styles: object-fit cover with proper aspect ratios, subtle border radius, smooth fade-in on load transition, elegant placeholder with sand #E8D5B0 shimmer effect during loading. Prevent layout shift with proper sizing"
+        },
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Apply polished image display to provider card images: proper aspect ratio, rounded corners, fade-in on load, shimmer placeholder. Use generated provider images with correct dimensions"
+        },
+        {
+          "path": "frontend/src/components/ProviderDetail.tsx",
+          "operation": "modify",
+          "description": "Apply polished image display to hero image and service photos with fade-in and shimmer effects"
+        },
+        {
+          "path": "frontend/src/components/Builder.tsx",
+          "operation": "modify",
+          "description": "Apply polished image display to cover photo, logo, and gallery images with proper aspect ratios and loading effects"
+        },
+        {
+          "path": "frontend/src/components/ImageUploader.tsx",
+          "operation": "modify",
+          "description": "Add shimmer loading placeholder with sand color while image uploads or processes"
+        }
+      ]
+    },
+    {
+      "id": "REQ-172",
+      "summary": "Refine typography hierarchy with improved readability",
+      "acceptanceCriteria": [
+        "Provider names use Inter 900 uppercase",
+        "Descriptions use Playfair Display italic",
+        "Body text has 1.6 line height",
+        "Headings have 1.2 line height",
+        "Uppercase text has proper letter spacing"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Refine typography hierarchy: ensure proper font weight contrast between headings (Inter 900 uppercase for provider names) and body text (Playfair Display italic for descriptions), optimal line heights (1.6 for body, 1.2 for headings), proper letter spacing for uppercase text (0.12em). Create typography utility classes"
+        },
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Apply refined typography: provider names in Inter 900 uppercase with 0.12em letter spacing, descriptions in Playfair Display italic with 1.6 line height"
+        },
+        {
+          "path": "frontend/src/components/ProviderDetail.tsx",
+          "operation": "modify",
+          "description": "Apply refined typography hierarchy to provider name, service names, and descriptions with proper font weights and line heights"
+        },
+        {
+          "path": "frontend/src/components/Splash.tsx",
+          "operation": "modify",
+          "description": "Ensure NEXUS logo uses Playfair Display italic, tagline uses proper typography with optimal line height"
+        }
+      ]
+    },
+    {
+      "id": "REQ-173",
+      "summary": "Remove LandingPage component completely and ensure Splash is the default initial screen",
+      "acceptanceCriteria": [
+        "LandingPage component removed from codebase",
+        "No references to landing page in navigation",
+        "Splash screen is initial screen on load",
+        "No way to access landing page features",
+        "App starts directly with Splash screen"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/LandingPage.tsx",
+          "operation": "delete",
+          "description": "Delete LandingPage component file completely to remove all premium landing page features (pricing showcase, testimonials carousel, features list, hero section with parallax)"
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Remove all references to LandingPage screen type from ScreenRouter, remove LandingPage from screen navigation logic, ensure no navigation paths lead to landing page. Confirm Splash is the default initial screen"
+        },
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Remove LandingPage screen type from AppScreen union type if present, clean up any landing page related state or interfaces"
+        }
+      ]
+    },
+    {
+      "id": "REQ-174",
+      "summary": "Update subscription screen to display original Version 8 pricing",
+      "acceptanceCriteria": [
+        "Subscription screen shows 199 CHF/an pricing",
+        "Trial messaging shows 'GRATUIT le premier mois'",
+        "No references to 39 CHF/mois remain",
+        "No references to 390 CHF annual option",
+        "All pricing consistent with Version 8"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Subscription.tsx",
+          "operation": "modify",
+          "description": "Update subscription pricing to Version 8 model: display 'GRATUIT le premier mois, puis 199 CHF/an', remove all references to monthly 39 CHF/mois pricing, remove annual 390 CHF option. Ensure only the 199 CHF/an plan is shown with trial messaging"
+        }
+      ]
+    },
+    {
+      "id": "REQ-175",
+      "summary": "Ensure all Version 8 core functionalities are preserved and working",
+      "acceptanceCriteria": [
+        "Client login with OTP works correctly",
+        "Pro login validates demo credentials",
+        "Geolocation calculates distances accurately",
+        "All filters function properly",
+        "RADAR tab manages booking requests",
+        "Calendar respects blocked time slots",
+        "Data persists in localStorage"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ClientLogin.tsx",
+          "operation": "modify",
+          "description": "Verify client authentication with phone + OTP is working correctly, ensure OTP generation and validation functions properly"
+        },
+        {
+          "path": "frontend/src/components/ProLogin.tsx",
+          "operation": "modify",
+          "description": "Verify pro authentication with email/password validates demo account (pro@nexus.ch) correctly"
+        },
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Verify geolocation filtering with distance calculation works correctly using haversine utility, ensure category/mode/city filters function properly"
+        },
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Verify RADAR tab manages booking requests correctly with ACCEPTER/REFUSER buttons, ensure AGENDA tab calendar respects blocked time slots"
+        },
+        {
+          "path": "frontend/src/components/BookingDate.tsx",
+          "operation": "modify",
+          "description": "Verify blocked time slots are filtered correctly in calendar, ensure past dates/times are disabled"
+        },
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Verify localStorage persistence is working for all data types (providers, bookings, sessions, user profiles) using existing key patterns"
         }
       ]
     }

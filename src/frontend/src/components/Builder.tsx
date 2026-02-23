@@ -1,572 +1,261 @@
 import React, { useState } from 'react';
-import { useAppContext, PublishedStudio } from '../context/AppContext';
+import { useAppContext } from '../context/AppContext';
+import { ArrowLeft, Check, Upload, X, GripVertical, Plus, Eye } from 'lucide-react';
+import ImageUploader from './ImageUploader';
+import GalleryPhotoUpload from './GalleryPhotoUpload';
+import BuilderProgress from './BuilderProgress';
 import { toast } from 'sonner';
-import { Toaster } from '@/components/ui/sonner';
 
-type Step = 1 | 2 | 3 | 4;
+type Category = 'Tatouage' | 'Piercing' | 'Branding' | 'Illustration';
 
-interface ServiceForm {
-  name: string;
-  priceDomicile: string;
-  priceStudio: string;
-  duration: string;
+interface ImageData {
+  base64: string;
+  cropParams: any;
 }
 
-const Builder: React.FC = () => {
-  const { goToNexusOS, goToSubscription, goToSplash } = useAppContext();
-  const [step, setStep] = useState<Step>(1);
-  
-  // Step 1: Info
+export default function Builder() {
+  const { goToNexusOS, publishStudio } = useAppContext();
+  const [currentStep, setCurrentStep] = useState(1);
+
+  // Step 1: Profile
+  const [coverPhoto, setCoverPhoto] = useState<ImageData | null>(null);
+  const [logo, setLogo] = useState<ImageData | null>(null);
   const [artistName, setArtistName] = useState('');
-  const [category, setCategory] = useState('');
-  const [city, setCity] = useState('');
+  const [category, setCategory] = useState<Category>('Tatouage');
+  const [cities, setCities] = useState<string[]>([]);
+  const [cityInput, setCityInput] = useState('');
   const [phone, setPhone] = useState('');
-  const [bio, setBio] = useState('');
+  const [gallery, setGallery] = useState<Array<ImageData | null>>([null, null, null]);
 
-  // Step 2: Logistics
-  const [modeDomicile, setModeDomicile] = useState(false);
-  const [modeStudio, setModeStudio] = useState(false);
-  const [studioAddress, setStudioAddress] = useState('');
-  const [studioLat, setStudioLat] = useState('');
-  const [studioLng, setStudioLng] = useState('');
+  const categories: Category[] = ['Tatouage', 'Piercing', 'Branding', 'Illustration'];
+  const stepLabels = ['Profil'];
 
-  // Step 3: Services
-  const [services, setServices] = useState<ServiceForm[]>([
-    { name: '', priceDomicile: '', priceStudio: '', duration: '' },
-  ]);
-
-  // Step 4: Availability
-  const [availability, setAvailability] = useState<{ [day: string]: string[] }>({
-    Lundi: [],
-    Mardi: [],
-    Mercredi: [],
-    Jeudi: [],
-    Vendredi: [],
-    Samedi: [],
-    Dimanche: [],
-  });
-
-  const handleStep2Next = () => {
-    if (!modeDomicile && !modeStudio) {
-      toast.error('Veuillez sélectionner au moins un mode de service');
-      return;
+  const handleAddCity = () => {
+    if (cityInput.trim() && !cities.includes(cityInput.trim())) {
+      setCities([...cities, cityInput.trim()]);
+      setCityInput('');
     }
+  };
 
-    if (modeStudio) {
-      if (!studioAddress || !studioLat || !studioLng) {
-        toast.error('Veuillez remplir l\'adresse et les coordonnées GPS du studio');
+  const handleRemoveCity = (city: string) => {
+    setCities(cities.filter((c) => c !== city));
+  };
+
+  const handleNext = () => {
+    if (currentStep === 1) {
+      if (!coverPhoto) {
+        toast.error('Veuillez ajouter une photo de couverture');
         return;
       }
-
-      const lat = parseFloat(studioLat);
-      const lng = parseFloat(studioLng);
-
-      if (isNaN(lat) || isNaN(lng)) {
-        toast.error('Coordonnées GPS invalides');
+      if (!logo) {
+        toast.error('Veuillez ajouter un logo');
         return;
       }
+      if (!artistName.trim()) {
+        toast.error('Veuillez entrer un nom d\'artiste');
+        return;
+      }
+      if (cities.length === 0) {
+        toast.error('Veuillez ajouter au moins une ville');
+        return;
+      }
+      if (!phone.trim()) {
+        toast.error('Veuillez entrer un numéro de téléphone');
+        return;
+      }
+      
+      // Check if at least 3 photos are uploaded
+      const uploadedPhotos = gallery.filter(p => p !== null);
+      if (uploadedPhotos.length < 3) {
+        toast.error('Veuillez ajouter au moins 3 photos à votre galerie');
+        return;
+      }
+      
+      // Publish studio
+      publishStudio({
+        name: artistName,
+        category: category.toLowerCase(),
+        city: cities,
+        phone,
+        bio: `Studio professionnel de ${category.toLowerCase()}. Expertise et qualité garanties.`,
+        modes: ['salon'],
+        studioAddress: `${cities[0]}, Suisse`,
+        studioLat: 46.5197,
+        studioLng: 6.6323,
+        services: [
+          {
+            name: `${category} standard`,
+            priceStudio: 100,
+            priceDomicile: null,
+            duration: '1h',
+          },
+        ],
+        availability: {
+          lundi: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'],
+          mardi: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'],
+          mercredi: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'],
+          jeudi: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'],
+          vendredi: ['09:00', '10:00', '11:00', '14:00', '15:00', '16:00'],
+        },
+        coverPhotoUrl: coverPhoto.base64,
+        coverPhoto: coverPhoto.base64,
+        gallery: uploadedPhotos.map(p => p!.base64),
+      });
+
+      toast.success('Profil créé avec succès !');
+      goToNexusOS();
     }
-
-    setStep(3);
   };
-
-  const addService = () => {
-    setServices([...services, { name: '', priceDomicile: '', priceStudio: '', duration: '' }]);
-  };
-
-  const updateService = (index: number, field: keyof ServiceForm, value: string) => {
-    const updated = [...services];
-    updated[index][field] = value;
-    setServices(updated);
-  };
-
-  const removeService = (index: number) => {
-    setServices(services.filter((_, i) => i !== index));
-  };
-
-  const toggleAvailability = (day: string, time: string) => {
-    setAvailability((prev) => {
-      const daySlots = prev[day] || [];
-      const exists = daySlots.includes(time);
-      return {
-        ...prev,
-        [day]: exists ? daySlots.filter((t) => t !== time) : [...daySlots, time],
-      };
-    });
-  };
-
-  const handlePublish = () => {
-    // Validate services
-    const validServices = services.filter(
-      (s) => s.name && s.duration && (s.priceDomicile || s.priceStudio)
-    );
-
-    if (validServices.length === 0) {
-      toast.error('Veuillez ajouter au moins une prestation valide');
-      return;
-    }
-
-    goToSubscription();
-  };
-
-  const timeSlots = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
 
   return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh', padding: '20px' }}>
-      <Toaster />
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '32px',
-        }}
-      >
-        <div
-          onClick={goToSplash}
-          style={{
-            fontFamily: 'Inter, system-ui, sans-serif',
-            fontSize: '22px',
-            fontWeight: 900,
-            letterSpacing: '-0.5px',
-            cursor: 'pointer',
-          }}
-        >
-          NEXUS<span style={{ color: '#6b7dff' }}>.</span>
+    <div className="min-h-screen bg-[#0A0A0A] text-[#F5F5F7] p-6">
+      <div className="max-w-4xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center gap-4 mb-8">
+          <button
+            onClick={goToNexusOS}
+            className="w-12 h-12 rounded-full bg-[#F5F5F7]/10 hover:bg-[#F5F5F7]/20 flex items-center justify-center transition-all"
+          >
+            <ArrowLeft className="w-6 h-6" />
+          </button>
+          <div>
+            <h1 className="text-3xl font-black">Créer votre profil</h1>
+            <p className="text-[#F5F5F7]/60">Configurez votre studio professionnel</p>
+          </div>
         </div>
-        <button
-          onClick={goToNexusOS}
-          style={{
-            background: 'transparent',
-            border: '1px solid rgba(255, 255, 255, 0.15)',
-            borderRadius: '999px',
-            color: 'rgba(255, 255, 255, 0.55)',
-            fontFamily: 'Inter, system-ui, sans-serif',
-            fontSize: '11px',
-            fontWeight: 700,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            padding: '8px 16px',
-            cursor: 'pointer',
-          }}
-        >
-          ← RETOUR
-        </button>
-      </div>
 
-      {/* Progress */}
-      <div style={{ maxWidth: '700px', margin: '0 auto', marginBottom: '40px' }}>
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
-          {[1, 2, 3, 4].map((s) => (
-            <div
-              key={s}
-              style={{
-                flex: 1,
-                height: '4px',
-                background: step >= s ? '#E8D5B0' : 'rgba(255, 255, 255, 0.09)',
-                borderRadius: '2px',
-              }}
+        {/* Progress */}
+        <BuilderProgress currentStep={currentStep} totalSteps={1} stepLabels={stepLabels} />
+
+        {/* Step 1: Profile */}
+        <div className="space-y-8 mt-8">
+          {/* Cover Photo */}
+          <div>
+            <label className="input-label">Photo de couverture (1200x400px)</label>
+            <ImageUploader
+              aspectRatio="3:1"
+              storageKey="nexus_builder_cover"
+              onChange={setCoverPhoto}
+              label=""
+              helpText="Format recommandé : 1200x400px"
             />
-          ))}
-        </div>
-      </div>
-
-      {/* Content */}
-      <div style={{ maxWidth: '700px', margin: '0 auto' }}>
-        {/* STEP 1: INFO */}
-        {step === 1 && (
-          <div>
-            <h1
-              style={{
-                fontSize: '32px',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                letterSpacing: '-0.5px',
-                marginBottom: '12px',
-              }}
-            >
-              Informations
-            </h1>
-            <p style={{ color: 'rgba(255, 255, 255, 0.55)', marginBottom: '32px', fontSize: '14px' }}>
-              Présentez votre activité professionnelle
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', marginBottom: '24px' }}>
-              <div>
-                <label className="input-label">Nom d'artiste *</label>
-                <input
-                  type="text"
-                  value={artistName}
-                  onChange={(e) => setArtistName(e.target.value)}
-                  placeholder="Ex: Studio Élégance"
-                  className="input-field"
-                />
-              </div>
-
-              <div>
-                <label className="input-label">Catégorie *</label>
-                <select
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="input-field"
-                  style={{ cursor: 'pointer' }}
-                >
-                  <option value="">Sélectionner...</option>
-                  <option value="Barber">Barber</option>
-                  <option value="Coiffure">Coiffure</option>
-                  <option value="Esthétique">Esthétique</option>
-                  <option value="Massage">Massage</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="input-label">Ville *</label>
-                <input
-                  type="text"
-                  value={city}
-                  onChange={(e) => setCity(e.target.value)}
-                  placeholder="Ex: Lausanne"
-                  className="input-field"
-                />
-              </div>
-
-              <div>
-                <label className="input-label">Téléphone *</label>
-                <input
-                  type="tel"
-                  value={phone}
-                  onChange={(e) => setPhone(e.target.value)}
-                  placeholder="+41 79 123 45 67"
-                  className="input-field"
-                />
-              </div>
-
-              <div>
-                <label className="input-label">Bio *</label>
-                <textarea
-                  value={bio}
-                  onChange={(e) => setBio(e.target.value)}
-                  placeholder="Décrivez votre expertise en quelques mots..."
-                  className="input-field"
-                  style={{ minHeight: '100px', resize: 'vertical' }}
-                />
-              </div>
-            </div>
-
-            <button
-              onClick={() => setStep(2)}
-              className="btn-sand"
-              disabled={!artistName || !category || !city || !phone || !bio}
-            >
-              SUIVANT →
-            </button>
           </div>
-        )}
 
-        {/* STEP 2: LOGISTICS */}
-        {step === 2 && (
+          {/* Logo */}
           <div>
-            <h1
-              style={{
-                fontSize: '32px',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                letterSpacing: '-0.5px',
-                marginBottom: '12px',
-              }}
-            >
-              Logistique
-            </h1>
-            <p style={{ color: 'rgba(255, 255, 255, 0.55)', marginBottom: '32px', fontSize: '14px' }}>
-              Comment souhaitez-vous travailler ?
-            </p>
-
-            <div style={{ marginBottom: '24px' }}>
-              <label className="input-label">Mode de service *</label>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                <div
-                  onClick={() => setModeDomicile(!modeDomicile)}
-                  style={{
-                    background: modeDomicile ? 'rgba(232,213,176,0.12)' : '#1a1a1a',
-                    border: `1px solid ${modeDomicile ? '#E8D5B0' : 'rgba(255, 255, 255, 0.09)'}`,
-                    borderRadius: '12px',
-                    padding: '16px 18px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                  }}
-                >
-                  <span style={{ fontSize: '24px' }}>🏠</span>
-                  <span style={{ fontSize: '15px', fontWeight: 700 }}>JE ME DÉPLACE</span>
-                </div>
-                <div
-                  onClick={() => setModeStudio(!modeStudio)}
-                  style={{
-                    background: modeStudio ? 'rgba(232,213,176,0.12)' : '#1a1a1a',
-                    border: `1px solid ${modeStudio ? '#E8D5B0' : 'rgba(255, 255, 255, 0.09)'}`,
-                    borderRadius: '12px',
-                    padding: '16px 18px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                  }}
-                >
-                  <span style={{ fontSize: '24px' }}>✂️</span>
-                  <span style={{ fontSize: '15px', fontWeight: 700 }}>AU STUDIO</span>
-                </div>
-              </div>
-            </div>
-
-            {modeStudio && (
-              <div style={{ marginBottom: '24px' }}>
-                <div style={{ marginBottom: '20px' }}>
-                  <label className="input-label">Adresse du studio *</label>
-                  <input
-                    type="text"
-                    value={studioAddress}
-                    onChange={(e) => setStudioAddress(e.target.value)}
-                    placeholder="Rue de Bourg 12, 1003 Lausanne"
-                    className="input-field"
-                  />
-                </div>
-
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                  <div>
-                    <label className="input-label">Latitude *</label>
-                    <input
-                      type="text"
-                      value={studioLat}
-                      onChange={(e) => setStudioLat(e.target.value)}
-                      placeholder="46.5197"
-                      className="input-field"
-                    />
-                  </div>
-                  <div>
-                    <label className="input-label">Longitude *</label>
-                    <input
-                      type="text"
-                      value={studioLng}
-                      onChange={(e) => setStudioLng(e.target.value)}
-                      placeholder="6.6323"
-                      className="input-field"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => setStep(1)} className="btn-outline" style={{ flex: 1 }}>
-                ← RETOUR
-              </button>
-              <button onClick={handleStep2Next} className="btn-sand" style={{ flex: 2 }}>
-                SUIVANT →
-              </button>
-            </div>
+            <label className="input-label">Logo du studio (carré)</label>
+            <ImageUploader
+              aspectRatio="1:1"
+              storageKey="nexus_builder_logo"
+              onChange={setLogo}
+              label=""
+              helpText="Format recommandé : 150x150px"
+            />
           </div>
-        )}
 
-        {/* STEP 3: SERVICES */}
-        {step === 3 && (
+          {/* Artist Name */}
           <div>
-            <h1
-              style={{
-                fontSize: '32px',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                letterSpacing: '-0.5px',
-                marginBottom: '12px',
-              }}
-            >
-              Prestations
-            </h1>
-            <p style={{ color: 'rgba(255, 255, 255, 0.55)', marginBottom: '32px', fontSize: '14px' }}>
-              Configurez vos services et tarifs
-            </p>
+            <label className="input-label">Nom d'artiste</label>
+            <input
+              type="text"
+              value={artistName}
+              onChange={(e) => setArtistName(e.target.value)}
+              placeholder="Ex: Studio Élé"
+              className="input-field"
+            />
+          </div>
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '20px' }}>
-              {services.map((service, idx) => (
-                <div
-                  key={idx}
-                  style={{
-                    background: '#1a1a1a',
-                    border: '1px solid rgba(255, 255, 255, 0.09)',
-                    borderRadius: '16px',
-                    padding: '20px',
-                  }}
+          {/* Category */}
+          <div>
+            <label className="input-label">Catégorie</label>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={`py-3 px-4 rounded-xl font-semibold transition-all ${
+                    category === cat
+                      ? 'bg-[#E8D5B0] text-[#0A0A0A]'
+                      : 'bg-[#F5F5F7]/5 border border-[#F5F5F7]/20 text-[#F5F5F7] hover:border-[#E8D5B0]/50'
+                  }`}
                 >
-                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                    <div style={{ fontSize: '14px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.55)' }}>
-                      PRESTATION {idx + 1}
-                    </div>
-                    {services.length > 1 && (
-                      <button
-                        onClick={() => removeService(idx)}
-                        style={{
-                          background: 'transparent',
-                          border: 'none',
-                          color: 'rgba(239, 68, 68, 0.7)',
-                          cursor: 'pointer',
-                          fontSize: '12px',
-                          fontWeight: 700,
-                        }}
-                      >
-                        SUPPRIMER
-                      </button>
-                    )}
-                  </div>
-
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                    <input
-                      type="text"
-                      value={service.name}
-                      onChange={(e) => updateService(idx, 'name', e.target.value)}
-                      placeholder="Nom de la prestation"
-                      className="input-field"
-                    />
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                      <div>
-                        <label className="input-label">🏠 Domicile (CHF)</label>
-                        <input
-                          type="number"
-                          value={service.priceDomicile}
-                          onChange={(e) => updateService(idx, 'priceDomicile', e.target.value)}
-                          placeholder="60"
-                          className="input-field"
-                          disabled={!modeDomicile}
-                        />
-                      </div>
-                      <div>
-                        <label className="input-label">✂️ Studio (CHF)</label>
-                        <input
-                          type="number"
-                          value={service.priceStudio}
-                          onChange={(e) => updateService(idx, 'priceStudio', e.target.value)}
-                          placeholder="40"
-                          className="input-field"
-                          disabled={!modeStudio}
-                        />
-                      </div>
-                    </div>
-
-                    <input
-                      type="text"
-                      value={service.duration}
-                      onChange={(e) => updateService(idx, 'duration', e.target.value)}
-                      placeholder="Durée (ex: 60 min)"
-                      className="input-field"
-                    />
-                  </div>
-                </div>
+                  {cat}
+                </button>
               ))}
             </div>
+          </div>
 
-            <button
-              onClick={addService}
-              style={{
-                width: '100%',
-                background: 'transparent',
-                border: '1px dashed rgba(255, 255, 255, 0.25)',
-                borderRadius: '12px',
-                padding: '16px',
-                color: 'rgba(255, 255, 255, 0.55)',
-                fontSize: '13px',
-                fontWeight: 700,
-                cursor: 'pointer',
-                marginBottom: '24px',
-              }}
-            >
-              + AJOUTER UNE PRESTATION
-            </button>
-
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => setStep(2)} className="btn-outline" style={{ flex: 1 }}>
-                ← RETOUR
-              </button>
-              <button onClick={() => setStep(4)} className="btn-sand" style={{ flex: 2 }}>
-                SUIVANT →
+          {/* Cities */}
+          <div>
+            <label className="input-label">Villes</label>
+            <div className="flex gap-2 mb-3">
+              <input
+                type="text"
+                value={cityInput}
+                onChange={(e) => setCityInput(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleAddCity()}
+                placeholder="Ex: Lausanne"
+                className="input-field flex-1"
+              />
+              <button
+                onClick={handleAddCity}
+                className="px-6 py-3 bg-[#E8D5B0] rounded-xl font-bold text-[#0A0A0A] hover:bg-[#E8D5B0]/90 transition-all"
+              >
+                <Plus className="w-5 h-5" />
               </button>
             </div>
-          </div>
-        )}
-
-        {/* STEP 4: AVAILABILITY */}
-        {step === 4 && (
-          <div>
-            <h1
-              style={{
-                fontSize: '32px',
-                fontWeight: 900,
-                textTransform: 'uppercase',
-                letterSpacing: '-0.5px',
-                marginBottom: '12px',
-              }}
-            >
-              Disponibilités
-            </h1>
-            <p style={{ color: 'rgba(255, 255, 255, 0.55)', marginBottom: '32px', fontSize: '14px' }}>
-              Sélectionnez vos créneaux disponibles
-            </p>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '24px' }}>
-              {Object.keys(availability).map((day) => (
-                <div key={day}>
-                  <div
-                    style={{
-                      fontSize: '13px',
-                      fontWeight: 700,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.08em',
-                      color: 'rgba(255, 255, 255, 0.55)',
-                      marginBottom: '10px',
-                    }}
+            <div className="flex flex-wrap gap-2">
+              {cities.map((city) => (
+                <div
+                  key={city}
+                  className="flex items-center gap-2 px-4 py-2 bg-[#E8D5B0]/20 border border-[#E8D5B0]/30 rounded-full text-sm"
+                >
+                  <span>{city}</span>
+                  <button
+                    onClick={() => handleRemoveCity(city)}
+                    className="hover:text-[#DC2626] transition-colors"
                   >
-                    {day}
-                  </div>
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                    {timeSlots.map((time) => {
-                      const isSelected = availability[day].includes(time);
-                      return (
-                        <button
-                          key={time}
-                          onClick={() => toggleAvailability(day, time)}
-                          style={{
-                            background: isSelected ? 'rgba(232,213,176,0.12)' : '#1a1a1a',
-                            border: `1px solid ${isSelected ? '#E8D5B0' : 'rgba(255, 255, 255, 0.09)'}`,
-                            borderRadius: '8px',
-                            padding: '8px 12px',
-                            color: isSelected ? '#E8D5B0' : 'rgba(255, 255, 255, 0.55)',
-                            fontSize: '12px',
-                            fontWeight: 700,
-                            cursor: 'pointer',
-                          }}
-                        >
-                          {time}
-                        </button>
-                      );
-                    })}
-                  </div>
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               ))}
             </div>
-
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button onClick={() => setStep(3)} className="btn-outline" style={{ flex: 1 }}>
-                ← RETOUR
-              </button>
-              <button onClick={handlePublish} className="btn-sand" style={{ flex: 2 }}>
-                PUBLIER →
-              </button>
-            </div>
           </div>
-        )}
+
+          {/* Phone */}
+          <div>
+            <label className="input-label">Téléphone</label>
+            <input
+              type="tel"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              placeholder="+41 79 123 45 67"
+              className="input-field"
+            />
+          </div>
+
+          {/* Gallery */}
+          <div>
+            <label className="input-label">Galerie (minimum 3 photos)</label>
+            <GalleryPhotoUpload
+              photos={gallery}
+              onChange={setGallery}
+              minPhotos={3}
+            />
+          </div>
+
+          {/* Actions */}
+          <div className="flex gap-4 pt-8">
+            <button
+              onClick={handleNext}
+              className="flex-1 py-4 bg-[#E8D5B0] rounded-xl font-bold text-[#0A0A0A] hover:scale-105 transition-transform flex items-center justify-center gap-2"
+            >
+              <Check className="w-5 h-5" />
+              PUBLIER LE PROFIL
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
-};
-
-export default Builder;
+}

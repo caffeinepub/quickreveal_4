@@ -12,6 +12,7 @@ import ProLogin from './components/ProLogin';
 import NexusOS from './components/NexusOS';
 import Builder from './components/Builder';
 import Subscription from './components/Subscription';
+import SupportChat from './components/SupportChat';
 
 const SCREEN_ORDER: ScreenType[] = [
   'splash',
@@ -39,27 +40,22 @@ const ScreenRouter: React.FC = () => {
     const prevIndex = SCREEN_ORDER.indexOf(prevScreen);
     const currIndex = SCREEN_ORDER.indexOf(currentScreen);
 
-    // Determine transition direction
     let enterClass = '';
     let exitClass = '';
 
-    if (prevScreen === 'splash' && currentScreen === 'explorer') {
-      // Fade transition from splash to explorer
+    if (prevScreen === 'splash' || currentScreen === 'splash') {
       enterClass = 'screen-fade-in';
       exitClass = 'screen-fade-out';
     } else if (currIndex > prevIndex) {
-      // Forward navigation
       enterClass = 'screen-enter-forward';
       exitClass = 'screen-exit-forward';
     } else {
-      // Backward navigation
       enterClass = 'screen-enter-backward';
       exitClass = 'screen-exit-backward';
     }
 
     setTransitionClass(exitClass);
 
-    // After exit animation, switch screen and play enter animation
     const timer = setTimeout(() => {
       setDisplayScreen(currentScreen);
       setTransitionClass(enterClass);
@@ -107,6 +103,7 @@ function App() {
   return (
     <AppContextProvider>
       <ScreenRouter />
+      <SupportChat />
     </AppContextProvider>
   );
 }

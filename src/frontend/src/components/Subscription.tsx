@@ -1,199 +1,253 @@
-import React from 'react';
-import { useAppContext, PublishedStudio } from '../context/AppContext';
-import { Check } from 'lucide-react';
-import { toast } from 'sonner';
-import { Toaster } from '@/components/ui/sonner';
+import React, { useState } from 'react';
+import { useAppContext } from '../context/AppContext';
+import PaymentForm, { PaymentData } from './PaymentForm';
 
 const Subscription: React.FC = () => {
-  const { goToNexusOS, publishStudio, setActiveNexusTab, goToSplash } = useAppContext();
+  const { goToNexusOS, updateSubscription } = useAppContext();
+  const [showPayment, setShowPayment] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [isPaymentValid, setIsPaymentValid] = useState(false);
+  const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
 
   const handleSubscribe = () => {
-    // Create published studio from builder data
-    const studio: PublishedStudio = {
-      name: 'Mon Studio',
-      category: 'Coiffure',
-      city: 'Lausanne',
-      phone: '+41 79 123 45 67',
-      bio: 'Studio professionnel de qualité',
-      modes: ['domicile', 'salon'],
-      studioAddress: 'Rue de Bourg 12, 1003 Lausanne',
-      studioLat: 46.5197,
-      studioLng: 6.6323,
-      services: [
-        {
-          name: 'Coupe classique',
-          priceDomicile: 60,
-          priceStudio: 40,
-          duration: '45 min',
-        },
-      ],
-      availability: {},
-      coverPhotoUrl: '/assets/generated/provider-julien-rossi.dim_800x600.png',
-    };
-
-    publishStudio(studio);
-    setActiveNexusTab('portfolio');
-    
-    toast.success('🚀 Studio en ligne !');
-    
-    setTimeout(() => {
-      goToNexusOS();
-    }, 1000);
+    setShowPayment(true);
   };
 
-  const advantages = [
-    'Visibilité maximale dans l\'Explorer',
-    'Gestion complète de votre agenda',
-    'Système de paiement sécurisé',
-    'Notifications en temps réel',
-    'Support prioritaire 7j/7',
-    'Analytics détaillés',
-  ];
+  const handleValidationChange = (isValid: boolean, data: PaymentData | null) => {
+    setIsPaymentValid(isValid);
+    setPaymentData(data);
+  };
 
-  return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh', padding: '20px' }}>
-      <Toaster />
-      {/* Header */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          marginBottom: '40px',
-        }}
-      >
+  const handleConfirmPayment = () => {
+    if (!isPaymentValid || !paymentData) return;
+
+    setIsProcessing(true);
+    setTimeout(() => {
+      const trialEnd = Date.now() + 30 * 24 * 60 * 60 * 1000; // 30 days
+      updateSubscription({
+        status: 'trial',
+        trialEndsAt: trialEnd,
+        nextBillingDate: trialEnd,
+        paymentMethod: {
+          cardLast4: paymentData.cardNumber.replace(/\s/g, '').slice(-4),
+          cardExpiry: paymentData.expiry,
+        },
+      });
+      setIsProcessing(false);
+      goToNexusOS();
+    }, 1500);
+  };
+
+  if (showPayment) {
+    return (
+      <div style={{ background: '#0a0a0a', minHeight: '100vh', padding: '20px' }}>
         <div
-          onClick={goToSplash}
+          onClick={() => setShowPayment(false)}
           style={{
             fontFamily: 'Inter, system-ui, sans-serif',
             fontSize: '22px',
             fontWeight: 900,
             letterSpacing: '-0.5px',
+            marginBottom: '32px',
             cursor: 'pointer',
           }}
         >
-          NEXUS<span style={{ color: '#6b7dff' }}>.</span>
+          NEXUS<span style={{ color: '#E8D5B0' }}>.</span>
+        </div>
+
+        <div style={{ maxWidth: '500px', margin: '0 auto' }}>
+          <h1
+            style={{
+              fontSize: '32px',
+              fontWeight: 900,
+              textTransform: 'uppercase',
+              letterSpacing: '-0.5px',
+              marginBottom: '12px',
+            }}
+          >
+            Paiement
+          </h1>
+          <p style={{ color: 'rgba(255, 255, 255, 0.55)', marginBottom: '32px', fontSize: '14px' }}>
+            Sécurisez votre abonnement NEXUS
+          </p>
+
+          <div
+            style={{
+              background: '#1a1a1a',
+              border: '1px solid rgba(255, 255, 255, 0.09)',
+              borderRadius: '16px',
+              padding: '24px',
+              marginBottom: '24px',
+            }}
+          >
+            <PaymentForm onValidationChange={handleValidationChange} />
+          </div>
+
+          <button
+            className="btn-sand"
+            onClick={handleConfirmPayment}
+            disabled={!isPaymentValid || isProcessing}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+            }}
+          >
+            {isProcessing ? (
+              <>
+                <div className="spinner" />
+                TRAITEMENT...
+              </>
+            ) : (
+              'CONFIRMER LE PAIEMENT'
+            )}
+          </button>
+
+          <div
+            style={{
+              fontSize: '12px',
+              color: 'rgba(255, 255, 255, 0.35)',
+              textAlign: 'center',
+              marginTop: '16px',
+              lineHeight: 1.6,
+            }}
+          >
+            Paiement sécurisé. Vos données sont protégées.
+          </div>
         </div>
       </div>
+    );
+  }
 
-      {/* Content */}
-      <div style={{ maxWidth: '500px', margin: '0 auto', paddingTop: '40px' }}>
-        {/* Badge */}
+  return (
+    <div style={{ background: '#0a0a0a', minHeight: '100vh', padding: '20px' }}>
+      <div
+        onClick={goToNexusOS}
+        style={{
+          fontFamily: 'Inter, system-ui, sans-serif',
+          fontSize: '22px',
+          fontWeight: 900,
+          letterSpacing: '-0.5px',
+          marginBottom: '32px',
+          cursor: 'pointer',
+        }}
+      >
+        NEXUS<span style={{ color: '#E8D5B0' }}>.</span>
+      </div>
+
+      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
+        {/* Trial Banner */}
         <div
           style={{
-            display: 'inline-block',
-            background: 'linear-gradient(135deg, #E8D5B0 0%, #d4b896 100%)',
-            color: '#0a0a0a',
-            padding: '8px 16px',
-            borderRadius: '999px',
-            fontSize: '11px',
-            fontWeight: 900,
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
-            marginBottom: '24px',
-          }}
-        >
-          ✨ OFFRE DE LANCEMENT
-        </div>
-
-        <h1
-          style={{
-            fontSize: '42px',
-            fontWeight: 900,
-            textTransform: 'uppercase',
-            letterSpacing: '-1px',
-            marginBottom: '16px',
-            lineHeight: 1.1,
-          }}
-        >
-          Rejoignez NEXUS
-        </h1>
-
-        <p
-          style={{
-            fontSize: '16px',
-            color: 'rgba(255, 255, 255, 0.55)',
+            background: 'linear-gradient(135deg, rgba(232,213,176,0.15), rgba(232,213,176,0.05))',
+            border: '1px solid rgba(232,213,176,0.3)',
+            borderRadius: '16px',
+            padding: '24px',
             marginBottom: '32px',
-            lineHeight: 1.6,
+            textAlign: 'center',
           }}
         >
-          Développez votre activité avec la plateforme professionnelle la plus avancée de Suisse
-          romande
-        </p>
+          <div
+            style={{
+              fontSize: '14px',
+              fontWeight: 700,
+              textTransform: 'uppercase',
+              letterSpacing: '0.08em',
+              color: '#E8D5B0',
+              marginBottom: '8px',
+            }}
+          >
+            OFFRE DE LANCEMENT
+          </div>
+          <div
+            style={{
+              fontFamily: 'Playfair Display, Georgia, serif',
+              fontSize: '36px',
+              fontWeight: 900,
+              marginBottom: '8px',
+            }}
+          >
+            GRATUIT le premier mois
+          </div>
+          <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.55)' }}>
+            puis 199 CHF/an
+          </div>
+        </div>
 
         {/* Pricing Card */}
         <div
           style={{
-            background: 'linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%)',
-            border: '2px solid #E8D5B0',
-            borderRadius: '20px',
+            background: '#1a1a1a',
+            border: '1px solid rgba(255, 255, 255, 0.09)',
+            borderRadius: '16px',
             padding: '32px',
-            marginBottom: '28px',
+            marginBottom: '24px',
           }}
         >
           <div
             style={{
               fontSize: '18px',
               fontWeight: 700,
+              marginBottom: '16px',
+            }}
+          >
+            Abonnement NEXUS Pro
+          </div>
+          <div
+            style={{
+              fontFamily: 'Playfair Display, Georgia, serif',
+              fontSize: '48px',
+              fontWeight: 900,
               color: '#E8D5B0',
-              marginBottom: '12px',
+              marginBottom: '8px',
             }}
           >
-            GRATUIT le premier mois
+            199.–
+            <span style={{ fontSize: '18px', fontWeight: 400, color: 'rgba(255, 255, 255, 0.55)' }}>
+              {' '}
+              / an
+            </span>
           </div>
-          <div
-            style={{
-              fontSize: '14px',
-              color: 'rgba(255, 255, 255, 0.55)',
-              marginBottom: '20px',
-            }}
-          >
-            puis <strong style={{ color: '#ffffff' }}>199 CHF/an</strong>
+          <div style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.55)', marginBottom: '24px' }}>
+            Facturation annuelle · Résiliable à tout moment
           </div>
 
-          <div
-            style={{
-              height: '1px',
-              background: 'rgba(255, 255, 255, 0.09)',
-              marginBottom: '20px',
-            }}
-          />
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {advantages.map((advantage, idx) => (
-              <div
-                key={idx}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                }}
-              >
+          {/* Advantages */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginBottom: '24px' }}>
+            {[
+              'Profil professionnel complet',
+              'Gestion des réservations en temps réel',
+              'Calendrier intelligent',
+              'Portefeuille et transactions',
+              'Visibilité maximale sur NEXUS',
+              'Support prioritaire',
+            ].map((advantage, idx) => (
+              <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                 <div
                   style={{
                     width: '20px',
                     height: '20px',
                     borderRadius: '50%',
-                    background: 'rgba(34, 197, 94, 0.15)',
+                    background: 'rgba(232,213,176,0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    flexShrink: 0,
+                    fontSize: '12px',
+                    color: '#E8D5B0',
                   }}
                 >
-                  <Check size={12} color="#22c55e" strokeWidth={3} />
+                  ✓
                 </div>
-                <div style={{ fontSize: '14px', color: 'rgba(255, 255, 255, 0.85)' }}>
-                  {advantage}
-                </div>
+                <div style={{ fontSize: '14px' }}>{advantage}</div>
               </div>
             ))}
           </div>
-        </div>
 
-        <button onClick={handleSubscribe} className="btn-sand" style={{ marginBottom: '20px' }}>
-          COMMENCER GRATUITEMENT
-        </button>
+          <button className="btn-sand" onClick={handleSubscribe}>
+            COMMENCER L'ESSAI GRATUIT
+          </button>
+        </div>
 
         <div
           style={{
@@ -203,7 +257,8 @@ const Subscription: React.FC = () => {
             lineHeight: 1.6,
           }}
         >
-          Aucune carte bancaire requise · Annulation à tout moment
+          En vous abonnant, vous acceptez nos conditions générales. Votre premier mois est gratuit,
+          puis 199 CHF seront facturés annuellement. Vous pouvez annuler à tout moment.
         </div>
       </div>
     </div>

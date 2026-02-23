@@ -7,9 +7,16 @@ import Runtime "mo:core/Runtime";
 import Iter "mo:core/Iter";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
+import OutCall "http-outcalls/outcall";
+import MixinStorage "blob-storage/Mixin";
+import Storage "blob-storage/Storage";
+import Stripe "stripe/stripe";
 
 actor {
-  // Initialize the access control system
+  // Mixins
+  include MixinStorage();
+
+  // Access control system
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
 
@@ -118,6 +125,45 @@ actor {
   let reservations = Map.empty<Text, Reservation>();
   let babyCribs = Map.empty<Text, BabyCrib>();
   let loyaltyPoints = Map.empty<Principal, LoyaltyPoints>();
+
+  // Stripe configuration
+  var stripeConfig : ?Stripe.StripeConfiguration = null;
+
+  /// Checks if Stripe is configured.
+  public query func isStripeConfigured() : async Bool {
+    stripeConfig != null;
+  };
+
+  /// Sets Stripe configuration (admin only)
+  public shared ({ caller }) func setStripeConfiguration(config : Stripe.StripeConfiguration) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    stripeConfig := ?config;
+  };
+
+  /// Retrieves current configuration (private).
+  func getStripeConfiguration() : Stripe.StripeConfiguration {
+    switch (stripeConfig) {
+      case (null) { Runtime.trap("Stripe needs to be first configured") };
+      case (?value) { value };
+    };
+  };
+
+  /// Gets Stripe session status.
+  public func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+    await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
+  };
+
+  /// Creates Stripe checkout session.
+  public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
+    await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
+  };
+
+  /// Transform query (used internally).
+  public query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
+    OutCall.transform(input);
+  };
 
   // Initialize baby cribs (Admin only)
   public shared ({ caller }) func initializeCribs() : async () {

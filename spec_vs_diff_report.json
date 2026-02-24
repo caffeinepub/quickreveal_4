@@ -1,0 +1,184 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-24T22:51:16.034Z",
+  "summary": "The diff implements a significant portion of the NEXUS v2.0 platform, covering authentication, role selection, OTP verification, Pro onboarding modal, profile builder, explorer, subscription screen, notification center, city-based geolocation replacement, demo data, and confetti utility. However, several backend-heavy requirements (REQ-5, REQ-11, REQ-12, REQ-13, REQ-15) show only partial or missing implementation, and several frontend features (REQ-8, REQ-9, REQ-10, REQ-11, REQ-12, REQ-13) are either absent or only partially visible in the diff.",
+  "missing_requirements": [
+    {
+      "id": "REQ-5",
+      "requirement": "Define backend data models and CRUD for all entities including Review, Notification, Wallet, Transaction, GalleryPhoto, Availability with all fields; booking status transitions including completed and reviewed states; wallet balance updates.",
+      "reason": "The backend/main.mo uses simplified types. ProProfile is missing revolutHandle, isPublished, isFlashActive, flashActivatedAt, subscriptionStatus, avgRating, reviewCount, responseTimeMin, acceptanceRate, completedCount. No Review, Notification, Wallet, or Transaction entities exist. Booking status only has pending/confirmed/cancelled with no completed or reviewed states.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "requirement": "Build the Pro detail page (Fiche Pro) with full-width cover photo, profile/name/slogan/badges, reputation scores, full bio, service catalogue with before/after photos, scrollable gallery, available time slots, public reviews, and sticky Book Now CTA.",
+      "reason": "ProviderDetail.tsx is referenced in ScreenRouter.tsx as an import but not included in the diff as an added or modified file. Its implementation cannot be verified.",
+      "evidence": [
+        "frontend/src/components/ScreenRouter.tsx"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "requirement": "Implement the 6-step Flash booking flow: service selection, time slot selection with quick options, address input, booking summary, NEXUS PAY with 3s auto-success, post-payment confirmation with 10:00 countdown.",
+      "reason": "BookingFlow.tsx is referenced in ScreenRouter.tsx but not included in the diff. BookingContact.tsx, BookingDate.tsx, and BookingLocation.tsx are redirect stubs only. The full 6-step flow cannot be verified.",
+      "evidence": [
+        "frontend/src/components/ScreenRouter.tsx",
+        "frontend/src/components/BookingContact.tsx",
+        "frontend/src/components/BookingDate.tsx",
+        "frontend/src/components/BookingLocation.tsx"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "requirement": "React Query polling every 10 seconds, per-request 10:00 countdown timers, and auto-routing to next available pro on decline or timeout.",
+      "reason": "NexusOS.tsx shows a radar tab with demo requests but the React Query polling refetchInterval of 10 seconds is not visible in the truncated diff. Per-request countdown timers and auto-routing on decline/timeout are not shown.",
+      "evidence": [
+        "frontend/src/components/NexusOS.tsx"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "requirement": "Implement the Live Status shared timeline visible to both client and pro, with all lifecycle steps, 24h post-service prompts, fund release simulation, and 48h NEXUS mediation flow.",
+      "reason": "No LiveStatus or shared timeline component appears anywhere in the diff. The feature is entirely absent.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-12",
+      "requirement": "Build the Wallet Pro screen with available/escrowed balances, simulated Revolut transfer button, full transaction history table, weekly/monthly/total stats, and monthly revenue bar chart.",
+      "reason": "NexusOS.tsx references walletBalance and escrowBalance from context but no transaction history table, stats summary, or bar chart implementation is visible in the diff.",
+      "evidence": [
+        "frontend/src/components/NexusOS.tsx"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "requirement": "Implement the double review system: 24h post-service client public review prompt, pro internal client rating stored but not public, and automatic Explorer suspension for pros below 3.5 average rating.",
+      "reason": "No review prompt component or review submission flow is visible in the diff. Explorer filtering for ratings below 3.5 is not shown. No Review entity handling exists in the backend.",
+      "evidence": [
+        "frontend/src/components/Explorer.tsx",
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "requirement": "Seed 6 demo pro profiles in the backend at canister initialization only if no profiles exist, with pre-filled services, cover photos, ratings, and all required fields.",
+      "reason": "The backend/main.mo diff does not show any seeding logic at canister initialization. Demo profiles exist only as frontend static data in demoData.ts, not seeded in the backend canister.",
+      "evidence": [
+        "backend/main.mo",
+        "frontend/src/utils/demoData.ts"
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "requirement": "Confetti animation triggers on booking confirmation in addition to subscription activation.",
+      "reason": "confetti.ts is implemented and called in SubscriptionScreen.tsx on activation, but no evidence of confetti being triggered on booking confirmation (step 6 of booking flow) is visible in the diff.",
+      "evidence": [
+        "frontend/src/utils/confetti.ts",
+        "frontend/src/components/SubscriptionScreen.tsx"
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "requirement": "The 6 generated cover photo image files must exist under frontend/public/assets/generated.",
+      "reason": "The 6 image files (e.g. barber-lausanne-cover.dim_1200x400.png) are referenced in demoData.ts but do not appear in the diff as added files under frontend/public/assets/generated.",
+      "evidence": [
+        "frontend/src/utils/demoData.ts"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "Migration module (backend/migration.mo) with OldActor/NewActor pattern for canister state migration",
+      "reason": "The build request does not mention any migration module or canister upgrade migration pattern. This was added without being requested.",
+      "evidence": [
+        "backend/migration.mo"
+      ]
+    },
+    {
+      "description": "Welcome.tsx screen with optional display name input for new users",
+      "reason": "The build request specifies role selection after login with OTP for clients and pro onboarding modal for pros. A separate Welcome screen asking for a display name is not part of the spec.",
+      "evidence": [
+        "frontend/src/components/Welcome.tsx"
+      ]
+    },
+    {
+      "description": "UpgradeModal.tsx — a separate upgrade modal distinct from the Pro onboarding modal",
+      "reason": "The spec only requires a single Pro onboarding modal (REQ-3) with the LAUNCH MY SERVICE title and 5 specific benefits. A separate UpgradeModal with different content was added without being requested.",
+      "evidence": [
+        "frontend/src/components/UpgradeModal.tsx"
+      ]
+    },
+    {
+      "description": "ProLogin.tsx — a separate Pro login screen",
+      "reason": "The build request specifies a single unified login/splash screen (REQ-1) with Internet Identity for all users. A separate ProLogin screen is not specified.",
+      "evidence": [
+        "frontend/src/components/ProLogin.tsx"
+      ]
+    },
+    {
+      "description": "Bern included as a city in the CITY_DISTANCES table",
+      "reason": "REQ-17 explicitly limits the city list to exactly 10 Swiss romande cities with no mention of Bern. Adding Bern contradicts the constraint.",
+      "evidence": [
+        "frontend/src/utils/cityData.ts"
+      ]
+    },
+    {
+      "description": "DE (German) added to the language badges list in the Pro profile builder",
+      "reason": "REQ-4 specifies exactly FR/EN/PT/ES/AR as language badges. German (DE) was added without being requested.",
+      "evidence": [
+        "frontend/src/components/Builder.tsx"
+      ]
+    },
+    {
+      "description": "BarberKing Geneva seeded with 32 reviews instead of the specified 23",
+      "reason": "REQ-15 specifies BarberKing Geneva with exactly 23 reviews. demoData.ts sets reviewCount to 32.",
+      "evidence": [
+        "frontend/src/utils/demoData.ts"
+      ]
+    },
+    {
+      "description": "Studio Ele seeded with 28 reviews instead of the specified 31",
+      "reason": "REQ-15 specifies Studio Ele with exactly 31 reviews. demoData.ts sets reviewCount to 28.",
+      "evidence": [
+        "frontend/src/utils/demoData.ts"
+      ]
+    }
+  ],
+  "confidence": 0.72,
+  "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "frontend/src/components/BookingContact.tsx",
+    "frontend/src/components/BookingDate.tsx",
+    "frontend/src/components/BookingLocation.tsx",
+    "frontend/src/components/Builder.tsx",
+    "frontend/src/components/ClientDashboard.tsx",
+    "frontend/src/components/Explorer.tsx",
+    "frontend/src/components/LandingPage.tsx",
+    "frontend/src/components/NexusOS.tsx",
+    "frontend/src/components/NotificationCenter.tsx",
+    "frontend/src/components/OTPVerification.tsx",
+    "frontend/src/components/ProLogin.tsx",
+    "frontend/src/components/ProOnboardingModal.tsx",
+    "frontend/src/components/RoleSelection.tsx",
+    "frontend/src/components/ScreenRouter.tsx",
+    "frontend/src/components/Splash.tsx",
+    "frontend/src/components/Subscription.tsx",
+    "frontend/src/components/SubscriptionScreen.tsx",
+    "frontend/src/components/UpgradeModal.tsx",
+    "frontend/src/components/Welcome.tsx",
+    "frontend/src/context/AppContext.tsx",
+    "frontend/src/context/AuthContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/index.css",
+    "frontend/src/utils/cityData.ts",
+    "frontend/src/utils/confetti.ts",
+    "frontend/src/utils/demoData.ts",
+    "frontend/src/utils/servicePresets.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json"
+  ]
+}

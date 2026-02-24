@@ -1,0 +1,478 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "NEXUS Platform v2.0 — Frontend Implementation with City-Based Geolocation, 10s Polling, and 6 Demo Pro Profiles",
+  "requirements": [
+    {
+      "id": "REQ-1",
+      "summary": "Implement Internet Identity login screen with centered NEXUS logo, single 'Sign In' button, and subtitle text, routing to role selection after authentication",
+      "acceptanceCriteria": [
+        "NEXUS logo with blue signature dot is centered on the login screen",
+        "A single 'Sign In' button triggers Internet Identity authentication",
+        "After login, user is routed to the role selection screen"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Splash.tsx",
+          "operation": "modify",
+          "description": "Update the login screen to display the NEXUS logo centered from frontend/public/assets/generated/nexus-logo.dim_400x120.png, a single 'Sign In' button that triggers Internet Identity authentication via the authorization component, and subtitle text 'Secure authentication — Face ID / Fingerprint / WebAuthn'. After successful login, route to the role selection screen. Verify the authorization component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Implement role selection screen with Client/Pro options, Client OTP flow (code 1234 accepted once, never re-asked), and immediate Pro onboarding modal trigger",
+      "acceptanceCriteria": [
+        "Two role options displayed after login",
+        "Client OTP flow accepts code 1234 and marks phone as verified",
+        "OTP is never re-asked after first verification",
+        "Pro selection immediately opens the onboarding modal"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/RoleSelection.tsx",
+          "operation": "modify",
+          "description": "Update to display two role cards: 'I'm looking for a service' (Client) and 'I offer a service' (Pro). When Client is selected, trigger a simulated OTP phone verification flow with a 30s countdown timer that accepts code 1234 and stores a '✅ Phone verified' badge in the user profile (ensure verification status is persisted so OTP is never re-asked). When Pro is selected, immediately open the ProOnboardingModal component without requiring OTP verification."
+        },
+        {
+          "path": "frontend/src/components/OTPVerification.tsx",
+          "operation": "create",
+          "description": "Create a new component that renders a phone number input, a 4-digit OTP code input field, a 30s countdown timer, and a verify button. Accept code 1234 as valid. On successful verification, update the user profile to mark phone as verified and navigate to the explorer screen. Include validation feedback and error states."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a mutation hook for updating the user profile's phone verification status using the authorization component's saveCallerUserProfile capability. Verify the component's usage instructions before implementing."
+        }
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "summary": "Implement Pro onboarding modal with title 'LAUNCH MY SERVICE', 5 benefit bullets, 'Start 7 days free' CTA, and 'Not now' option",
+      "acceptanceCriteria": [
+        "Modal appears immediately when Pro role is selected",
+        "All 5 benefit bullet points are displayed",
+        "'Start 7 days free' CTA routes to the Pro profile builder",
+        "'Not now' dismisses the modal"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProOnboardingModal.tsx",
+          "operation": "modify",
+          "description": "Update the modal to display the title 'LAUNCH MY SERVICE', list the 5 benefits (visible profile, instant bookings, NEXUS PAY, real-time notifications, zero commission for 7 days), a 'Start 7 days free' CTA button that navigates to the Builder screen, and a 'Not now' button that dismisses the modal. Apply the NEXUS design system styling (#0A0A0A background, #E8C89A gold accents, #1A1A1A cards)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Build Pro profile builder with 7 sections (Identity, Revolut payment, Service catalogue, Gallery, Availability, Flash mode, Reputation), city selector from 10 Swiss romande cities, and publication validation",
+      "acceptanceCriteria": [
+        "All 7 sections (A–G) are present and functional in the builder",
+        "Category selection auto-populates the correct service presets",
+        "City selector shows exactly the 10 Swiss romande cities",
+        "Revolut field is marked as blocking: publication button is disabled without it",
+        "Publication button validates all 3 conditions and shows red checklist if incomplete",
+        "Flash mode auto-disables after 4 hours"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Builder.tsx",
+          "operation": "modify",
+          "description": "Refactor the Builder wizard to include 7 sequential sections: (A) Identity — cover photo 1200×400px drag & drop, circular profile photo 150×150px, brand name, slogan (80 chars with counter), bio (500 chars with counter), category dropdown (Barber/Coiffure/Esthétique/Massage) that auto-loads service presets from frontend/src/utils/servicePresets.ts, city dropdown from the fixed list [Geneva, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre], intervention radius slider 1–50 km, language badge selector (FR/EN/PT/ES/AR), phone field (hidden from clients). (B) Revolut payment setup — input for @revolut-username or +41 phone, 'Validate my Revolut' button that marks as verified with badge '💳 Revolut verified ✅', required before publication. (C) Service catalogue with category presets auto-loaded on category selection, each service editable (name, price, duration), 2 before/after photo slots, badge selector (Popular/New/Promo), delete/reorder, and '+ Add custom service' button. (D) Gallery with minimum 3 photos, drag & drop reordering, starred primary photo selection. (E) Availability grid Mon–Sun with time slots per day, available/unavailable toggle per day, minimum lead time selector (1h/2h/24h/48h), 'I travel to the client' toggle. (F) Flash mode toggle with auto-disable after 4h and 'Available NOW' messaging. (G) Reputation score read-only display (average rating, response time, acceptance rate, completed services). Publication button validates: Revolut set + min 3 photos + min 1 service; if incomplete shows red checklist modal; if complete opens the subscription modal. Use ImageUploader and CroppingModal components for photo uploads."
+        },
+        {
+          "path": "frontend/src/utils/cityData.ts",
+          "operation": "create",
+          "description": "Create a utility module exporting the fixed list of 10 Swiss romande cities [Geneva, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre] and a city-zone proximity map that defines which cities are considered 'nearby' (e.g., Lausanne ↔ Morges ↔ Nyon are nearby; Geneva ↔ Nyon are nearby; Fribourg ↔ Neuchâtel are nearby). Include a helper function that calculates proximity category (same city / nearby / far) based on the proximity map."
+        },
+        {
+          "path": "frontend/src/components/CategoryServicePresetLoader.tsx",
+          "operation": "create",
+          "description": "Create a component that listens to category selection changes and auto-loads the corresponding service presets from frontend/src/utils/servicePresets.ts into the service catalogue form fields. Provide clear visual feedback when presets are loaded."
+        },
+        {
+          "path": "frontend/src/components/PublicationValidationModal.tsx",
+          "operation": "create",
+          "description": "Create a modal component that displays a red checklist showing which publication requirements are incomplete (Revolut verified, min 3 gallery photos, min 1 service). Show green checkmarks for completed items and red X marks for incomplete items. Include a 'Close' button that returns the user to the builder to complete missing items."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Implement subscription modal with 7-day free trial offer, simulated Revolut payment (3s auto-success), golden confetti animation, trial banner, and Day -1 notification scheduling",
+      "acceptanceCriteria": [
+        "Subscription modal appears before first publication",
+        "Simulated Revolut payment auto-succeeds after 3 seconds",
+        "Golden confetti animation plays on activation",
+        "Trial banner appears in Pro dashboard",
+        "Day -1 notification is queued and displayed"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/SubscriptionScreen.tsx",
+          "operation": "modify",
+          "description": "Update the subscription modal to display '🎁 7 DAYS FREE then 19.90 CHF/month — Cancellable anytime', list 6 included benefits, billing email input, and a simulated 'Pay via Revolut' button with 3s auto-success animation. On activation: trigger golden confetti animation for 3 seconds using canvas-confetti library, display success message 'You are live! Clients around you can already see your profile.', show 'View my client profile' button that navigates to the pro detail page, add 'Free trial — Day 7' banner state to the user profile, and schedule a Day -1 notification 'Your trial expires tomorrow' (store notification creation timestamp for future display)."
+        },
+        {
+          "path": "frontend/src/components/TrialBanner.tsx",
+          "operation": "create",
+          "description": "Create a banner component that displays 'Free trial — Day X' in the Pro dashboard (NexusOS), calculating remaining trial days from the trialStartDate stored in the user profile. Style with gold accent background and countdown text."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a mutation hook for publishing the pro profile and activating the trial subscription, updating the subscriptionStatus and trialStartDate fields in the backend ProProfile entity."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Build Explorer screen with category filters, city selector, distance slider using city-zone proximity matching, Flash section, and pro card grid with skeleton loading",
+      "acceptanceCriteria": [
+        "City selector shows the 10 Swiss romande cities",
+        "Distance filter works by city-zone proximity matching without GPS",
+        "Available NOW section shows Flash-active pros with pulsing badge",
+        "Pro cards render with all listed fields",
+        "Skeleton loading displays while data loads",
+        "6 demo profiles are visible immediately on first load"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Refactor the Explorer screen to remove all GPS/geolocation logic (useGeolocation hook, Haversine calculations, Nominatim geocoding). Replace with a city dropdown selector showing the 10 Swiss romande cities from frontend/src/utils/cityData.ts. Add header 'What service are you looking for?', horizontally scrollable category filters (📍 Near me, Barber, Coiffure, Esthétique, Massage, ⚡ Flash, Price ↕), distance slider 1–50 km that filters by city-zone proximity matching using the cityData proximity map, and a dedicated 'Available NOW ⚡' horizontal scroll section showing Flash-active pros with pulsing green badge animation. Render pro cards with cover photo, FLASH badge if active, Revolut verified badge, circular profile photo, name, category, star rating with review count, city distance label (calculated by proximity category), response time, starting price, and '⚡ BOOK' CTA button. Display skeleton loading animations while data is being fetched. Ensure 6 demo profiles are immediately visible on first load by querying the backend for all published profiles."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a query hook for fetching all published pro profiles from the backend, with optional filters for category and city proximity. The query should return profile data including Flash status, Revolut verification, ratings, and city information."
+        },
+        {
+          "path": "frontend/src/components/ProCard.tsx",
+          "operation": "create",
+          "description": "Create a reusable pro profile card component that renders a pro's cover photo, Flash badge (pulsing green animation if active), Revolut verified badge, circular profile photo, name, category, star rating with review count, city distance label, response time, starting price, and '⚡ BOOK' CTA button. Apply NEXUS design system styling with #1A1A1A card background, 16px border radius, and hover transitions."
+        },
+        {
+          "path": "frontend/src/components/FlashProSection.tsx",
+          "operation": "create",
+          "description": "Create a horizontal scrollable section component that displays only Flash-active pros with a pulsing green 'Available NOW ⚡' badge. Include left/right scroll arrows for navigation on desktop. Style with #22C55E success green for the pulsing animation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "summary": "Build Pro detail page showing cover photo, profile info, badges, reputation, bio, service catalogue, gallery, available time slots, reviews, and sticky booking CTA",
+      "acceptanceCriteria": [
+        "All sections render correctly from pro profile data",
+        "Before/after photos display per service",
+        "Available slots are shown",
+        "Sticky booking CTA is always visible at the bottom"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProviderDetail.tsx",
+          "operation": "modify",
+          "description": "Update the Pro detail page (Fiche Pro) to render: full-width cover photo from the pro profile, circular profile photo + name + slogan + Revolut verified badge + language badges, reputation scores section (average rating, response time, acceptance rate, completed services count), full bio text, service catalogue with each service showing name/price/duration and before/after photos in a grid, scrollable gallery with all galleryPhotos from the profile, available time slots calculated from weeklyAvailability, public reviews section (placeholder if no reviews exist), and a sticky bottom CTA '⚡ Book Now' that navigates to the BookingFlow component. Fetch pro profile data using the existing useQueries hook and pass the proId from route params."
+        },
+        {
+          "path": "frontend/src/components/ServiceCatalogueDisplay.tsx",
+          "operation": "create",
+          "description": "Create a component that renders a grid of service cards, each showing the service name, price, duration, badge (Popular/New/Promo), and before/after photos in a side-by-side layout. Include a 'Select' button that passes the service to the booking flow."
+        },
+        {
+          "path": "frontend/src/components/AvailableSlotsDisplay.tsx",
+          "operation": "create",
+          "description": "Create a component that parses the pro's weeklyAvailability data and displays available time slots for the next 7 days, grouped by date. Include a date picker and time slot buttons that allow the user to select a datetime for booking."
+        }
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "summary": "Implement 6-step Flash booking flow with service selection, time slots, address input, recap, NEXUS PAY with simulated Revolut QR/auto-success, and post-payment confirmation with 10-minute countdown",
+      "acceptanceCriteria": [
+        "All 6 steps are navigable in sequence with back navigation",
+        "Quick time slot buttons work",
+        "NEXUS PAY auto-succeeds after 3 seconds",
+        "Post-payment countdown starts at 10:00 and counts down",
+        "Booking record is created in the backend on payment confirmation"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BookingFlow.tsx",
+          "operation": "modify",
+          "description": "Refactor the booking flow to implement 6 sequential steps: Step 1 — service selection (1 tap from service catalogue); Step 2 — time slot selection with quick options (In 1h, In 2h, Tonight, Tomorrow) plus full calendar picker; Step 3 — address input (manual text field) with optional note to the pro; Step 4 — booking summary recap showing service name, pro name, datetime, address, price with Edit/Confirm buttons; Step 5 — NEXUS PAY screen showing amount, escrow guarantee messaging ('Your money is protected / Released to pro after service / Refunded if no-show'), animated Revolut QR code placeholder image, 'Pay via Revolut' button with 3s auto-success simulation; Step 6 — post-payment confirmation with pulsing green circle animation, message 'Request sent to [Pro Name]', '⏱️ The pro has 10 minutes to confirm', and a 10:00 countdown timer that ticks down every second. On payment confirmation, create the booking record in the backend using the createBookingRequest mutation hook. Include back navigation for steps 1–4 and disable back navigation on steps 5–6."
+        },
+        {
+          "path": "frontend/src/components/QuickTimeSlotSelector.tsx",
+          "operation": "create",
+          "description": "Create a component that displays quick time slot buttons (In 1h, In 2h, Tonight, Tomorrow) and calculates the corresponding datetime based on the current time. Include a full calendar date/time picker below the quick options. Validate selected times against the pro's weeklyAvailability and minBookingLeadTime."
+        },
+        {
+          "path": "frontend/src/components/BookingCountdown.tsx",
+          "operation": "create",
+          "description": "Create a countdown timer component that starts at 10:00 (10 minutes) and ticks down every second, displaying MM:SS format in red text (#EF4444). When the timer reaches 00:00, trigger a timeout callback."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a mutation hook for creating a booking request using the backend createBookingRequest capability, passing proId, serviceId, date, timeSlot, and address as parameters."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Build Radar Pro screen with React Query 10s polling, pulsing red badge on nav icon for pending requests, tabs (Pending/Confirmed/History), and Accept/Decline actions with countdown timers",
+      "acceptanceCriteria": [
+        "React Query polls the backend every 10 seconds for new bookings",
+        "Red badge appears on nav icon when pending requests exist without page reload",
+        "New request cards appear within 10 seconds of creation",
+        "Accept action updates booking status and triggers client notification",
+        "Decline/timeout triggers auto-routing logic"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Update the NexusOS (Pro dashboard) to implement React Query polling every 10 seconds for pending booking requests using the getBookingsByProfessional query with refetchInterval: 10000. Add a pulsing red badge to the 'Radar' navigation tab icon when pendingBookings.length > 0. Render tabs for Pending 🔴, Confirmed, and History. Each pending request card shows: client name + rating (placeholder if no rating), service name + guaranteed amount, appointment datetime, distance from pro (calculated by city proximity), 10:00 countdown timer in red, Accept (✅) and Decline (❌) action buttons, and a message-to-client text field. On Accept: call updateBookingStatus mutation with status 'confirmed', show 'Confirmed ✅' badge, trigger a simulated client notification 'Studio Élé confirmed! Service in Xh Ym 🎉', and start a countdown to client arrival. On Decline or timeout: trigger auto-routing to the next available pro (simulated by updating booking status to 'cancelled' and showing client message 'Searching for another pro...')."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Update the getBookingsByProfessional query hook to include refetchInterval: 10000 (10 seconds) and refetchOnWindowFocus: true for real-time polling. Add a computed pendingBookingsCount property that returns the count of bookings with status 'pending'."
+        },
+        {
+          "path": "frontend/src/components/PendingRequestCard.tsx",
+          "operation": "create",
+          "description": "Create a card component for a pending booking request that displays client name, service name, price, datetime, distance label, a 10:00 countdown timer, Accept/Decline action buttons, and an optional message-to-client input field. Style with #1A1A1A card background and #EF4444 red for the countdown timer."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Implement Live Status shared timeline showing booking lifecycle steps, visible to both client and pro, with 24h post-service prompt for completion/dispute resolution",
+      "acceptanceCriteria": [
+        "Timeline shows all lifecycle steps with timestamps",
+        "Both client and pro see the same timeline for a given booking",
+        "24h post-service prompt appears for both parties",
+        "Fund release / mediation flows are triggered correctly"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BookingTimeline.tsx",
+          "operation": "create",
+          "description": "Create a shared timeline component that displays booking lifecycle steps: Request sent, Pro accepted, Payment secured, Service in Xh Ym, Confirm service completed, Leave a review. Each step shows a timestamp and status indicator (pending/completed). Fetch booking data using the getBooking query hook and display the timeline for both client and pro views. Include logic to show a 24h post-service prompt with '✅ All good!' or '⚠️ Report a problem' buttons for both parties. On '✅': trigger simulated fund release. On '⚠️': show '48h NEXUS mediation' message. If no response after 48h: trigger auto-release funds (simulated via backend call)."
+        },
+        {
+          "path": "frontend/src/components/ClientDashboard.tsx",
+          "operation": "modify",
+          "description": "Update the client dashboard to include the BookingTimeline component for each confirmed booking, showing the shared lifecycle timeline. Wire the timeline into the booking detail view accessible from the dashboard booking list."
+        },
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Update the NexusOS Pro dashboard to include the BookingTimeline component for each confirmed booking in the Confirmed tab, showing the shared lifecycle timeline from the pro's perspective."
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Build Wallet Pro screen showing available vs. escrowed balance, simulated Revolut transfer, transaction history table, stats summary, and monthly revenue bar chart",
+      "acceptanceCriteria": [
+        "Available and escrowed balances display correctly",
+        "Revolut transfer button shows a success confirmation (simulated)",
+        "Transaction history table is populated",
+        "Bar chart renders monthly revenue data"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/WalletPro.tsx",
+          "operation": "create",
+          "description": "Create a Wallet Pro screen that displays available balance vs. escrowed balance (with 🔒 icon), a simulated 'Transfer to my Revolut' button with 3s loading animation followed by success confirmation toast, a transaction history table (columns: service, client, amount, date, status) populated from backend transaction data, stats summary cards (weekly/monthly/total revenue), and a monthly revenue bar chart using a charting library (recharts). Fetch wallet and transaction data using query hooks that call backend capabilities for wallet balance and transaction history."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add query hooks for fetching wallet balance (availableBalance, escrowedBalance) and transaction history from the backend. Include filters for date range and transaction type."
+        },
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Add a 'Wallet' tab to the NexusOS dashboard navigation that renders the WalletPro component. Ensure the tab is visible and accessible from the main dashboard nav."
+        }
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "summary": "Implement double review system with 24h post-service prompts for client public review and pro internal client rating, with auto-suspension for pros rated below 3.5",
+      "acceptanceCriteria": [
+        "Client review prompt appears 24h after confirmed completion",
+        "Pro internal client rating is stored but not shown publicly",
+        "Pros with average rating below 3.5 are filtered out of Explorer results"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ReviewPrompt.tsx",
+          "operation": "create",
+          "description": "Create a review prompt component that appears 24h after a confirmed service completion. For clients: show a 5-star rating input + comment text area for a public pro review. For pros: show a 5-star rating input for an internal client rating (not shown publicly). Include a submit button that calls the backend review creation mutation. Display a success confirmation after submission."
+        },
+        {
+          "path": "frontend/src/components/ClientDashboard.tsx",
+          "operation": "modify",
+          "description": "Update the client dashboard to check for bookings that are 24h past their service datetime and status is 'confirmed'. Display the ReviewPrompt component for those bookings at the top of the dashboard with a dismiss option."
+        },
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Update the NexusOS Pro dashboard to check for bookings that are 24h past their service datetime and status is 'confirmed'. Display the ReviewPrompt component (pro version, internal client rating) for those bookings in the Confirmed tab."
+        },
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Update the Explorer to filter out pro profiles where avgRating < 3.5 from the displayed results. Add a client-side filter that checks the avgRating field from the fetched pro profiles and excludes suspended pros from rendering."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add mutation hooks for creating client public reviews and pro internal client ratings, calling the backend review creation capability with the appropriate review type and visibility flags."
+        }
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "summary": "Implement Notification Center with bell icon, red badge for unread count, dropdown panel with notification history, and 7 notification types including simulated SMS display",
+      "acceptanceCriteria": [
+        "Bell icon with red unread badge is visible in the top-right nav",
+        "All 7 notification types are handled and displayed",
+        "Simulated SMS notifications display the +41 number in-app",
+        "Badge clears when notifications are viewed"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/NotificationCenter.tsx",
+          "operation": "create",
+          "description": "Create a Notification Center component with a bell icon 🔔 in the top-right of the app layout that displays a red badge with unread notification count. On click, open a dropdown panel showing notification history with icons and messages for 7 notification types: ⚡ Flash request received, ✅ Booking confirmed, 💰 Payment received/released, ⭐ New review, ⚠️ Dispute opened, 📅 Service reminder 2h before, 📱 Simulated SMS display (show 'SMS sent to +41...' in-app). Mark all notifications as read when the panel is opened. Fetch notifications using a query hook with 10s polling. Style with NEXUS design system."
+        },
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add a query hook for fetching the current user's notifications from the backend with refetchInterval: 10000 (10 seconds) for real-time updates. Add a mutation hook for marking notifications as read."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Add the NotificationCenter component to the app root layout so it is visible on all authenticated screens. Position it in the top-right corner using absolute positioning or a header layout slot."
+        }
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "summary": "Wire 6 demo pro profiles with pre-filled services, ratings, reviews, and generated cover photos so they are immediately visible in the Explorer on first load",
+      "acceptanceCriteria": [
+        "6 demo pro profiles are visible in the Explorer on first load without any manual setup",
+        "Profile #1 (Studio Blade) shows active Flash badge",
+        "All profiles display correct category, city, rating, and review count",
+        "Each profile has pre-filled services matching their category presets",
+        "Seeding only runs once if no profiles exist"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Update the Explorer to fetch all published pro profiles using the existing query hook. Ensure that the 6 demo profiles seeded by the backend are immediately displayed on first load. Assign the 6 generated cover photos from frontend/public/assets/generated to the demo profiles in the UI by matching profile names to the corresponding cover image filenames: Studio Blade → frontend/public/assets/generated/barber-lausanne-cover.dim_1200x400.png, BarberKing Geneva → frontend/public/assets/generated/barber-geneva-cover.dim_1200x400.png, Studio Élé → frontend/public/assets/generated/coiffure-geneva-cover.dim_1200x400.png, Atelier Fribourg Hair → frontend/public/assets/generated/coiffure-fribourg-cover.dim_1200x400.png, Glow by Sofia → frontend/public/assets/generated/esthetique-lausanne-cover.dim_1200x400.png, Zen Touch → frontend/public/assets/generated/massage-geneva-cover.dim_1200x400.png. Verify that Studio Blade displays the pulsing Flash badge. Display skeleton loaders while data is being fetched."
+        }
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "summary": "Apply NEXUS design system consistently across all screens with specified colors, animations, mobile-first layout, and Inter font",
+      "acceptanceCriteria": [
+        "All screens use the defined color palette",
+        "Flash badges pulse with green animation",
+        "Skeleton loaders appear during all async data fetches",
+        "Confetti animation triggers on subscription activation and booking confirmation",
+        "Layout is mobile-first and constrained to 430px max-width"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Update the global CSS to ensure the NEXUS design system is applied consistently: background #0A0A0A, gold accent #E8C89A, cards #1A1A1A with 16px border radius, primary text #FFFFFF, secondary text #888888, success green #22C55E, urgent red #EF4444, pulsing animated green badge for Flash status using @keyframes, skeleton loading animations with shimmer effect, 200ms ease-in-out transitions on all interactive elements, and Inter font from Google Fonts."
+        },
+        {
+          "path": "frontend/tailwind.config.js",
+          "operation": "modify",
+          "description": "Update the Tailwind config to define the NEXUS design system tokens: colors (background, gold, card, primary, secondary, success, urgent), border radius (16px), shadows, animations (pulse for Flash badge, shimmer for skeleton loaders), mobile-first breakpoints, and max-width constraint of 430px for the main content container."
+        },
+        {
+          "path": "frontend/src/components/SkeletonLoader.tsx",
+          "operation": "create",
+          "description": "Create a reusable skeleton loader component with shimmer animation for loading states. Support multiple variants: card, text, image, list. Use the NEXUS design system colors and animations."
+        },
+        {
+          "path": "frontend/src/utils/confetti.ts",
+          "operation": "create",
+          "description": "Create a utility module that exports a function to trigger golden confetti animation for 3 seconds using the canvas-confetti library with gold (#E8C89A) color configuration."
+        }
+      ]
+    },
+    {
+      "id": "REQ-17",
+      "summary": "Replace all GPS/geolocation logic with city-based selection system using 10 Swiss romande cities and city-zone proximity matching, removing dependencies on useGeolocation, haversine, and nominatim",
+      "acceptanceCriteria": [
+        "No GPS permission prompts appear anywhere in the app",
+        "City dropdowns show exactly the 10 listed cities",
+        "City-zone proximity map correctly groups nearby cities",
+        "Explorer distance filter works using city-zone matching",
+        "No runtime errors from removed geolocation dependencies"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useGeolocation.ts",
+          "operation": "delete",
+          "description": "Remove the useGeolocation hook as it is no longer needed after replacing GPS logic with city-based selection."
+        },
+        {
+          "path": "frontend/src/utils/haversine.ts",
+          "operation": "delete",
+          "description": "Remove the Haversine distance calculation utility as distance is now determined by city-zone proximity matching."
+        },
+        {
+          "path": "frontend/src/utils/nominatim.ts",
+          "operation": "delete",
+          "description": "Remove the Nominatim geocoding utility as city selection is now manual from a fixed list."
+        },
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Remove all imports and references to useGeolocation, haversine, and nominatim. Ensure the city-based selection system is fully integrated and no GPS permission prompts appear."
+        },
+        {
+          "path": "frontend/src/components/Builder.tsx",
+          "operation": "modify",
+          "description": "Remove all imports and references to geolocation utilities. Ensure the city selector and radius controls use only the city-based proximity matching system."
+        }
+      ]
+    },
+    {
+      "id": "REQ-18",
+      "summary": "Wire the 6 generated demo pro cover photos as static assets and assign each to the corresponding seeded demo profile",
+      "acceptanceCriteria": [
+        "Each of the 6 demo profiles displays a distinct colored cover photo",
+        "Cover photos load from frontend/public/assets/generated",
+        "No broken image links on the Explorer or Fiche Pro screens"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProCard.tsx",
+          "operation": "modify",
+          "description": "Update the ProCard component to display the cover photo from the pro profile data. Map demo profile names to the corresponding generated cover image paths: Studio Blade → /assets/generated/barber-lausanne-cover.dim_1200x400.png, BarberKing Geneva → /assets/generated/barber-geneva-cover.dim_1200x400.png, Studio Élé → /assets/generated/coiffure-geneva-cover.dim_1200x400.png, Atelier Fribourg Hair → /assets/generated/coiffure-fribourg-cover.dim_1200x400.png, Glow by Sofia → /assets/generated/esthetique-lausanne-cover.dim_1200x400.png, Zen Touch → /assets/generated/massage-geneva-cover.dim_1200x400.png. Use the exact generated filename including .dim_1200x400 dimension marker. Ensure images load correctly without broken links."
+        },
+        {
+          "path": "frontend/src/components/ProviderDetail.tsx",
+          "operation": "modify",
+          "description": "Update the ProviderDetail component to display the full-width cover photo from the pro profile data using the same mapping as ProCard. Ensure the generated cover images load correctly from /assets/generated with the exact filenames including dimension markers."
+        }
+      ]
+    }
+  ]
+}

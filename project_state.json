@@ -1,0 +1,239 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 3,
+  "summary": "NEXUS Platform v2.0 — Premium home-services booking platform for Swiss micro-independents (Suisse romande). Stack: Internet Computer (ICP) + Motoko. Design: dark #0A0A0A / gold #E8C89A, mobile-first, Inter font. Markets: Barber, Coiffure, Esthétique, Massage. Currency: CHF. 11 blocs: Auth/Onboarding, Espace Pro, Abonnement, Explorer, Fiche Pro, Flux Réservation Flash, Radar Pro, Live Status, Wallet Pro, Avis Double, Centre Notifications. Geolocation via manual city selection (10 Swiss romande cities). Real-time via React Query polling every 10s. 6 demo pro profiles pre-populated at launch.",
+  "architectural_notes": [
+    "Stack: Internet Computer (ICP) + Motoko; frontend React mobile-first max-width 430px",
+    "Geolocation: manual city selection from 10 Swiss romande cities (Genève, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre); distance by city zone matching",
+    "Real-time: React Query polling every 10s for Radar Pro new booking requests",
+    "Design tokens: background #0A0A0A, gold #E8C89A, cards #1A1A1A, radius 16px, success #22C55E, urgent #EF4444, Inter font, 200ms transitions",
+    "All payments, QR codes, SMS, escrow, transfers, subscriptions, and OTP are simulated (UI-only)"
+  ],
+  "known_issues": [],
+  "isFixRequest": false,
+  "imageRequirements": "## Required Images\n- Bold warm-toned gradient cover photo for a Barber studio — deep red and charcoal tones, scissors and fade motif, premium dark aesthetic (barber-lausanne-cover.dim_1200x400.png)\n- Bold cool-toned gradient cover photo for a Barber studio — midnight blue and gold tones, geometric barbershop motif, urban premium aesthetic (barber-geneva-cover.dim_1200x400.png)\n- Elegant gradient cover photo for a hair salon — soft rose gold and ivory tones, flowing hair silhouette motif, luxury aesthetic (coiffure-geneva-cover.dim_1200x400.png)\n- Elegant gradient cover photo for a hair salon — forest green and champagne tones, botanical and hair motif, artisan aesthetic (coiffure-fribourg-cover.dim_1200x400.png)\n- Glowing gradient cover photo for an esthetics studio — blush pink and pearl white tones, floral and skincare motif, high-end spa aesthetic (esthetique-lausanne-cover.dim_1200x400.png)\n- Serene gradient cover photo for a massage studio — deep teal and warm sand tones, zen stone and wave motif, wellness aesthetic (massage-geneva-cover.dim_1200x400.png)",
+  "existing_features": [
+    {
+      "id": "feature-implement-internet-identity-authentication-with-a-centered-nexus-logo-a-single-sign-in-button-and-subtitle-text-secure-authentication-face-id-fingerprint-webauthn-after-login-route-the-user-to-role-selection",
+      "title": "Implement Internet Identity authentication with a centered NEXUS logo, a single 'Sign In' button, and subtitle text 'Secure authentication — Face ID / Fingerprint / WebAuthn'. After login, route the user to role selection.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-a-role-selection-screen-after-login-with-two-options-i-m-looking-for-a-service-client-and-i-offer-a-service-pro-client-path-triggers-simulated-otp-phone-verification-code-1234-accepted-30s-timer-never-re-asked-after-first-verification-badge-phone-verified-stored-pro-path-opens-the-pro-onboarding-modal-immediately",
+      "title": "Implement a role selection screen after login with two options: 'I'm looking for a service' (Client) and 'I offer a service' (Pro). Client path triggers simulated OTP phone verification (code 1234 accepted, 30s timer, never re-asked after first verification, badge '✅ Phone verified' stored). Pro path opens the Pro onboarding modal immediately.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-pro-onboarding-modal-with-title-launch-my-service-listing-5-benefits-visible-profile-instant-bookings-nexus-pay-real-time-notifications-zero-commission-for-7-days-a-start-7-days-free-cta-and-a-not-now-option",
+      "title": "Implement the Pro onboarding modal with title 'LAUNCH MY SERVICE', listing 5 benefits (visible profile, instant bookings, NEXUS PAY, real-time notifications, zero commission for 7 days), a 'Start 7 days free' CTA, and a 'Not now' option.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-pro-profile-builder-espace-pro-with-the-following-sections-in-order-a-identity-cover-photo-1200-400px-drag-drop-circular-profile-photo-150-150px-artist-brand-name-slogan-80-chars-with-counter-professional-bio-500-chars-with-counter-category-selector-barber-coiffure-esth-tique-massage-that-auto-loads-service-presets-on-selection-city-selector-from-the-10-swiss-romande-cities-geneva-lausanne-fribourg-neuch-tel-sion-montreux-yverdon-nyon-morges-sierre-with-intervention-radius-slider-1-50-km-language-badges-fr-en-pt-es-ar-phone-field-hidden-from-clients-b-revolut-payment-setup-input-for-revolut-username-or-41-phone-validate-my-revolut-button-that-saves-and-shows-badge-revolut-verified-marked-as-required-before-publication-c-service-catalogue-with-category-presets-auto-loaded-each-service-editable-name-price-duration-2-before-after-photo-slots-badge-selector-popular-new-promo-delete-reorder-and-add-custom-service-d-gallery-with-minimum-3-photos-drag-drop-reordering-starred-primary-photo-e-availability-grid-mon-sun-with-time-slots-per-day-available-unavailable-toggle-per-day-minimum-lead-time-selector-1h-2h-24h-48h-i-travel-to-the-client-toggle-f-flash-mode-toggle-with-auto-disable-after-4h-and-available-now-messaging-g-reputation-score-read-only-display-average-rating-response-time-acceptance-rate-completed-services-publication-button-validates-revolut-set-min-3-photos-min-1-service-if-incomplete-shows-red-checklist-if-complete-opens-subscription-modal",
+      "title": "Build the Pro profile builder (Espace Pro) with the following sections in order: (A) Identity — cover photo 1200×400px drag & drop, circular profile photo 150×150px, artist/brand name, slogan (80 chars with counter), professional bio (500 chars with counter), category selector (Barber / Coiffure / Esthétique / Massage) that auto-loads service presets on selection, city selector from the 10 Swiss romande cities (Geneva, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre) with intervention radius slider 1–50 km, language badges (FR/EN/PT/ES/AR), phone field (hidden from clients). (B) Revolut payment setup — input for @revolut-username or +41 phone, 'Validate my Revolut' button that saves and shows badge '💳 Revolut verified ✅', marked as required before publication. (C) Service catalogue with category presets auto-loaded, each service editable (name, price, duration), 2 before/after photo slots, badge selector (Popular/New/Promo), delete/reorder, and '+ Add custom service'. (D) Gallery with minimum 3 photos, drag & drop reordering, starred primary photo. (E) Availability grid Mon–Sun with time slots per day, available/unavailable toggle per day, minimum lead time selector (1h/2h/24h/48h), 'I travel to the client' toggle. (F) Flash mode toggle with auto-disable after 4h and 'Available NOW' messaging. (G) Reputation score read-only display (average rating, response time, acceptance rate, completed services). Publication button validates: Revolut set + min 3 photos + min 1 service; if incomplete shows red checklist; if complete opens subscription modal.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-subscription-modal-full-screen-shown-before-profile-publication-display-7-days-free-then-19-90-chf-month-cancellable-anytime-list-6-included-benefits-billing-email-input-simulated-pay-via-revolut-button-with-3s-auto-success-activate-my-free-trial-cta-on-activation-show-golden-confetti-for-3-seconds-display-success-message-you-are-live-clients-around-you-can-already-see-your-profile-show-view-my-client-profile-button-add-free-trial-day-7-banner-in-the-pro-dashboard-and-schedule-a-day-1-notification-your-trial-expires-tomorrow",
+      "title": "Implement the subscription modal (full-screen) shown before profile publication: display '🎁 7 DAYS FREE then 19.90 CHF/month — Cancellable anytime', list 6 included benefits, billing email input, simulated 'Pay via Revolut' button with 3s auto-success, 'ACTIVATE MY FREE TRIAL' CTA. On activation: show golden confetti for 3 seconds, display success message 'You are live! Clients around you can already see your profile.', show 'View my client profile' button, add 'Free trial — Day 7' banner in the Pro dashboard, and schedule a Day -1 notification 'Your trial expires tomorrow'.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-explorer-screen-client-side-with-header-what-service-are-you-looking-for-horizontally-scrollable-category-filters-near-me-barber-coiffure-esth-tique-massage-flash-price-distance-slider-1-50-km-city-selector-from-the-10-swiss-romande-cities-client-sets-their-city-distance-is-calculated-by-city-zone-proximity-matching-not-gps-available-now-horizontal-scroll-section-showing-flash-active-pros-with-pulsing-green-badge-main-pro-card-grid-with-skeleton-loading-animations-each-pro-card-shows-cover-photo-flash-badge-if-active-revolut-verified-badge-circular-profile-photo-name-category-star-rating-with-review-count-city-distance-label-response-time-starting-price-and-book-cta",
+      "title": "Build the Explorer screen (client side) with: header 'What service are you looking for?', horizontally scrollable category filters (📍 Near me, Barber, Coiffure, Esthétique, Massage, ⚡ Flash, Price ↕), distance slider 1–50 km, city selector from the 10 Swiss romande cities (client sets their city; distance is calculated by city-zone proximity matching, not GPS), 'Available NOW ⚡' horizontal scroll section showing Flash-active pros with pulsing green badge, main pro card grid with skeleton loading animations. Each pro card shows: cover photo, FLASH badge if active, Revolut verified badge, circular profile photo, name, category, star rating with review count, city distance label, response time, starting price, and '⚡ BOOK' CTA.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-6-step-flash-booking-flow-step-1-service-selection-1-tap-step-2-time-slot-selection-with-quick-options-in-1h-in-2h-tonight-tomorrow-plus-full-calendar-step-3-address-input-manual-text-field-with-optional-note-to-the-pro-step-4-booking-summary-recap-service-pro-datetime-address-price-with-edit-confirm-buttons-step-5-nexus-pay-screen-showing-amount-escrow-guarantee-messaging-your-money-is-protected-released-to-pro-after-service-refunded-if-no-show-animated-revolut-qr-code-placeholder-pay-via-revolut-button-with-3s-auto-success-simulation-step-6-post-payment-confirmation-with-pulsing-green-circle-message-request-sent-to-pro-name-the-pro-has-10-minutes-to-confirm-and-a-10-00-countdown-timer",
+      "title": "Implement the 6-step Flash booking flow: Step 1 — service selection (1 tap); Step 2 — time slot selection with quick options (In 1h, In 2h, Tonight, Tomorrow) plus full calendar; Step 3 — address input (manual text field) with optional note to the pro; Step 4 — booking summary recap (service, pro, datetime, address, price) with Edit / Confirm buttons; Step 5 — NEXUS PAY screen showing amount, escrow guarantee messaging ('Your money is protected / Released to pro after service / Refunded if no-show'), animated Revolut QR code placeholder, 'Pay via Revolut' button with 3s auto-success simulation; Step 6 — post-payment confirmation with pulsing green circle, message 'Request sent to [Pro Name]', '⏱️ The pro has 10 minutes to confirm', and a 10:00 countdown timer.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-radar-pro-screen-pro-dashboard-with-react-query-polling-every-10-seconds-include-pulsing-red-badge-on-the-navigation-icon-when-new-pending-requests-exist-tabs-pending-confirmed-history-each-pending-request-card-shows-client-name-rating-service-name-guaranteed-amount-appointment-datetime-distance-from-pro-10-00-countdown-timer-in-red-accept-and-decline-action-buttons-and-a-message-to-client-field-on-accept-mark-booking-confirmed-show-confirmed-send-client-notification-studio-l-confirmed-service-in-xh-ym-show-pro-countdown-to-client-arrival-on-decline-or-timeout-auto-route-to-next-available-pro-show-client-searching-for-another-pro",
+      "title": "Build the Radar Pro screen (Pro dashboard) with React Query polling every 10 seconds. Include: pulsing red badge on the navigation icon when new pending requests exist, tabs (Pending 🔴 / Confirmed / History). Each pending request card shows: client name + rating, service name + guaranteed amount, appointment datetime, distance from pro, 10:00 countdown timer in red, Accept (✅) and Decline (❌) action buttons, and a message-to-client field. On Accept: mark booking confirmed, show 'Confirmed ✅', send client notification 'Studio Élé confirmed! Service in Xh Ym 🎉', show pro countdown to client arrival. On Decline or timeout: auto-route to next available pro, show client 'Searching for another pro...'.",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-live-status-shared-timeline-visible-to-both-client-and-pro-showing-booking-lifecycle-steps-request-sent-pro-accepted-payment-secured-service-in-xh-ym-confirm-service-completed-leave-a-review-24h-after-confirmed-completion-prompt-both-parties-client-gets-all-good-report-a-problem-pro-gets-the-same-on-simulate-fund-release-on-show-48h-nexus-mediation-if-no-response-after-48h-auto-release-funds-simulated",
+      "title": "Implement the Live Status shared timeline visible to both client and pro, showing booking lifecycle steps: Request sent, Pro accepted, Payment secured, Service in Xh Ym, Confirm service completed, Leave a review. 24h after confirmed completion, prompt both parties: client gets '✅ All good!' / '⚠️ Report a problem', pro gets the same. On ✅: simulate fund release. On ⚠️: show '48h NEXUS mediation'. If no response after 48h: auto-release funds (simulated).",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-build-the-wallet-pro-screen-showing-available-balance-vs-escrowed-balance-simulated-transfer-to-my-revolut-button-with-visual-confirmation-full-transaction-history-table-service-client-amount-date-status-stats-summary-weekly-monthly-total-and-a-monthly-revenue-bar-chart",
+      "title": "Build the Wallet Pro screen showing: available balance vs. escrowed balance (🔒), simulated 'Transfer to my Revolut' button with visual confirmation, full transaction history table (service / client / amount / date / status), stats summary (weekly / monthly / total), and a monthly revenue bar chart.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-double-review-system-24h-after-a-confirmed-service-prompt-the-client-to-leave-a-public-5-star-rating-comment-for-the-pro-and-prompt-the-pro-to-rate-the-client-internally-5-star-not-shown-publicly-automatically-suspend-a-pro-from-the-explorer-if-their-average-rating-drops-below-3-5",
+      "title": "Implement the double review system: 24h after a confirmed service, prompt the client to leave a public 5-star rating + comment for the pro, and prompt the pro to rate the client internally (5-star, not shown publicly). Automatically suspend a pro from the Explorer if their average rating drops below 3.5.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-the-notification-center-bell-icon-in-the-top-right-with-a-red-badge-showing-unread-count-a-dropdown-panel-with-notification-history-notification-types-flash-request-received-booking-confirmed-payment-received-released-new-review-dispute-opened-service-reminder-2h-before-simulated-sms-display-show-sms-sent-to-41-in-app-mark-all-as-read-on-open",
+      "title": "Implement the Notification Center: bell icon 🔔 in the top-right with a red badge showing unread count, a dropdown/panel with notification history. Notification types: ⚡ Flash request received, ✅ Booking confirmed, 💰 Payment received/released, ⭐ New review, ⚠️ Dispute opened, 📅 Service reminder 2h before, 📱 Simulated SMS display (show 'SMS sent to +41...' in-app). Mark all as read on open.",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-seed-6-demo-pro-profiles-in-the-backend-at-canister-initialization-only-if-no-profiles-exist-profiles-1-studio-blade-barber-lausanne-rating-4-9-47-reviews-flash-active-2-barberking-geneva-barber-geneva-rating-4-7-23-reviews-3-studio-l-coiffure-geneva-rating-4-8-31-reviews-4-atelier-fribourg-hair-coiffure-fribourg-rating-4-6-12-reviews-5-glow-by-sofia-esth-tique-lausanne-rating-4-8-19-reviews-6-zen-touch-massage-geneva-rating-4-9-38-reviews-each-profile-has-pre-filled-services-from-their-category-presets-rating-between-4-6-4-9-between-12-47-fake-reviews-a-cover-photo-generated-image-assigned-and-all-required-fields-set-so-they-appear-as-published-profiles-in-the-explorer",
+      "title": "Seed 6 demo pro profiles in the backend at canister initialization (only if no profiles exist). Profiles: (1) 'Studio Blade' — Barber, Lausanne, rating 4.9, 47 reviews, Flash ACTIVE; (2) 'BarberKing Geneva' — Barber, Geneva, rating 4.7, 23 reviews; (3) 'Studio Élé' — Coiffure, Geneva, rating 4.8, 31 reviews; (4) 'Atelier Fribourg Hair' — Coiffure, Fribourg, rating 4.6, 12 reviews; (5) 'Glow by Sofia' — Esthétique, Lausanne, rating 4.8, 19 reviews; (6) 'Zen Touch' — Massage, Geneva, rating 4.9, 38 reviews. Each profile has: pre-filled services from their category presets, rating between 4.6–4.9, between 12–47 fake reviews, a cover photo (generated image assigned), and all required fields set so they appear as published profiles in the Explorer.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-apply-the-nexus-design-system-consistently-across-all-screens-background-0a0a0a-gold-accent-e8c89a-cards-1a1a1a-with-16px-border-radius-primary-text-ffffff-secondary-text-888888-success-green-22c55e-urgent-red-ef4444-pulsing-animated-green-badge-for-flash-status-skeleton-loading-animations-on-all-data-fetching-screens-200ms-ease-in-out-transitions-golden-confetti-on-key-success-events-mobile-first-layout-with-max-width-430px-inter-font",
+      "title": "Apply the NEXUS design system consistently across all screens: background #0A0A0A, gold accent #E8C89A, cards #1A1A1A with 16px border radius, primary text #FFFFFF, secondary text #888888, success green #22C55E, urgent red #EF4444, pulsing animated green badge for Flash status, skeleton loading animations on all data-fetching screens, 200ms ease-in-out transitions, golden confetti on key success events, mobile-first layout with max-width 430px, Inter font.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-replace-all-gps-geolocation-logic-navigator-geolocation-haversine-calculations-nominatim-geocoding-with-a-city-based-selection-system-use-a-fixed-list-of-10-swiss-romande-cities-geneva-lausanne-fribourg-neuch-tel-sion-montreux-yverdon-nyon-morges-sierre-pros-select-their-city-during-onboarding-clients-select-their-city-in-the-explorer-distance-between-client-and-pro-is-determined-by-a-city-zone-proximity-map-e-g-lausanne-morges-nyon-are-nearby-geneva-nyon-are-nearby-fribourg-neuch-tel-are-nearby-remove-all-imports-and-references-to-usegeolocation-ts-haversine-ts-and-nominatim-ts-from-explorer-and-builder",
+      "title": "Replace all GPS/geolocation logic (navigator.geolocation, Haversine calculations, Nominatim geocoding) with a city-based selection system. Use a fixed list of 10 Swiss romande cities: Geneva, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre. Pros select their city during onboarding. Clients select their city in the Explorer. Distance between client and pro is determined by a city-zone proximity map (e.g., Lausanne ↔ Morges ↔ Nyon are 'nearby'; Geneva ↔ Nyon are 'nearby'; Fribourg ↔ Neuchâtel are 'nearby'). Remove all imports and references to useGeolocation.ts, haversine.ts, and nominatim.ts from Explorer and Builder.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Auth & Onboarding: Internet Identity login, role selection (Client/Pro), OTP phone verification (simulated code 1234), Pro onboarding modal with 7-day free trial offer",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Espace Pro: identity section (cover photo, profile photo, artist name, slogan, bio, category, city, languages), Revolut payment setup (blocking for publication), service catalogue with presets by category, gallery (min 3 photos), availability grid, Flash mode toggle, reputation score (read-only), publication checklist",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Subscription modal: 7-day free trial then 19.90 CHF/month, simulated Revolut activation, golden confetti on activation, trial countdown banner",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Explorer (client side): city-based search with 10 Swiss romande cities, category filters, Flash filter, distance filter, 'Available Now' horizontal scroll section, pro cards with skeleton loading, 6 demo profiles pre-populated",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Fiche Pro (client view): full cover photo, profile info, scores, bio, service catalogue with before/after photos, gallery, available slots, public reviews, sticky booking CTA",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Flash booking flow: 6-step flow (service selection, time slot, address, summary, NEXUS PAY with simulated Revolut QR + auto-success in 3s, post-payment countdown 10min for pro confirmation)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Radar Pro: React Query polling every 10s, red pulsing badge on new requests, tabs (Pending/Confirmed/History), request cards with 10-min countdown, Accept/Decline actions, auto-redirect to next pro on decline/timeout",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Live Status: shared timeline for client and pro showing booking lifecycle, 24h post-service confirmation prompt, simulated fund release or 48h mediation flow",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Wallet Pro: available vs. escrowed balance display, simulated Revolut transfer, transaction history, weekly/monthly/total stats, monthly revenue bar chart",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Double review system: 24h post-service, client leaves public 5-star review, pro rates client internally; auto-suspend pro from Explorer if rating < 3.5",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Notification center: bell icon with red badge, notification history for Flash requests, confirmations, payments, reviews, disputes, reminders, simulated SMS display",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "6 demo pro profiles: 2 Barbers (Lausanne + Geneva), 2 Coiffeuses (Geneva + Fribourg), 1 Esthéticienne (Lausanne), 1 Masseur (Geneva); each with colored cover photo, preset services, ratings 4.6-4.9, 12-47 fake reviews, 1 profile in active Flash mode",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Define backend data models and CRUD operations for: ProProfile (id, principalId, name, slogan, bio, category, city, radiusKm, languages, phone, revolutHandle, isPublished, isFlashActive, flashActivatedAt, subscriptionStatus, trialStartDate, avgRating, reviewCount, responseTimeMin, acceptanceRate, completedCount), Service (id, proId, name, price, duration, badge, beforePhotoUrl, afterPhotoUrl, order), GalleryPhoto (id, proId, url, isPrimary, order), Availability (proId, weekday, slots, isAvailable, minLeadTime, travelsToClient), Booking (id, clientId, proId, serviceId, datetime, address, status, amount, escrowStatus, createdAt), Review (id, bookingId, authorId, targetId, score, comment, isPublic), Notification (id, userId, type, message, isRead, createdAt), Wallet (proId, availableBalance, escrowedBalance), Transaction (id, proId, bookingId, amount, type, date, status). Persist all data in stable canister memory.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Build the Pro detail page (Fiche Pro, client view) showing: full-width cover photo, profile photo + name + slogan + badges, reputation scores (rating, response time, acceptance rate), full bio, service catalogue with price/duration and before/after photos, scrollable gallery, available time slots, public reviews, and a sticky bottom CTA '⚡ Book Now'.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-30",
+      "summary": "Render the 6 generated demo pro cover photos as static assets from frontend/public/assets/generated and assign each to the corresponding seeded demo profile.",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "NEXUS Platform",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

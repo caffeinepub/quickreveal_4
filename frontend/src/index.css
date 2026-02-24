@@ -1,0 +1,245 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: oklch(0.08 0.005 240);
+    --foreground: oklch(0.98 0.002 240);
+    --card: oklch(0.12 0.005 240);
+    --card-foreground: oklch(0.98 0.002 240);
+    --popover: oklch(0.12 0.005 240);
+    --popover-foreground: oklch(0.98 0.002 240);
+    --primary: oklch(0.82 0.08 75);
+    --primary-foreground: oklch(0.08 0.005 240);
+    --secondary: oklch(0.18 0.005 240);
+    --secondary-foreground: oklch(0.98 0.002 240);
+    --muted: oklch(0.18 0.005 240);
+    --muted-foreground: oklch(0.55 0.01 240);
+    --accent: oklch(0.82 0.08 75);
+    --accent-foreground: oklch(0.08 0.005 240);
+    --destructive: oklch(0.55 0.22 25);
+    --destructive-foreground: oklch(0.98 0.002 240);
+    --border: oklch(0.22 0.005 240);
+    --input: oklch(0.18 0.005 240);
+    --ring: oklch(0.82 0.08 75);
+    --radius: 1rem;
+    --success: oklch(0.65 0.18 145);
+    --urgent: oklch(0.55 0.22 25);
+    --gold: oklch(0.82 0.08 75);
+  }
+
+  .dark {
+    --background: oklch(0.08 0.005 240);
+    --foreground: oklch(0.98 0.002 240);
+    --card: oklch(0.12 0.005 240);
+    --card-foreground: oklch(0.98 0.002 240);
+    --popover: oklch(0.12 0.005 240);
+    --popover-foreground: oklch(0.98 0.002 240);
+    --primary: oklch(0.82 0.08 75);
+    --primary-foreground: oklch(0.08 0.005 240);
+    --secondary: oklch(0.18 0.005 240);
+    --secondary-foreground: oklch(0.98 0.002 240);
+    --muted: oklch(0.18 0.005 240);
+    --muted-foreground: oklch(0.55 0.01 240);
+    --accent: oklch(0.82 0.08 75);
+    --accent-foreground: oklch(0.08 0.005 240);
+    --destructive: oklch(0.55 0.22 25);
+    --destructive-foreground: oklch(0.98 0.002 240);
+    --border: oklch(0.22 0.005 240);
+    --input: oklch(0.18 0.005 240);
+    --ring: oklch(0.82 0.08 75);
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Inter', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer utilities {
+  .text-gold {
+    color: #E8C89A;
+  }
+  .bg-gold {
+    background-color: #E8C89A;
+  }
+  .border-gold {
+    border-color: #E8C89A;
+  }
+  .text-nexus-secondary {
+    color: #888888;
+  }
+  .bg-nexus-card {
+    background-color: #1A1A1A;
+  }
+  .bg-nexus-bg {
+    background-color: #0A0A0A;
+  }
+}
+
+/* Flash badge pulse animation */
+@keyframes flash-pulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+  }
+  50% {
+    opacity: 0.8;
+    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
+  }
+}
+
+.flash-pulse {
+  animation: flash-pulse 2s ease-in-out infinite;
+}
+
+/* Skeleton shimmer */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    #1A1A1A 25%,
+    #2A2A2A 50%,
+    #1A1A1A 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Pulsing red badge */
+@keyframes red-pulse {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+.red-pulse {
+  animation: red-pulse 1.5s ease-in-out infinite;
+}
+
+/* Countdown urgent */
+@keyframes countdown-urgent {
+  0%, 100% { color: #EF4444; }
+  50% { color: #FF6B6B; }
+}
+
+.countdown-urgent {
+  animation: countdown-urgent 1s ease-in-out infinite;
+}
+
+/* Confetti container */
+#confetti-canvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 9999;
+}
+
+/* Smooth transitions */
+* {
+  transition-property: color, background-color, border-color, opacity, transform;
+  transition-duration: 200ms;
+  transition-timing-function: ease-in-out;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 2px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #E8C89A;
+}
+
+/* Mobile-first max width */
+.nexus-container {
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  background-color: #0A0A0A;
+  position: relative;
+}
+
+/* Green pulsing dot */
+@keyframes green-dot-pulse {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
+  }
+}
+
+.green-dot-pulse {
+  animation: green-dot-pulse 2s ease-in-out infinite;
+}
+
+/* Success circle pulse */
+@keyframes success-circle {
+  0% { transform: scale(0.8); opacity: 0; }
+  50% { transform: scale(1.05); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.success-circle-anim {
+  animation: success-circle 0.6s ease-out forwards;
+}
+
+/* Slide up animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.slide-up {
+  animation: slide-up 0.3s ease-out forwards;
+}
+
+/* Fade in */
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}

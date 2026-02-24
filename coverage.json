@@ -1,0 +1,300 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-24T22:51:16.040Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 18,
+    "implemented": 15,
+    "items": [
+      {
+        "id": "REQ-1",
+        "summary": "Implement Internet Identity authentication with a centered NEXUS logo, a single 'Sign In' button, and subtitle text 'Secure authentication — Face ID / Fingerprint / WebAuthn'. After login, route the user to role selection.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Splash.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Splash.tsx"
+        ]
+      },
+      {
+        "id": "REQ-10",
+        "summary": "Build the Radar Pro screen (Pro dashboard) with React Query polling every 10 seconds. Include: pulsing red badge on the navigation icon when new pending requests exist, tabs (Pending 🔴 / Confirmed / History). Each pending request card shows: client name + rating, service name + guaranteed amount, appointment datetime, distance from pro, 10:00 countdown timer in red, Accept (✅) and Decline (❌) action buttons, and a message-to-client field. On Accept: mark booking confirmed, show 'Confirmed ✅', send client notification 'Studio Élé confirmed! Service in Xh Ym 🎉', show pro countdown to client arrival. On Decline or timeout: auto-route to next available pro, show client 'Searching for another pro...'.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/PendingRequestCard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-11",
+        "summary": "Implement the Live Status shared timeline visible to both client and pro, showing booking lifecycle steps: Request sent, Pro accepted, Payment secured, Service in Xh Ym, Confirm service completed, Leave a review. 24h after confirmed completion, prompt both parties: client gets '✅ All good!' / '⚠️ Report a problem', pro gets the same. On ✅: simulate fund release. On ⚠️: show '48h NEXUS mediation'. If no response after 48h: auto-release funds (simulated).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/BookingTimeline.tsx",
+          "frontend/src/components/ClientDashboard.tsx",
+          "frontend/src/components/NexusOS.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ClientDashboard.tsx",
+          "frontend/src/components/NexusOS.tsx"
+        ]
+      },
+      {
+        "id": "REQ-12",
+        "summary": "Build the Wallet Pro screen showing: available balance vs. escrowed balance (🔒), simulated 'Transfer to my Revolut' button with visual confirmation, full transaction history table (service / client / amount / date / status), stats summary (weekly / monthly / total), and a monthly revenue bar chart.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/WalletPro.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/NexusOS.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/NexusOS.tsx"
+        ]
+      },
+      {
+        "id": "REQ-13",
+        "summary": "Implement the double review system: 24h after a confirmed service, prompt the client to leave a public 5-star rating + comment for the pro, and prompt the pro to rate the client internally (5-star, not shown publicly). Automatically suspend a pro from the Explorer if their average rating drops below 3.5.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ReviewPrompt.tsx",
+          "frontend/src/components/ClientDashboard.tsx",
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ClientDashboard.tsx",
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-14",
+        "summary": "Implement the Notification Center: bell icon 🔔 in the top-right with a red badge showing unread count, a dropdown/panel with notification history. Notification types: ⚡ Flash request received, ✅ Booking confirmed, 💰 Payment received/released, ⭐ New review, ⚠️ Dispute opened, 📅 Service reminder 2h before, 📱 Simulated SMS display (show 'SMS sent to +41...' in-app). Mark all as read on open.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/NotificationCenter.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/NotificationCenter.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-15",
+        "summary": "Seed 6 demo pro profiles in the backend at canister initialization (only if no profiles exist). Profiles: (1) 'Studio Blade' — Barber, Lausanne, rating 4.9, 47 reviews, Flash ACTIVE; (2) 'BarberKing Geneva' — Barber, Geneva, rating 4.7, 23 reviews; (3) 'Studio Élé' — Coiffure, Geneva, rating 4.8, 31 reviews; (4) 'Atelier Fribourg Hair' — Coiffure, Fribourg, rating 4.6, 12 reviews; (5) 'Glow by Sofia' — Esthétique, Lausanne, rating 4.8, 19 reviews; (6) 'Zen Touch' — Massage, Geneva, rating 4.9, 38 reviews. Each profile has: pre-filled services from their category presets, rating between 4.6–4.9, between 12–47 fake reviews, a cover photo (generated image assigned), and all required fields set so they appear as published profiles in the Explorer.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Explorer.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Explorer.tsx"
+        ]
+      },
+      {
+        "id": "REQ-16",
+        "summary": "Apply the NEXUS design system consistently across all screens: background #0A0A0A, gold accent #E8C89A, cards #1A1A1A with 16px border radius, primary text #FFFFFF, secondary text #888888, success green #22C55E, urgent red #EF4444, pulsing animated green badge for Flash status, skeleton loading animations on all data-fetching screens, 200ms ease-in-out transitions, golden confetti on key success events, mobile-first layout with max-width 430px, Inter font.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/components/SkeletonLoader.tsx",
+          "frontend/src/utils/confetti.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/index.css",
+          "frontend/tailwind.config.js",
+          "frontend/src/utils/confetti.ts"
+        ]
+      },
+      {
+        "id": "REQ-17",
+        "summary": "Replace all GPS/geolocation logic (navigator.geolocation, Haversine calculations, Nominatim geocoding) with a city-based selection system. Use a fixed list of 10 Swiss romande cities: Geneva, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre. Pros select their city during onboarding. Clients select their city in the Explorer. Distance between client and pro is determined by a city-zone proximity map (e.g., Lausanne ↔ Morges ↔ Nyon are 'nearby'; Geneva ↔ Nyon are 'nearby'; Fribourg ↔ Neuchâtel are 'nearby'). Remove all imports and references to useGeolocation.ts, haversine.ts, and nominatim.ts from Explorer and Builder.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useGeolocation.ts",
+          "frontend/src/utils/haversine.ts",
+          "frontend/src/utils/nominatim.ts",
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/components/Builder.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/components/Builder.tsx"
+        ]
+      },
+      {
+        "id": "REQ-18",
+        "summary": "Render the 6 generated demo pro cover photos as static assets from frontend/public/assets/generated and assign each to the corresponding seeded demo profile.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/ProCard.tsx",
+          "frontend/src/components/ProviderDetail.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-2",
+        "summary": "Implement a role selection screen after login with two options: 'I'm looking for a service' (Client) and 'I offer a service' (Pro). Client path triggers simulated OTP phone verification (code 1234 accepted, 30s timer, never re-asked after first verification, badge '✅ Phone verified' stored). Pro path opens the Pro onboarding modal immediately.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/RoleSelection.tsx",
+          "frontend/src/components/OTPVerification.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/RoleSelection.tsx",
+          "frontend/src/components/OTPVerification.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-3",
+        "summary": "Implement the Pro onboarding modal with title 'LAUNCH MY SERVICE', listing 5 benefits (visible profile, instant bookings, NEXUS PAY, real-time notifications, zero commission for 7 days), a 'Start 7 days free' CTA, and a 'Not now' option.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ProOnboardingModal.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ProOnboardingModal.tsx"
+        ]
+      },
+      {
+        "id": "REQ-4",
+        "summary": "Build the Pro profile builder (Espace Pro) with the following sections in order: (A) Identity — cover photo 1200×400px drag & drop, circular profile photo 150×150px, artist/brand name, slogan (80 chars with counter), professional bio (500 chars with counter), category selector (Barber / Coiffure / Esthétique / Massage) that auto-loads service presets on selection, city selector from the 10 Swiss romande cities (Geneva, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre) with intervention radius slider 1–50 km, language badges (FR/EN/PT/ES/AR), phone field (hidden from clients). (B) Revolut payment setup — input for @revolut-username or +41 phone, 'Validate my Revolut' button that saves and shows badge '💳 Revolut verified ✅', marked as required before publication. (C) Service catalogue with category presets auto-loaded, each service editable (name, price, duration), 2 before/after photo slots, badge selector (Popular/New/Promo), delete/reorder, and '+ Add custom service'. (D) Gallery with minimum 3 photos, drag & drop reordering, starred primary photo. (E) Availability grid Mon–Sun with time slots per day, available/unavailable toggle per day, minimum lead time selector (1h/2h/24h/48h), 'I travel to the client' toggle. (F) Flash mode toggle with auto-disable after 4h and 'Available NOW' messaging. (G) Reputation score read-only display (average rating, response time, acceptance rate, completed services). Publication button validates: Revolut set + min 3 photos + min 1 service; if incomplete shows red checklist; if complete opens subscription modal.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Builder.tsx",
+          "frontend/src/utils/cityData.ts",
+          "frontend/src/components/CategoryServicePresetLoader.tsx",
+          "frontend/src/components/PublicationValidationModal.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Builder.tsx",
+          "frontend/src/utils/cityData.ts"
+        ]
+      },
+      {
+        "id": "REQ-5",
+        "summary": "Define backend data models and CRUD operations for: ProProfile (id, principalId, name, slogan, bio, category, city, radiusKm, languages, phone, revolutHandle, isPublished, isFlashActive, flashActivatedAt, subscriptionStatus, trialStartDate, avgRating, reviewCount, responseTimeMin, acceptanceRate, completedCount), Service (id, proId, name, price, duration, badge, beforePhotoUrl, afterPhotoUrl, order), GalleryPhoto (id, proId, url, isPrimary, order), Availability (proId, weekday, slots, isAvailable, minLeadTime, travelsToClient), Booking (id, clientId, proId, serviceId, datetime, address, status, amount, escrowStatus, createdAt), Review (id, bookingId, authorId, targetId, score, comment, isPublic), Notification (id, userId, type, message, isRead, createdAt), Wallet (proId, availableBalance, escrowedBalance), Transaction (id, proId, bookingId, amount, type, date, status). Persist all data in stable canister memory.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-6",
+        "summary": "Implement the subscription modal (full-screen) shown before profile publication: display '🎁 7 DAYS FREE then 19.90 CHF/month — Cancellable anytime', list 6 included benefits, billing email input, simulated 'Pay via Revolut' button with 3s auto-success, 'ACTIVATE MY FREE TRIAL' CTA. On activation: show golden confetti for 3 seconds, display success message 'You are live! Clients around you can already see your profile.', show 'View my client profile' button, add 'Free trial — Day 7' banner in the Pro dashboard, and schedule a Day -1 notification 'Your trial expires tomorrow'.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/SubscriptionScreen.tsx",
+          "frontend/src/components/TrialBanner.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/SubscriptionScreen.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Build the Explorer screen (client side) with: header 'What service are you looking for?', horizontally scrollable category filters (📍 Near me, Barber, Coiffure, Esthétique, Massage, ⚡ Flash, Price ↕), distance slider 1–50 km, city selector from the 10 Swiss romande cities (client sets their city; distance is calculated by city-zone proximity matching, not GPS), 'Available NOW ⚡' horizontal scroll section showing Flash-active pros with pulsing green badge, main pro card grid with skeleton loading animations. Each pro card shows: cover photo, FLASH badge if active, Revolut verified badge, circular profile photo, name, category, star rating with review count, city distance label, response time, starting price, and '⚡ BOOK' CTA.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/hooks/useQueries.ts",
+          "frontend/src/components/ProCard.tsx",
+          "frontend/src/components/FlashProSection.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Build the Pro detail page (Fiche Pro, client view) showing: full-width cover photo, profile photo + name + slogan + badges, reputation scores (rating, response time, acceptance rate), full bio, service catalogue with price/duration and before/after photos, scrollable gallery, available time slots, public reviews, and a sticky bottom CTA '⚡ Book Now'.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/components/ProviderDetail.tsx",
+          "frontend/src/components/ServiceCatalogueDisplay.tsx",
+          "frontend/src/components/AvailableSlotsDisplay.tsx"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Implement the 6-step Flash booking flow: Step 1 — service selection (1 tap); Step 2 — time slot selection with quick options (In 1h, In 2h, Tonight, Tomorrow) plus full calendar; Step 3 — address input (manual text field) with optional note to the pro; Step 4 — booking summary recap (service, pro, datetime, address, price) with Edit / Confirm buttons; Step 5 — NEXUS PAY screen showing amount, escrow guarantee messaging ('Your money is protected / Released to pro after service / Refunded if no-show'), animated Revolut QR code placeholder, 'Pay via Revolut' button with 3s auto-success simulation; Step 6 — post-payment confirmation with pulsing green circle, message 'Request sent to [Pro Name]', '⏱️ The pro has 10 minutes to confirm', and a 10:00 countdown timer.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/BookingFlow.tsx",
+          "frontend/src/components/QuickTimeSlotSelector.tsx",
+          "frontend/src/components/BookingCountdown.tsx",
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "build-request.json",
+    "feature_evidence.json",
+    "frontend-implementation-plan.json",
+    "frontend/public/assets/generated/barber-geneva-cover.dim_1200x400.png",
+    "frontend/public/assets/generated/barber-lausanne-cover.dim_1200x400.png",
+    "frontend/public/assets/generated/coiffure-fribourg-cover.dim_1200x400.png",
+    "frontend/public/assets/generated/coiffure-geneva-cover.dim_1200x400.png",
+    "frontend/public/assets/generated/esthetique-lausanne-cover.dim_1200x400.png",
+    "frontend/public/assets/generated/massage-geneva-cover.dim_1200x400.png",
+    "frontend/src/components/BookingContact.tsx",
+    "frontend/src/components/BookingDate.tsx",
+    "frontend/src/components/BookingLocation.tsx",
+    "frontend/src/components/Builder.tsx",
+    "frontend/src/components/ClientDashboard.tsx",
+    "frontend/src/components/Explorer.tsx",
+    "frontend/src/components/LandingPage.tsx",
+    "frontend/src/components/NexusOS.tsx",
+    "frontend/src/components/NotificationCenter.tsx",
+    "frontend/src/components/OTPVerification.tsx",
+    "frontend/src/components/ProLogin.tsx",
+    "frontend/src/components/ProOnboardingModal.tsx",
+    "frontend/src/components/RoleSelection.tsx",
+    "frontend/src/components/ScreenRouter.tsx",
+    "frontend/src/components/Splash.tsx",
+    "frontend/src/components/Subscription.tsx",
+    "frontend/src/components/SubscriptionScreen.tsx",
+    "frontend/src/components/UpgradeModal.tsx",
+    "frontend/src/components/Welcome.tsx",
+    "frontend/src/context/AppContext.tsx",
+    "frontend/src/context/AuthContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
+    "frontend/src/index.css",
+    "frontend/src/utils/cityData.ts",
+    "frontend/src/utils/confetti.ts",
+    "frontend/src/utils/demoData.ts",
+    "frontend/src/utils/servicePresets.ts",
+    "frontend/tailwind.config.js",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

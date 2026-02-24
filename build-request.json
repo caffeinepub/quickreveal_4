@@ -1,421 +1,254 @@
 {
   "kind": "build_request",
-  "title": "NEXUS Platform v2.0 — Full Build with City-Based Geolocation, 10s Polling, and 6 Demo Pro Profiles",
+  "title": "NEXUS Complete Design Overhaul — Premium Dark UI with Gold Accents",
   "projectName": "NEXUS Platform",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Implement Internet Identity authentication with a centered NEXUS logo, a single 'Sign In' button, and subtitle text 'Secure authentication — Face ID / Fingerprint / WebAuthn'. After login, route the user to role selection.",
-      "target": "both",
+      "text": "Redesign the login/splash screen with a full-screen #0A0A0A background. Display a single typographic NEXUS logo using Inter Black: 'NEXUS' in white #FFFFFF at 52px with letter-spacing -2px, followed by a period '.' in electric blue #4F6EF7 at 60px. Below the logo, show the tagline 'Services à domicile premium' in #888888 italic 16px with 16px margin. Add a 1px golden horizontal separator 60px wide centered with 32px margin. Render a pill button 'SE CONNECTER' with background #E8C89A, text #0A0A0A Bold 16px tracking 2px uppercase, border-radius 50px, 85% max-width, 56px height, shadow 0 8px 32px rgba(232,200,154,0.3), and scale(0.97)+brightness(1.1) on tap. Below the button, display one line: '🔒 Face ID · Empreinte · WebAuthn' in #555555 12px centered. At the very bottom of the screen: 'CHF · Suisse romande · +41' in #333333 11px. Remove any image/logo asset and eliminate duplicate NEXUS text occurrences.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-5"
         ],
         "quotes": [
-          "Écran de connexion",
-          "Bouton unique 'Se connecter' via Internet Identity"
+          "SUPPRIMER immédiatement",
+          "REMPLACER par cet écran unique et élégant",
+          "Fond : #0A0A0A plein écran"
         ]
       },
       "acceptanceCriteria": [
-        "NEXUS logo with blue signature dot is centered on the login screen",
-        "A single 'Sign In' button triggers Internet Identity authentication",
-        "After login, user is routed to the role selection screen"
+        "No image asset or duplicate NEXUS text appears on the login screen",
+        "Background is solid #0A0A0A full-screen",
+        "NEXUS logo renders as white Inter Black 52px with blue period #4F6EF7 60px, letter-spacing -2px",
+        "Tagline, golden separator, CTA button, security line, and locale footer are all present and correctly styled",
+        "Button triggers the existing login/auth flow",
+        "Tap on button triggers scale(0.97) + brightness animation"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement a role selection screen after login with two options: 'I'm looking for a service' (Client) and 'I offer a service' (Pro). Client path triggers simulated OTP phone verification (code 1234 accepted, 30s timer, never re-asked after first verification, badge '✅ Phone verified' stored). Pro path opens the Pro onboarding modal immediately.",
-      "target": "both",
+      "text": "Implement a fixed global header displayed on all authenticated screens. Background #0A0A0A with border-bottom 1px #1F1F1F. Left side: NEXUS logo in the same style as the login screen but at 24px (white Bold + blue period #4F6EF7). Right side: a notification bell 🔔 with a red pulsing badge showing unread count, and a circular 32px avatar showing the user's initials with a dark background. Remove the 'Mes résa' button from the header.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-5"
         ],
         "quotes": [
-          "choix du rôle",
-          "CLIENT → vérification téléphone uniquement",
-          "Code OTP 4 chiffres (simulé : code 1234 accepté)"
+          "Header fixe sur toutes les pages",
+          "Logo NEXUS gauche",
+          "Cloche 🔔 droite avec badge rouge animé pulsant",
+          "Bouton \"Mes résa\" remplacé par icône profil circulaire 32px"
         ]
       },
       "acceptanceCriteria": [
-        "Two role options displayed after login",
-        "Client OTP flow accepts code 1234 and marks phone as verified",
-        "OTP is never re-asked after first verification",
-        "Pro selection immediately opens the onboarding modal"
+        "Header is fixed/sticky at the top on all authenticated screens",
+        "Background is #0A0A0A with 1px #1F1F1F bottom border",
+        "NEXUS logo (white + blue period) appears on the left at 24px",
+        "Notification bell with animated red pulse badge appears on the right",
+        "Circular 32px initials avatar appears on the right",
+        "'Mes résa' button is absent from the header"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Implement the Pro onboarding modal with title 'LAUNCH MY SERVICE', listing 5 benefits (visible profile, instant bookings, NEXUS PAY, real-time notifications, zero commission for 7 days), a 'Start 7 days free' CTA, and a 'Not now' option.",
+      "text": "Redesign the Explorer screen search bar: background #1A1A1A, border 1px #2A2A2A, a golden pin icon on the left, placeholder 'Votre ville...' in #555, dropdown of Swiss Romande cities on tap, and a '≤ 50 km' golden pill on the right that opens a distance slider on tap.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-5"
         ],
         "quotes": [
-          "modal immédiate",
-          "LANCER MON SERVICE",
-          "Zéro commission 7 premiers jours"
+          "BARRE DE RECHERCHE",
+          "Fond #1A1A1A, border 1px #2A2A2A",
+          "Dropdown villes suisses romandes au tap"
         ]
       },
       "acceptanceCriteria": [
-        "Modal appears immediately when Pro role is selected",
-        "All 5 benefit bullet points are displayed",
-        "'Start 7 days free' CTA routes to the Pro profile builder",
-        "'Not now' dismisses the modal"
+        "Search bar has #1A1A1A background and 1px #2A2A2A border",
+        "Golden pin icon is displayed on the left of the input",
+        "Placeholder text 'Votre ville...' appears in #555",
+        "Tapping the input opens a dropdown with Swiss Romande city options",
+        "Golden '≤ 50 km' pill is displayed on the right and opens a distance slider on tap"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Build the Pro profile builder (Espace Pro) with the following sections in order: (A) Identity — cover photo 1200×400px drag & drop, circular profile photo 150×150px, artist/brand name, slogan (80 chars with counter), professional bio (500 chars with counter), category selector (Barber / Coiffure / Esthétique / Massage) that auto-loads service presets on selection, city selector from the 10 Swiss romande cities (Geneva, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre) with intervention radius slider 1–50 km, language badges (FR/EN/PT/ES/AR), phone field (hidden from clients). (B) Revolut payment setup — input for @revolut-username or +41 phone, 'Validate my Revolut' button that saves and shows badge '💳 Revolut verified ✅', marked as required before publication. (C) Service catalogue with category presets auto-loaded, each service editable (name, price, duration), 2 before/after photo slots, badge selector (Popular/New/Promo), delete/reorder, and '+ Add custom service'. (D) Gallery with minimum 3 photos, drag & drop reordering, starred primary photo. (E) Availability grid Mon–Sun with time slots per day, available/unavailable toggle per day, minimum lead time selector (1h/2h/24h/48h), 'I travel to the client' toggle. (F) Flash mode toggle with auto-disable after 4h and 'Available NOW' messaging. (G) Reputation score read-only display (average rating, response time, acceptance rate, completed services). Publication button validates: Revolut set + min 3 photos + min 1 service; if incomplete shows red checklist; if complete opens subscription modal.",
-      "target": "both",
+      "text": "Redesign the Explorer category filters as horizontally scrollable pills with no visible scrollbar. Active pill: background #E8C89A, text #0A0A0A Bold. Inactive pill: background #1A1A1A, text #888, border 1px #2A2A2A. All pills: border-radius 50px, padding 10px 20px. Order: [Tous] [⚡Flash] [✂️Barber] [💇Coiffure] [💅Esthétique] [🤲Massage].",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-5"
         ],
         "quotes": [
-          "BLOC 2 — MON ESPACE PRO",
-          "SECTION A — IDENTITÉ",
-          "SECTION B — RECEVOIR MES PAIEMENTS",
-          "SECTION C — CATALOGUE SERVICES",
-          "SECTION D — GALERIE",
-          "SECTION E — DISPONIBILITÉS",
-          "SECTION F — MODE FLASH",
-          "SECTION G — SCORE & RÉPUTATION"
+          "FILTRES CATÉGORIES",
+          "Pills horizontaux scrollables sans scrollbar visible",
+          "Ordre : [Tous] [⚡Flash]"
         ]
       },
       "acceptanceCriteria": [
-        "All 7 sections (A–G) are present and functional in the builder",
-        "Category selection auto-populates the correct service presets",
-        "City selector shows exactly the 10 Swiss romande cities",
-        "Revolut field is marked as blocking: publication button is disabled without it",
-        "Publication button validates all 3 conditions and shows red checklist if incomplete",
-        "Flash mode auto-disables after 4 hours"
+        "Category pills scroll horizontally with no visible scrollbar",
+        "Active pill has #E8C89A background and #0A0A0A Bold text",
+        "Inactive pills have #1A1A1A background, #888 text, 1px #2A2A2A border",
+        "Pills have border-radius 50px and padding 10px 20px",
+        "Pills appear in the order: Tous, Flash, Barber, Coiffure, Esthétique, Massage"
       ]
     },
     {
       "id": "REQ-5",
-      "text": "Define backend data models and CRUD operations for: ProProfile (id, principalId, name, slogan, bio, category, city, radiusKm, languages, phone, revolutHandle, isPublished, isFlashActive, flashActivatedAt, subscriptionStatus, trialStartDate, avgRating, reviewCount, responseTimeMin, acceptanceRate, completedCount), Service (id, proId, name, price, duration, badge, beforePhotoUrl, afterPhotoUrl, order), GalleryPhoto (id, proId, url, isPrimary, order), Availability (proId, weekday, slots, isAvailable, minLeadTime, travelsToClient), Booking (id, clientId, proId, serviceId, datetime, address, status, amount, escrowStatus, createdAt), Review (id, bookingId, authorId, targetId, score, comment, isPublic), Notification (id, userId, type, message, isRead, createdAt), Wallet (proId, availableBalance, escrowedBalance), Transaction (id, proId, bookingId, amount, type, date, status). Persist all data in stable canister memory.",
-      "target": "backend",
+      "text": "Add a 'DISPONIBLES MAINTENANT' Flash section in the Explorer above the main pro list. Title: a green pulsing dot + 'DISPONIBLES MAINTENANT' text in #22C55E, 13px, tracking 2px. Display horizontally scrollable flash pro cards: 160px wide, 200px tall, 16px radius, full-card cover photo, black gradient overlay at the bottom, a green 'FLASH' badge (background #22C55E, white text, radius 50px, padding 10px 12px) in the top-left, pro name in white Bold at the bottom, and city in #CCC 12px.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-5"
         ],
         "quotes": [
-          "BLOC 2",
-          "BLOC 6",
-          "BLOC 7",
-          "BLOC 9",
-          "BLOC 10",
-          "BLOC 11"
+          "SECTION FLASH \"DISPONIBLES MAINTENANT\"",
+          "Cards horizontales scrollables",
+          "Badge FLASH : fond #22C55E"
         ]
       },
       "acceptanceCriteria": [
-        "All listed entity types have corresponding Motoko types and stable storage",
-        "CRUD operations exist for each entity",
-        "Booking status transitions (pending → confirmed → completed → reviewed) are enforced",
-        "Wallet balances update correctly on booking confirmation and completion"
+        "Section title shows a pulsing green dot and 'DISPONIBLES MAINTENANT' in #22C55E 13px tracking 2px",
+        "Flash cards scroll horizontally",
+        "Each card is 160×200px with 16px radius and a cover photo",
+        "Black gradient overlay appears at the card bottom",
+        "FLASH badge in #22C55E top-left, pro name white Bold and city #CCC 12px at the bottom"
       ]
     },
     {
       "id": "REQ-6",
-      "text": "Implement the subscription modal (full-screen) shown before profile publication: display '🎁 7 DAYS FREE then 19.90 CHF/month — Cancellable anytime', list 6 included benefits, billing email input, simulated 'Pay via Revolut' button with 3s auto-success, 'ACTIVATE MY FREE TRIAL' CTA. On activation: show golden confetti for 3 seconds, display success message 'You are live! Clients around you can already see your profile.', show 'View my client profile' button, add 'Free trial — Day 7' banner in the Pro dashboard, and schedule a Day -1 notification 'Your trial expires tomorrow'.",
-      "target": "both",
+      "text": "Redesign the main pro cards in the Explorer list. Each card: full-width cover photo 180px height object-fit cover, green FLASH badge top-left, semi-transparent 'Revolut ✅' badge top-right (background rgba(0,0,0,0.6)), info zone background #111111, pro name Bold 18px white with ⭐ rating right-aligned, category in #888 14px with review count, location 📍city and ⚡response time in #666 12px, separator line, price 'À partir de X CHF' in #E8C89A Bold, and a golden 'RÉSERVER ⚡' button. Card border-radius 20px, shadow 0 4px 24px rgba(0,0,0,0.4), margin between cards 16px.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-5"
         ],
         "quotes": [
-          "BLOC 3 — ABONNEMENT",
-          "Confetti dorés 3 secondes",
-          "Bandeau Espace Pro : 'Essai gratuit J-7'"
+          "CARDS PROS LISTE PRINCIPALE",
+          "Redesign complet",
+          "Border-radius card : 20px"
         ]
       },
       "acceptanceCriteria": [
-        "Subscription modal appears before first publication",
-        "Simulated Revolut payment auto-succeeds after 3 seconds",
-        "Golden confetti animation plays on activation",
-        "Trial banner appears in Pro dashboard",
-        "Day -1 notification is queued and displayed"
+        "Cover photo occupies full card width at 180px height with object-fit cover",
+        "FLASH badge (green) appears top-left; Revolut badge appears top-right with semi-transparent background",
+        "Info zone has #111111 background with pro name, rating, category, location, response time, price, and RÉSERVER button",
+        "Price is displayed in #E8C89A Bold",
+        "Card has 20px border-radius and 0 4px 24px rgba(0,0,0,0.4) shadow",
+        "Cards have 16px vertical margin between them"
       ]
     },
     {
       "id": "REQ-7",
-      "text": "Build the Explorer screen (client side) with: header 'What service are you looking for?', horizontally scrollable category filters (📍 Near me, Barber, Coiffure, Esthétique, Massage, ⚡ Flash, Price ↕), distance slider 1–50 km, city selector from the 10 Swiss romande cities (client sets their city; distance is calculated by city-zone proximity matching, not GPS), 'Available NOW ⚡' horizontal scroll section showing Flash-active pros with pulsing green badge, main pro card grid with skeleton loading animations. Each pro card shows: cover photo, FLASH badge if active, Revolut verified badge, circular profile photo, name, category, star rating with review count, city distance label, response time, starting price, and '⚡ BOOK' CTA.",
+      "text": "Add a fixed bottom navigation bar for mobile. Background #0F0F0F, border-top 1px #1F1F1F, height 64px plus iOS safe area padding. Four tabs: [🔍 Explorer] [📅 Réservations] [💬 Messages] [👤 Profil]. Active tab: icon + text in #E8C89A. Inactive tab: icon + text in #555555. Show a red badge on Réservations when there are new/pending bookings. Wire each tab to its corresponding screen.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2",
-          "msg-4"
+          "msg-5"
         ],
         "quotes": [
-          "BLOC 4 — EXPLORER",
-          "Le client choisit sa ville dans l'Explorer",
-          "Le calcul de distance se fait par correspondance de villes et zones proches"
+          "NAVIGATION BAS (MOBILE)",
+          "4 onglets",
+          "Onglet actif : icône + texte doré #E8C89A"
         ]
       },
       "acceptanceCriteria": [
-        "City selector shows the 10 Swiss romande cities",
-        "Distance filter works by city-zone proximity matching without GPS",
-        "Available NOW section shows Flash-active pros with pulsing badge",
-        "Pro cards render with all listed fields",
-        "Skeleton loading displays while data loads",
-        "6 demo profiles are visible immediately on first load"
+        "Bottom nav bar is fixed at the bottom of the screen on all main app screens",
+        "Background is #0F0F0F with 1px #1F1F1F top border",
+        "Height is 64px with env(safe-area-inset-bottom) padding for iOS",
+        "Four tabs displayed: Explorer, Réservations, Messages, Profil",
+        "Active tab icon and label render in #E8C89A; inactive tabs in #555555",
+        "Red badge appears on Réservations tab when there are pending bookings",
+        "Tapping each tab navigates to the corresponding screen"
       ]
     },
     {
       "id": "REQ-8",
-      "text": "Build the Pro detail page (Fiche Pro, client view) showing: full-width cover photo, profile photo + name + slogan + badges, reputation scores (rating, response time, acceptance rate), full bio, service catalogue with price/duration and before/after photos, scrollable gallery, available time slots, public reviews, and a sticky bottom CTA '⚡ Book Now'.",
+      "text": "Apply a global Inter typography system across the entire app. Import Inter from Google Fonts. Apply: H1 28px Bold #FFFFFF tracking -1px; H2 22px SemiBold #FFFFFF; Body 15px Regular #CCCCCC; Caption 12px Regular #888888; Labels 11px SemiBold #888888 tracking 2px uppercase; Prices 18px Bold #E8C89A; Buttons 14px Bold #0A0A0A tracking 1px uppercase. Replace all existing font-family declarations with Inter.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-5"
         ],
         "quotes": [
-          "BLOC 5 — FICHE PRO"
+          "TYPOGRAPHIE GLOBALE",
+          "Police unique : Inter (Google Fonts)",
+          "Titres H1 : 28px Bold #FFFFFF tracking -1px"
         ]
       },
       "acceptanceCriteria": [
-        "All sections render correctly from pro profile data",
-        "Before/after photos display per service",
-        "Available slots are shown",
-        "Sticky booking CTA is always visible at the bottom"
+        "Inter is the sole font family used throughout the app",
+        "H1/H2/body/caption/label/price/button text sizes and weights match the specification",
+        "Price elements render in #E8C89A Bold 18px",
+        "Button text is #0A0A0A Bold 14px uppercase with tracking 1px"
       ]
     },
     {
       "id": "REQ-9",
-      "text": "Implement the 6-step Flash booking flow: Step 1 — service selection (1 tap); Step 2 — time slot selection with quick options (In 1h, In 2h, Tonight, Tomorrow) plus full calendar; Step 3 — address input (manual text field) with optional note to the pro; Step 4 — booking summary recap (service, pro, datetime, address, price) with Edit / Confirm buttons; Step 5 — NEXUS PAY screen showing amount, escrow guarantee messaging ('Your money is protected / Released to pro after service / Refunded if no-show'), animated Revolut QR code placeholder, 'Pay via Revolut' button with 3s auto-success simulation; Step 6 — post-payment confirmation with pulsing green circle, message 'Request sent to [Pro Name]', '⏱️ The pro has 10 minutes to confirm', and a 10:00 countdown timer.",
-      "target": "both",
+      "text": "Implement micro-animations across the app: (1) All buttons and tappable cards have active/tap state scale(0.96) with 150ms ease transition. (2) Cards show a subtle elevated box-shadow on hover/tap. (3) FLASH badges have an infinite CSS pulse animation (opacity 1→0.6→1, 1.5s). (4) Red notification badges have a red pulse animation. (5) Skeleton loading states use a golden shimmer animation on #1A1A1A backgrounds. (6) Screen/page transitions use a 200ms fade.",
+      "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-5"
         ],
         "quotes": [
-          "BLOC 6 — FLUX RÉSERVATION FLASH"
+          "MICRO-ANIMATIONS",
+          "Tous les boutons : scale 0.96 au tap + transition 150ms",
+          "Badge FLASH : pulse CSS infini",
+          "Skeleton loading : shimmer doré sur fond #1A1A1A",
+          "Transitions de pages : fade 200ms"
         ]
       },
       "acceptanceCriteria": [
-        "All 6 steps are navigable in sequence with back navigation",
-        "Quick time slot buttons work",
-        "NEXUS PAY auto-succeeds after 3 seconds",
-        "Post-payment countdown starts at 10:00 and counts down",
-        "Booking record is created in the backend on payment confirmation"
+        "All interactive buttons scale to 0.96 on tap/active with 150ms transition",
+        "Cards show shadow elevation on hover/tap",
+        "FLASH badges continuously pulse (opacity 1→0.6→1) on a 1.5s loop",
+        "Red notification badges have a pulsing red animation",
+        "Skeleton loaders show a golden shimmer sweep on #1A1A1A",
+        "Navigating between screens fades in/out over 200ms"
       ]
     },
     {
       "id": "REQ-10",
-      "text": "Build the Radar Pro screen (Pro dashboard) with React Query polling every 10 seconds. Include: pulsing red badge on the navigation icon when new pending requests exist, tabs (Pending 🔴 / Confirmed / History). Each pending request card shows: client name + rating, service name + guaranteed amount, appointment datetime, distance from pro, 10:00 countdown timer in red, Accept (✅) and Decline (❌) action buttons, and a message-to-client field. On Accept: mark booking confirmed, show 'Confirmed ✅', send client notification 'Studio Élé confirmed! Service in Xh Ym 🎉', show pro countdown to client arrival. On Decline or timeout: auto-route to next available pro, show client 'Searching for another pro...'.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-2",
-          "msg-4"
-        ],
-        "quotes": [
-          "BLOC 7 — RADAR PRO",
-          "Polling toutes les 10 secondes",
-          "badge rouge apparaisse",
-          "la card de demande arrive sans recharger la page"
-        ]
-      },
-      "acceptanceCriteria": [
-        "React Query polls the backend every 10 seconds for new bookings",
-        "Red badge appears on nav icon when pending requests exist without page reload",
-        "New request cards appear within 10 seconds of creation",
-        "Accept action updates booking status and triggers client notification",
-        "Decline/timeout triggers auto-routing logic"
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "text": "Implement the Live Status shared timeline visible to both client and pro, showing booking lifecycle steps: Request sent, Pro accepted, Payment secured, Service in Xh Ym, Confirm service completed, Leave a review. 24h after confirmed completion, prompt both parties: client gets '✅ All good!' / '⚠️ Report a problem', pro gets the same. On ✅: simulate fund release. On ⚠️: show '48h NEXUS mediation'. If no response after 48h: auto-release funds (simulated).",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "BLOC 8 — LIVE STATUS",
-          "Timeline visible client ET pro"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Timeline shows all lifecycle steps with timestamps",
-        "Both client and pro see the same timeline for a given booking",
-        "24h post-service prompt appears for both parties",
-        "Fund release / mediation flows are triggered correctly"
-      ]
-    },
-    {
-      "id": "REQ-12",
-      "text": "Build the Wallet Pro screen showing: available balance vs. escrowed balance (🔒), simulated 'Transfer to my Revolut' button with visual confirmation, full transaction history table (service / client / amount / date / status), stats summary (weekly / monthly / total), and a monthly revenue bar chart.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "BLOC 9 — WALLET PRO"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Available and escrowed balances display correctly",
-        "Revolut transfer button shows a success confirmation (simulated)",
-        "Transaction history table is populated",
-        "Bar chart renders monthly revenue data"
-      ]
-    },
-    {
-      "id": "REQ-13",
-      "text": "Implement the double review system: 24h after a confirmed service, prompt the client to leave a public 5-star rating + comment for the pro, and prompt the pro to rate the client internally (5-star, not shown publicly). Automatically suspend a pro from the Explorer if their average rating drops below 3.5.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "BLOC 10 — AVIS DOUBLE",
-          "Note pro < 3.5 → suspension Explorer auto"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Client review prompt appears 24h after confirmed completion",
-        "Pro internal client rating is stored but not shown publicly",
-        "Pros with average rating below 3.5 are filtered out of Explorer results"
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "text": "Implement the Notification Center: bell icon 🔔 in the top-right with a red badge showing unread count, a dropdown/panel with notification history. Notification types: ⚡ Flash request received, ✅ Booking confirmed, 💰 Payment received/released, ⭐ New review, ⚠️ Dispute opened, 📅 Service reminder 2h before, 📱 Simulated SMS display (show 'SMS sent to +41...' in-app). Mark all as read on open.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "BLOC 11 — CENTRE NOTIFICATIONS",
-          "Cloche 🔔 haut droite + badge rouge"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Bell icon with red unread badge is visible in the top-right nav",
-        "All 7 notification types are handled and displayed",
-        "Simulated SMS notifications display the +41 number in-app",
-        "Badge clears when notifications are viewed"
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "text": "Seed 6 demo pro profiles in the backend at canister initialization (only if no profiles exist). Profiles: (1) 'Studio Blade' — Barber, Lausanne, rating 4.9, 47 reviews, Flash ACTIVE; (2) 'BarberKing Geneva' — Barber, Geneva, rating 4.7, 23 reviews; (3) 'Studio Élé' — Coiffure, Geneva, rating 4.8, 31 reviews; (4) 'Atelier Fribourg Hair' — Coiffure, Fribourg, rating 4.6, 12 reviews; (5) 'Glow by Sofia' — Esthétique, Lausanne, rating 4.8, 19 reviews; (6) 'Zen Touch' — Massage, Geneva, rating 4.9, 38 reviews. Each profile has: pre-filled services from their category presets, rating between 4.6–4.9, between 12–47 fake reviews, a cover photo (generated image assigned), and all required fields set so they appear as published profiles in the Explorer.",
-      "target": "both",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Génère 6 profils pros de démo pré-remplis et vivants dès le lancement",
-          "1 profil en mode Flash actif",
-          "L'Explorer doit sembler vivant et attractif dès la première seconde"
-        ]
-      },
-      "acceptanceCriteria": [
-        "6 demo pro profiles are visible in the Explorer on first load without any manual setup",
-        "Profile #1 (Studio Blade) shows active Flash badge",
-        "All profiles display correct category, city, rating, and review count",
-        "Each profile has pre-filled services matching their category presets",
-        "Seeding only runs once if no profiles exist"
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "text": "Apply the NEXUS design system consistently across all screens: background #0A0A0A, gold accent #E8C89A, cards #1A1A1A with 16px border radius, primary text #FFFFFF, secondary text #888888, success green #22C55E, urgent red #EF4444, pulsing animated green badge for Flash status, skeleton loading animations on all data-fetching screens, 200ms ease-in-out transitions, golden confetti on key success events, mobile-first layout with max-width 430px, Inter font.",
+      "text": "Build or fully redesign the pro detail screen (client view). Layout: full-width cover photo at 220px height; circular 80px profile photo with 3px golden border overlapping the cover by -40px; pro name in 24px Bold white with 48px margin-top; slogan in 14px italic #888; inline badges [⚡ Flash] [💳 Revolut ✅] [⭐ rating] [N avis]; a score bar (background #1A1A1A, radius 12px, padding 16px) showing ⚡response time, ✅ acceptance rate, and 🎯 total prestations in three columns; horizontally scrollable service cards (background #1A1A1A, radius 12px) showing service name Bold white, duration + price in gold, optional before/after photos, and badges [Populaire] [Nouveau] [Promo]; a sticky bottom CTA button '⚡ RÉSERVER MAINTENANT — X CHF' with background #E8C89A, text #0A0A0A Bold, full width, 56px height, radius 0, border-top 1px rgba(232,200,154,0.3).",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-2"
+          "msg-5"
         ],
         "quotes": [
-          "DESIGN",
-          "Fond #0A0A0A / Doré #E8C89A",
-          "Mobile-first / max-width 430px"
+          "FICHE PRO (vue client)",
+          "Photo couverture : plein largeur, height 220px",
+          "Bouton sticky bas"
         ]
       },
       "acceptanceCriteria": [
-        "All screens use the defined color palette",
-        "Flash badges pulse with green animation",
-        "Skeleton loaders appear during all async data fetches",
-        "Confetti animation triggers on subscription activation and booking confirmation",
-        "Layout is mobile-first and constrained to 430px max-width"
-      ]
-    },
-    {
-      "id": "REQ-17",
-      "text": "Replace all GPS/geolocation logic (navigator.geolocation, Haversine calculations, Nominatim geocoding) with a city-based selection system. Use a fixed list of 10 Swiss romande cities: Geneva, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre. Pros select their city during onboarding. Clients select their city in the Explorer. Distance between client and pro is determined by a city-zone proximity map (e.g., Lausanne ↔ Morges ↔ Nyon are 'nearby'; Geneva ↔ Nyon are 'nearby'; Fribourg ↔ Neuchâtel are 'nearby'). Remove all imports and references to useGeolocation.ts, haversine.ts, and nominatim.ts from Explorer and Builder.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "Utilise la saisie manuelle par ville avec une liste des villes principales de Suisse romande",
-          "Le calcul de distance se fait par correspondance de villes et zones proches"
-        ]
-      },
-      "acceptanceCriteria": [
-        "No GPS permission prompts appear anywhere in the app",
-        "City dropdowns show exactly the 10 listed cities",
-        "City-zone proximity map correctly groups nearby cities",
-        "Explorer distance filter works using city-zone matching",
-        "No runtime errors from removed geolocation dependencies"
-      ]
-    },
-    {
-      "id": "REQ-18",
-      "text": "Render the 6 generated demo pro cover photos as static assets from frontend/public/assets/generated and assign each to the corresponding seeded demo profile.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-4"
-        ],
-        "quotes": [
-          "photo de couverture colorée générée"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Each of the 6 demo profiles displays a distinct colored cover photo",
-        "Cover photos load from frontend/public/assets/generated",
-        "No broken image links on the Explorer or Fiche Pro screens"
+        "Cover photo is full-width at 220px",
+        "Profile photo is 80px circular with 3px golden border, overlapping cover by 40px",
+        "Pro name, slogan, and inline badges are displayed correctly",
+        "Score bar shows response time, acceptance rate, and prestations count in a dark card",
+        "Services render as horizontally scrollable cards with name, duration, price in gold, and optional badges",
+        "Sticky bottom button shows '⚡ RÉSERVER MAINTENANT — X CHF' in #E8C89A background with #0A0A0A text",
+        "Tapping the CTA initiates the booking flow for the selected service"
       ]
     }
   ],
   "constraints": [
-    "All Motoko logic must remain in a single main actor (backend/main.mo)",
-    "Do not use GPS, navigator.geolocation, Haversine distance calculations, or Nominatim geocoding — replace with city-based proximity matching",
-    "Do not use WebSockets — use React Query polling every 10 seconds for real-time updates",
-    "All payment flows (Revolut, NEXUS PAY, subscription) are simulated — no real payment integration",
-    "Do not edit files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
-    "OTP verification is simulated — code 1234 must always be accepted",
-    "Generated images must be served from frontend/public/assets/generated, not through the backend"
+    "Gold accent #E8C89A must only be used on prices, primary CTAs, and accent elements — never as a page background",
+    "The dark palette (#0A0A0A, #111111, #1A1A1A) must be used consistently; no light-mode styles should be introduced",
+    "All immutable frontend paths (hooks, main.tsx, ui components) must not be modified",
+    "Backend data model and API endpoints must not be changed"
   ],
   "nonGoals": [
-    "Real Revolut API integration or actual payment processing",
-    "Real SMS sending via Twilio or any external SMS provider",
-    "GPS-based geolocation or map rendering",
-    "WebSocket or push notification infrastructure",
-    "Multi-canister or microservices architecture",
-    "Admin dashboard or back-office management tools",
-    "Multi-language (i18n) support beyond badge display",
-    "Native mobile app (React Native / Flutter)"
+    "No changes to backend business logic, data models, or Motoko actor",
+    "No new backend features or API endpoints",
+    "No light mode or theme toggle",
+    "No changes to authentication flow logic (only visual styling of the login screen)"
   ],
   "imageRequirements": {
-    "required": [
-      "Bold warm-toned gradient cover photo for a Barber studio — deep red and charcoal tones, scissors and fade motif, premium dark aesthetic (barber-lausanne-cover.dim_1200x400.png)",
-      "Bold cool-toned gradient cover photo for a Barber studio — midnight blue and gold tones, geometric barbershop motif, urban premium aesthetic (barber-geneva-cover.dim_1200x400.png)",
-      "Elegant gradient cover photo for a hair salon — soft rose gold and ivory tones, flowing hair silhouette motif, luxury aesthetic (coiffure-geneva-cover.dim_1200x400.png)",
-      "Elegant gradient cover photo for a hair salon — forest green and champagne tones, botanical and hair motif, artisan aesthetic (coiffure-fribourg-cover.dim_1200x400.png)",
-      "Glowing gradient cover photo for an esthetics studio — blush pink and pearl white tones, floral and skincare motif, high-end spa aesthetic (esthetique-lausanne-cover.dim_1200x400.png)",
-      "Serene gradient cover photo for a massage studio — deep teal and warm sand tones, zen stone and wave motif, wellness aesthetic (massage-geneva-cover.dim_1200x400.png)"
-    ],
+    "required": [],
     "edits": []
   }
 }

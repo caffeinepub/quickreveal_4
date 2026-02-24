@@ -1,45 +1,59 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
 import Splash from './Splash';
-import RoleSelection from './RoleSelection';
 import Explorer from './Explorer';
 import ProviderDetail from './ProviderDetail';
 import BookingFlow from './BookingFlow';
 import ClientDashboard from './ClientDashboard';
 import NexusOS from './NexusOS';
 import Builder from './Builder';
-import SubscriptionScreen from './SubscriptionScreen';
+import LandingPage from './LandingPage';
+import RoleSelection from './RoleSelection';
 
 export default function ScreenRouter() {
-  const { currentScreen, navigate } = useAppContext();
-  const [showSubscription, setShowSubscription] = useState(false);
+  const { currentScreen } = useAppContext();
+  const [displayScreen, setDisplayScreen] = useState(currentScreen);
+  const [opacity, setOpacity] = useState(1);
 
-  if (showSubscription) {
-    return <SubscriptionScreen onBack={() => setShowSubscription(false)} />;
-  }
+  useEffect(() => {
+    if (currentScreen !== displayScreen) {
+      setOpacity(0);
+      const timer = setTimeout(() => {
+        setDisplayScreen(currentScreen);
+        setOpacity(1);
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [currentScreen, displayScreen]);
 
-  switch (currentScreen) {
-    case 'splash':
-      return <Splash />;
-    case 'landing':
-      return <Splash />;
-    case 'roleSelection':
-      return <RoleSelection />;
-    case 'explorer':
-      return <Explorer />;
-    case 'providerDetail':
-      return <ProviderDetail />;
-    case 'bookingFlow':
-      return <BookingFlow />;
-    case 'clientDashboard':
-      return <ClientDashboard />;
-    case 'nexusOS':
-      return <NexusOS />;
-    case 'builder':
-      return <Builder />;
-    case 'subscription':
-      return <SubscriptionScreen onBack={() => navigate('builder')} />;
-    default:
-      return <Splash />;
-  }
+  const renderScreen = () => {
+    switch (displayScreen) {
+      case 'splash':
+        return <Splash />;
+      case 'landing':
+        return <LandingPage />;
+      case 'roleSelection':
+        return <RoleSelection />;
+      case 'explorer':
+        return <Explorer />;
+      case 'providerDetail':
+        return <ProviderDetail />;
+      case 'bookingFlow':
+        return <BookingFlow />;
+      case 'clientDashboard':
+        return <ClientDashboard />;
+      case 'nexusOS':
+        return <NexusOS />;
+      case 'builder':
+        return <Builder />;
+      default:
+        return <Splash />;
+    }
+  };
+
+  return (
+    <div style={{ opacity, transition: 'opacity 200ms ease-out' }}>
+      {renderScreen()}
+    </div>
+  );
 }

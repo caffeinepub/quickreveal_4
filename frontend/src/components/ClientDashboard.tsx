@@ -1,197 +1,226 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAppContext } from '../context/AppContext';
-import { useAuthContext } from '../context/AuthContext';
-import { useGetBookingsByUser } from '../hooks/useQueries';
-import { BookingStatus } from '../backend';
-import { ArrowLeft, Clock, CheckCircle, XCircle, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-
-const STATUS_LABELS: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
-  pending: { label: 'En attente', color: '#888', icon: <Clock size={14} /> },
-  confirmed: { label: 'Confirmée', color: '#4ade80', icon: <CheckCircle size={14} /> },
-  cancelled: { label: 'Annulée', color: '#f87171', icon: <XCircle size={14} /> },
-};
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import GlobalHeader from './GlobalHeader';
+import BottomNav from './BottomNav';
+import type { LocalBooking } from '../context/AppContext';
 
 export default function ClientDashboard() {
-  const { navigate } = useAppContext();
-  const { logout, principal } = useAuthContext();
-  const prevBookingsRef = useRef<Record<string, string>>({});
+  const { navigate, bookings } = useAppContext();
+  const { clear } = useInternetIdentity();
+  const queryClient = useQueryClient();
 
-  const { data: bookings, isLoading } = useGetBookingsByUser(principal);
-
-  useEffect(() => {
-    if (!bookings) return;
-    bookings.forEach((booking) => {
-      const prevStatus = prevBookingsRef.current[booking.id];
-      const currentStatus = booking.status as unknown as string;
-      if (prevStatus && prevStatus !== currentStatus) {
-        if (currentStatus === BookingStatus.confirmed) {
-          toast.success('Réservation confirmée ✅', {
-            description: `Votre réservation a été acceptée par le professionnel`,
-          });
-        } else if (currentStatus === BookingStatus.cancelled) {
-          toast.error('Réservation annulée', {
-            description: 'Votre paiement sera remboursé sous 5-7 jours ouvrables',
-          });
-        }
-      }
-      prevBookingsRef.current[booking.id] = currentStatus;
-    });
-  }, [bookings]);
+  const pendingBookings = bookings?.filter((b) => b.status === 'pending') ?? [];
+  const confirmedBookings = bookings?.filter((b) => b.status === 'confirmed') ?? [];
+  const completedBookings = bookings?.filter((b) => b.status === 'completed') ?? [];
+  const hasPendingBookings = pendingBookings.length > 0;
 
   const handleLogout = async () => {
-    await logout();
+    await clear();
+    queryClient.clear();
     navigate('splash');
   };
 
-  const pendingBookings = bookings?.filter((b) => (b.status as unknown as string) === BookingStatus.pending) ?? [];
-  const confirmedBookings = bookings?.filter((b) => (b.status as unknown as string) === BookingStatus.confirmed) ?? [];
-  const cancelledBookings = bookings?.filter((b) => (b.status as unknown as string) === BookingStatus.cancelled) ?? [];
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'pending': return '#E8C89A';
+      case 'confirmed': return '#22C55E';
+      case 'cancelled': return '#EF4444';
+      default: return '#888888';
+    }
+  };
 
-  return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh', paddingBottom: '40px' }}>
-      {/* Header */}
-      <div
-        style={{
-          padding: '16px 20px',
-          borderBottom: '1px solid #1A1A1A',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button
-            onClick={() => navigate('explorer')}
-            style={{
-              background: '#1A1A1A',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '8px',
-              cursor: 'pointer',
-              color: '#fff',
-            }}
-          >
-            <ArrowLeft size={18} />
-          </button>
-          <h1 style={{ fontFamily: 'Inter, sans-serif', fontSize: '20px', fontWeight: 900, color: '#E8C89A' }}>
-            NEXUS
-          </h1>
+  const getStatusLabel = (status: string) => {
+    switch (status) {
+      case 'pending': return 'En attente';
+      case 'confirmed': return 'Confirmé';
+      case 'cancelled': return 'Annulé';
+      case 'completed': return 'Terminé';
+      default: return status;
+    }
+  };
+
+  const renderBookingCard = (booking: LocalBooking) => (
+    <div
+      key={booking.id}
+      style={{
+        backgroundColor: '#111111',
+        borderRadius: '16px',
+        padding: '16px',
+        marginBottom: '12px',
+        border: '1px solid #1F1F1F',
+      }}
+    >
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+        <div>
+          <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '16px', fontFamily: "'Inter', sans-serif", marginBottom: '4px' }}>
+            {booking.proName ?? 'Pro'}
+          </div>
+          <div style={{ color: '#888888', fontSize: '14px', fontFamily: "'Inter', sans-serif" }}>
+            {booking.serviceName ?? 'Service'}
+          </div>
         </div>
-        <button
-          onClick={handleLogout}
+        <span
           style={{
-            background: '#1A1A1A',
-            border: '1px solid #333',
-            borderRadius: '20px',
-            color: '#888',
-            fontSize: '11px',
-            fontWeight: 700,
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            padding: '8px 16px',
-            cursor: 'pointer',
+            backgroundColor: `${getStatusColor(booking.status)}20`,
+            color: getStatusColor(booking.status),
+            fontSize: '12px',
+            fontWeight: 600,
+            fontFamily: "'Inter', sans-serif",
+            padding: '4px 10px',
+            borderRadius: '50px',
+            border: `1px solid ${getStatusColor(booking.status)}40`,
           }}
         >
-          Déconnexion
-        </button>
+          {getStatusLabel(booking.status)}
+        </span>
       </div>
+      <div style={{ display: 'flex', gap: '16px', marginBottom: '12px' }}>
+        <span style={{ color: '#666666', fontSize: '13px', fontFamily: "'Inter', sans-serif" }}>
+          📅 {booking.date ?? '—'}
+        </span>
+        <span style={{ color: '#666666', fontSize: '13px', fontFamily: "'Inter', sans-serif" }}>
+          🕐 {booking.timeSlot ?? '—'}
+        </span>
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <span style={{ color: '#E8C89A', fontWeight: 700, fontSize: '16px', fontFamily: "'Inter', sans-serif" }}>
+          {booking.servicePrice ?? 0} CHF
+        </span>
+      </div>
+    </div>
+  );
 
-      <div style={{ padding: '20px' }}>
-        <h2 style={{ fontSize: '24px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.5px', marginBottom: '24px' }}>
-          Mes Réservations
-        </h2>
+  return (
+    <div
+      className="screen-transition"
+      style={{ minHeight: '100dvh', backgroundColor: '#0A0A0A', paddingTop: '56px', paddingBottom: '80px' }}
+    >
+      <GlobalHeader hasNotifications={hasPendingBookings} />
 
-        {isLoading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: '40px' }}>
-            <Loader2 size={24} className="animate-spin" style={{ color: '#E8C89A' }} />
+      <div style={{ padding: '24px 16px 0' }}>
+        <h1
+          style={{
+            color: '#FFFFFF',
+            fontSize: '28px',
+            fontWeight: 700,
+            fontFamily: "'Inter', sans-serif",
+            letterSpacing: '-0.01em',
+            marginBottom: '8px',
+          }}
+        >
+          Mes réservations
+        </h1>
+        <p style={{ color: '#888888', fontSize: '15px', fontFamily: "'Inter', sans-serif", marginBottom: '28px' }}>
+          Gérez vos rendez-vous
+        </p>
+
+        {/* Pending bookings */}
+        {pendingBookings.length > 0 && (
+          <div style={{ marginBottom: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <span className="green-dot-pulse" style={{ backgroundColor: '#E8C89A' }} />
+              <span
+                style={{
+                  color: '#E8C89A',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  fontFamily: "'Inter', sans-serif",
+                  letterSpacing: '2px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                EN ATTENTE
+              </span>
+            </div>
+            {pendingBookings.map(renderBookingCard)}
           </div>
-        ) : (
-          <>
-            <Section title="En attente" count={pendingBookings.length}>
-              {pendingBookings.length === 0 ? (
-                <EmptyState message="Aucune réservation en attente" />
-              ) : (
-                pendingBookings.map((b) => <BookingCard key={b.id} booking={b} status="pending" />)
-              )}
-            </Section>
-
-            <Section title="Confirmées" count={confirmedBookings.length}>
-              {confirmedBookings.length === 0 ? (
-                <EmptyState message="Aucune réservation confirmée" />
-              ) : (
-                confirmedBookings.map((b) => <BookingCard key={b.id} booking={b} status="confirmed" />)
-              )}
-            </Section>
-
-            {cancelledBookings.length > 0 && (
-              <Section title="Annulées" count={cancelledBookings.length}>
-                {cancelledBookings.map((b) => <BookingCard key={b.id} booking={b} status="cancelled" />)}
-              </Section>
-            )}
-
-            {!bookings?.length && (
-              <div style={{ background: '#1A1A1A', borderRadius: '16px', padding: '24px', textAlign: 'center', border: '1px solid #222' }}>
-                <p style={{ color: '#666', fontSize: '14px', marginBottom: '16px' }}>
-                  Aucune réservation pour le moment
-                </p>
-                <button
-                  onClick={() => navigate('explorer')}
-                  style={{ background: '#E8C89A', border: 'none', borderRadius: '10px', padding: '10px 20px', color: '#0a0a0a', fontWeight: 700, cursor: 'pointer', fontSize: '13px' }}
-                >
-                  Explorer les professionnels
-                </button>
-              </div>
-            )}
-          </>
         )}
-      </div>
-    </div>
-  );
-}
 
-function Section({ title, count, children }: { title: string; count: number; children: React.ReactNode }) {
-  return (
-    <div style={{ marginBottom: '32px' }}>
-      <h3 style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#666', marginBottom: '12px' }}>
-        {title} ({count})
-      </h3>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>{children}</div>
-    </div>
-  );
-}
-
-function EmptyState({ message }: { message: string }) {
-  return (
-    <div style={{ background: '#1A1A1A', borderRadius: '12px', padding: '20px', textAlign: 'center', color: '#444', fontSize: '13px', border: '1px solid #222' }}>
-      {message}
-    </div>
-  );
-}
-
-function BookingCard({ booking, status }: { booking: { id: string; serviceId: string; date: string; timeSlot: string; totalPrice: bigint }; status: string }) {
-  const statusInfo = STATUS_LABELS[status] ?? STATUS_LABELS.pending;
-
-  return (
-    <div style={{ background: '#1A1A1A', borderRadius: '16px', padding: '16px', border: '1px solid #222' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '10px' }}>
-        <div>
-          <div style={{ fontWeight: 700, fontSize: '15px', marginBottom: '4px' }}>{booking.serviceId}</div>
-          <div style={{ fontSize: '13px', color: '#666' }}>{booking.date} à {booking.timeSlot}</div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontWeight: 700, color: '#E8C89A', fontSize: '16px' }}>{Number(booking.totalPrice)} CHF</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', color: statusInfo.color, fontSize: '12px', fontWeight: 600, marginTop: '4px' }}>
-            {statusInfo.icon}
-            {statusInfo.label}
+        {/* Confirmed bookings */}
+        {confirmedBookings.length > 0 && (
+          <div style={{ marginBottom: '28px' }}>
+            <h2 style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 600, fontFamily: "'Inter', sans-serif", marginBottom: '14px' }}>
+              Confirmés
+            </h2>
+            {confirmedBookings.map(renderBookingCard)}
           </div>
+        )}
+
+        {/* Completed bookings */}
+        {completedBookings.length > 0 && (
+          <div style={{ marginBottom: '28px' }}>
+            <h2 style={{ color: '#FFFFFF', fontSize: '18px', fontWeight: 600, fontFamily: "'Inter', sans-serif", marginBottom: '14px' }}>
+              Terminés
+            </h2>
+            {completedBookings.map(renderBookingCard)}
+          </div>
+        )}
+
+        {/* Empty state */}
+        {pendingBookings.length === 0 && confirmedBookings.length === 0 && completedBookings.length === 0 && (
+          <div
+            style={{
+              textAlign: 'center',
+              padding: '60px 24px',
+              color: '#555555',
+              fontFamily: "'Inter', sans-serif",
+            }}
+          >
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>📅</div>
+            <p style={{ fontSize: '18px', color: '#888888', fontWeight: 600, marginBottom: '8px' }}>
+              Aucune réservation
+            </p>
+            <p style={{ fontSize: '14px', marginBottom: '24px' }}>
+              Explorez les pros disponibles et réservez votre premier service
+            </p>
+            <button
+              onClick={() => navigate('explorer')}
+              className="btn-tap"
+              style={{
+                backgroundColor: '#E8C89A',
+                color: '#0A0A0A',
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: '14px',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                border: 'none',
+                borderRadius: '50px',
+                padding: '14px 28px',
+                cursor: 'pointer',
+              }}
+            >
+              Explorer les pros
+            </button>
+          </div>
+        )}
+
+        {/* Logout */}
+        <div style={{ marginTop: '32px', paddingBottom: '16px' }}>
+          <button
+            onClick={handleLogout}
+            className="btn-tap"
+            style={{
+              width: '100%',
+              backgroundColor: 'transparent',
+              color: '#555555',
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 500,
+              fontSize: '14px',
+              border: '1px solid #1F1F1F',
+              borderRadius: '12px',
+              padding: '14px',
+              cursor: 'pointer',
+            }}
+          >
+            Se déconnecter
+          </button>
         </div>
       </div>
-      {status === 'cancelled' && (
-        <div style={{ background: 'rgba(248,113,113,0.08)', border: '1px solid rgba(248,113,113,0.2)', borderRadius: '8px', padding: '10px', fontSize: '12px', color: '#f87171', marginTop: '8px' }}>
-          💳 Remboursement de {Number(booking.totalPrice)} CHF en cours (5-7 jours ouvrables)
-        </div>
-      )}
+
+      <BottomNav activeTab="reservations" hasPendingBookings={hasPendingBookings} />
     </div>
   );
 }

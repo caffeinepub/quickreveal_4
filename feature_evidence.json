@@ -2,8 +2,8 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-implement-internet-identity-authentication-with-a-centered-nexus-logo-a-single-sign-in-button-and-subtitle-text-secure-authentication-face-id-fingerprint-webauthn-after-login-route-the-user-to-role-selection",
-      "featureTitle": "Implement Internet Identity authentication with a centered NEXUS logo, a single 'Sign In' button, and subtitle text 'Secure authentication — Face ID / Fingerprint / WebAuthn'. After login, route the user to role selection.",
+      "featureId": "feature-redesign-the-login-splash-screen-with-a-full-screen-0a0a0a-background-display-a-single-typographic-nexus-logo-using-inter-black-nexus-in-white-ffffff-at-52px-with-letter-spacing-2px-followed-by-a-period-in-electric-blue-4f6ef7-at-60px-below-the-logo-show-the-tagline-services-domicile-premium-in-888888-italic-16px-with-16px-margin-add-a-1px-golden-horizontal-separator-60px-wide-centered-with-32px-margin-render-a-pill-button-se-connecter-with-background-e8c89a-text-0a0a0a-bold-16px-tracking-2px-uppercase-border-radius-50px-85-max-width-56px-height-shadow-0-8px-32px-rgba-232-200-154-0-3-and-scale-0-97-brightness-1-1-on-tap-below-the-button-display-one-line-face-id-empreinte-webauthn-in-555555-12px-centered-at-the-very-bottom-of-the-screen-chf-suisse-romande-41-in-333333-11px-remove-any-image-logo-asset-and-eliminate-duplicate-nexus-text-occurrences",
+      "featureTitle": "Redesign the login/splash screen with a full-screen #0A0A0A background. Display a single typographic NEXUS logo using Inter Black: 'NEXUS' in white #FFFFFF at 52px with letter-spacing -2px, followed by a period '.' in electric blue #4F6EF7 at 60px. Below the logo, show the tagline 'Services à domicile premium' in #888888 italic 16px with 16px margin. Add a 1px golden horizontal separator 60px wide centered with 32px margin. Render a pill button 'SE CONNECTER' with background #E8C89A, text #0A0A0A Bold 16px tracking 2px uppercase, border-radius 50px, 85% max-width, 56px height, shadow 0 8px 32px rgba(232,200,154,0.3), and scale(0.97)+brightness(1.1) on tap. Below the button, display one line: '🔒 Face ID · Empreinte · WebAuthn' in #555555 12px centered. At the very bottom of the screen: 'CHF · Suisse romande · +41' in #333333 11px. Remove any image/logo asset and eliminate duplicate NEXUS text occurrences.",
       "files": [
         "frontend/src/components/Splash.tsx"
       ],
@@ -24,12 +24,14 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-a-role-selection-screen-after-login-with-two-options-i-m-looking-for-a-service-client-and-i-offer-a-service-pro-client-path-triggers-simulated-otp-phone-verification-code-1234-accepted-30s-timer-never-re-asked-after-first-verification-badge-phone-verified-stored-pro-path-opens-the-pro-onboarding-modal-immediately",
-      "featureTitle": "Implement a role selection screen after login with two options: 'I'm looking for a service' (Client) and 'I offer a service' (Pro). Client path triggers simulated OTP phone verification (code 1234 accepted, 30s timer, never re-asked after first verification, badge '✅ Phone verified' stored). Pro path opens the Pro onboarding modal immediately.",
+      "featureId": "feature-implement-a-fixed-global-header-displayed-on-all-authenticated-screens-background-0a0a0a-with-border-bottom-1px-1f1f1f-left-side-nexus-logo-in-the-same-style-as-the-login-screen-but-at-24px-white-bold-blue-period-4f6ef7-right-side-a-notification-bell-with-a-red-pulsing-badge-showing-unread-count-and-a-circular-32px-avatar-showing-the-user-s-initials-with-a-dark-background-remove-the-mes-r-sa-button-from-the-header",
+      "featureTitle": "Implement a fixed global header displayed on all authenticated screens. Background #0A0A0A with border-bottom 1px #1F1F1F. Left side: NEXUS logo in the same style as the login screen but at 24px (white Bold + blue period #4F6EF7). Right side: a notification bell 🔔 with a red pulsing badge showing unread count, and a circular 32px avatar showing the user's initials with a dark background. Remove the 'Mes résa' button from the header.",
       "files": [
-        "frontend/src/components/OTPVerification.tsx",
-        "frontend/src/components/RoleSelection.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/ClientDashboard.tsx",
+        "frontend/src/components/Explorer.tsx",
+        "frontend/src/components/GlobalHeader.tsx",
+        "frontend/src/components/NexusOS.tsx",
+        "frontend/src/components/ProviderDetail.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -48,10 +50,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-the-pro-onboarding-modal-with-title-launch-my-service-listing-5-benefits-visible-profile-instant-bookings-nexus-pay-real-time-notifications-zero-commission-for-7-days-a-start-7-days-free-cta-and-a-not-now-option",
-      "featureTitle": "Implement the Pro onboarding modal with title 'LAUNCH MY SERVICE', listing 5 benefits (visible profile, instant bookings, NEXUS PAY, real-time notifications, zero commission for 7 days), a 'Start 7 days free' CTA, and a 'Not now' option.",
+      "featureId": "feature-redesign-the-explorer-screen-search-bar-background-1a1a1a-border-1px-2a2a2a-a-golden-pin-icon-on-the-left-placeholder-votre-ville-in-555-dropdown-of-swiss-romande-cities-on-tap-and-a-50-km-golden-pill-on-the-right-that-opens-a-distance-slider-on-tap",
+      "featureTitle": "Redesign the Explorer screen search bar: background #1A1A1A, border 1px #2A2A2A, a golden pin icon on the left, placeholder 'Votre ville...' in #555, dropdown of Swiss Romande cities on tap, and a '≤ 50 km' golden pill on the right that opens a distance slider on tap.",
       "files": [
-        "frontend/src/components/ProOnboardingModal.tsx"
+        "frontend/src/components/Explorer.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -70,11 +72,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-build-the-pro-profile-builder-espace-pro-with-the-following-sections-in-order-a-identity-cover-photo-1200-400px-drag-drop-circular-profile-photo-150-150px-artist-brand-name-slogan-80-chars-with-counter-professional-bio-500-chars-with-counter-category-selector-barber-coiffure-esth-tique-massage-that-auto-loads-service-presets-on-selection-city-selector-from-the-10-swiss-romande-cities-geneva-lausanne-fribourg-neuch-tel-sion-montreux-yverdon-nyon-morges-sierre-with-intervention-radius-slider-1-50-km-language-badges-fr-en-pt-es-ar-phone-field-hidden-from-clients-b-revolut-payment-setup-input-for-revolut-username-or-41-phone-validate-my-revolut-button-that-saves-and-shows-badge-revolut-verified-marked-as-required-before-publication-c-service-catalogue-with-category-presets-auto-loaded-each-service-editable-name-price-duration-2-before-after-photo-slots-badge-selector-popular-new-promo-delete-reorder-and-add-custom-service-d-gallery-with-minimum-3-photos-drag-drop-reordering-starred-primary-photo-e-availability-grid-mon-sun-with-time-slots-per-day-available-unavailable-toggle-per-day-minimum-lead-time-selector-1h-2h-24h-48h-i-travel-to-the-client-toggle-f-flash-mode-toggle-with-auto-disable-after-4h-and-available-now-messaging-g-reputation-score-read-only-display-average-rating-response-time-acceptance-rate-completed-services-publication-button-validates-revolut-set-min-3-photos-min-1-service-if-incomplete-shows-red-checklist-if-complete-opens-subscription-modal",
-      "featureTitle": "Build the Pro profile builder (Espace Pro) with the following sections in order: (A) Identity — cover photo 1200×400px drag & drop, circular profile photo 150×150px, artist/brand name, slogan (80 chars with counter), professional bio (500 chars with counter), category selector (Barber / Coiffure / Esthétique / Massage) that auto-loads service presets on selection, city selector from the 10 Swiss romande cities (Geneva, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre) with intervention radius slider 1–50 km, language badges (FR/EN/PT/ES/AR), phone field (hidden from clients). (B) Revolut payment setup — input for @revolut-username or +41 phone, 'Validate my Revolut' button that saves and shows badge '💳 Revolut verified ✅', marked as required before publication. (C) Service catalogue with category presets auto-loaded, each service editable (name, price, duration), 2 before/after photo slots, badge selector (Popular/New/Promo), delete/reorder, and '+ Add custom service'. (D) Gallery with minimum 3 photos, drag & drop reordering, starred primary photo. (E) Availability grid Mon–Sun with time slots per day, available/unavailable toggle per day, minimum lead time selector (1h/2h/24h/48h), 'I travel to the client' toggle. (F) Flash mode toggle with auto-disable after 4h and 'Available NOW' messaging. (G) Reputation score read-only display (average rating, response time, acceptance rate, completed services). Publication button validates: Revolut set + min 3 photos + min 1 service; if incomplete shows red checklist; if complete opens subscription modal.",
+      "featureId": "feature-redesign-the-explorer-category-filters-as-horizontally-scrollable-pills-with-no-visible-scrollbar-active-pill-background-e8c89a-text-0a0a0a-bold-inactive-pill-background-1a1a1a-text-888-border-1px-2a2a2a-all-pills-border-radius-50px-padding-10px-20px-order-tous-flash-barber-coiffure-esth-tique-massage",
+      "featureTitle": "Redesign the Explorer category filters as horizontally scrollable pills with no visible scrollbar. Active pill: background #E8C89A, text #0A0A0A Bold. Inactive pill: background #1A1A1A, text #888, border 1px #2A2A2A. All pills: border-radius 50px, padding 10px 20px. Order: [Tous] [⚡Flash] [✂️Barber] [💇Coiffure] [💅Esthétique] [🤲Massage].",
       "files": [
-        "frontend/src/components/Builder.tsx",
-        "frontend/src/utils/cityData.ts"
+        "frontend/src/components/Explorer.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -93,11 +94,32 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-the-subscription-modal-full-screen-shown-before-profile-publication-display-7-days-free-then-19-90-chf-month-cancellable-anytime-list-6-included-benefits-billing-email-input-simulated-pay-via-revolut-button-with-3s-auto-success-activate-my-free-trial-cta-on-activation-show-golden-confetti-for-3-seconds-display-success-message-you-are-live-clients-around-you-can-already-see-your-profile-show-view-my-client-profile-button-add-free-trial-day-7-banner-in-the-pro-dashboard-and-schedule-a-day-1-notification-your-trial-expires-tomorrow",
-      "featureTitle": "Implement the subscription modal (full-screen) shown before profile publication: display '🎁 7 DAYS FREE then 19.90 CHF/month — Cancellable anytime', list 6 included benefits, billing email input, simulated 'Pay via Revolut' button with 3s auto-success, 'ACTIVATE MY FREE TRIAL' CTA. On activation: show golden confetti for 3 seconds, display success message 'You are live! Clients around you can already see your profile.', show 'View my client profile' button, add 'Free trial — Day 7' banner in the Pro dashboard, and schedule a Day -1 notification 'Your trial expires tomorrow'.",
+      "featureId": "feature-add-a-disponibles-maintenant-flash-section-in-the-explorer-above-the-main-pro-list-title-a-green-pulsing-dot-disponibles-maintenant-text-in-22c55e-13px-tracking-2px-display-horizontally-scrollable-flash-pro-cards-160px-wide-200px-tall-16px-radius-full-card-cover-photo-black-gradient-overlay-at-the-bottom-a-green-flash-badge-background-22c55e-white-text-radius-50px-padding-10px-12px-in-the-top-left-pro-name-in-white-bold-at-the-bottom-and-city-in-ccc-12px",
+      "featureTitle": "Add a 'DISPONIBLES MAINTENANT' Flash section in the Explorer above the main pro list. Title: a green pulsing dot + 'DISPONIBLES MAINTENANT' text in #22C55E, 13px, tracking 2px. Display horizontally scrollable flash pro cards: 160px wide, 200px tall, 16px radius, full-card cover photo, black gradient overlay at the bottom, a green 'FLASH' badge (background #22C55E, white text, radius 50px, padding 10px 12px) in the top-left, pro name in white Bold at the bottom, and city in #CCC 12px.",
       "files": [
-        "frontend/src/components/SubscriptionScreen.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/Explorer.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-5"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-redesign-the-main-pro-cards-in-the-explorer-list-each-card-full-width-cover-photo-180px-height-object-fit-cover-green-flash-badge-top-left-semi-transparent-revolut-badge-top-right-background-rgba-0-0-0-0-6-info-zone-background-111111-pro-name-bold-18px-white-with-rating-right-aligned-category-in-888-14px-with-review-count-location-city-and-response-time-in-666-12px-separator-line-price-partir-de-x-chf-in-e8c89a-bold-and-a-golden-r-server-button-card-border-radius-20px-shadow-0-4px-24px-rgba-0-0-0-0-4-margin-between-cards-16px",
+      "featureTitle": "Redesign the main pro cards in the Explorer list. Each card: full-width cover photo 180px height object-fit cover, green FLASH badge top-left, semi-transparent 'Revolut ✅' badge top-right (background rgba(0,0,0,0.6)), info zone background #111111, pro name Bold 18px white with ⭐ rating right-aligned, category in #888 14px with review count, location 📍city and ⚡response time in #666 12px, separator line, price 'À partir de X CHF' in #E8C89A Bold, and a golden 'RÉSERVER ⚡' button. Card border-radius 20px, shadow 0 4px 24px rgba(0,0,0,0.4), margin between cards 16px.",
+      "files": [
+        "frontend/src/components/Explorer.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -116,11 +138,13 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-build-the-explorer-screen-client-side-with-header-what-service-are-you-looking-for-horizontally-scrollable-category-filters-near-me-barber-coiffure-esth-tique-massage-flash-price-distance-slider-1-50-km-city-selector-from-the-10-swiss-romande-cities-client-sets-their-city-distance-is-calculated-by-city-zone-proximity-matching-not-gps-available-now-horizontal-scroll-section-showing-flash-active-pros-with-pulsing-green-badge-main-pro-card-grid-with-skeleton-loading-animations-each-pro-card-shows-cover-photo-flash-badge-if-active-revolut-verified-badge-circular-profile-photo-name-category-star-rating-with-review-count-city-distance-label-response-time-starting-price-and-book-cta",
-      "featureTitle": "Build the Explorer screen (client side) with: header 'What service are you looking for?', horizontally scrollable category filters (📍 Near me, Barber, Coiffure, Esthétique, Massage, ⚡ Flash, Price ↕), distance slider 1–50 km, city selector from the 10 Swiss romande cities (client sets their city; distance is calculated by city-zone proximity matching, not GPS), 'Available NOW ⚡' horizontal scroll section showing Flash-active pros with pulsing green badge, main pro card grid with skeleton loading animations. Each pro card shows: cover photo, FLASH badge if active, Revolut verified badge, circular profile photo, name, category, star rating with review count, city distance label, response time, starting price, and '⚡ BOOK' CTA.",
+      "featureId": "feature-add-a-fixed-bottom-navigation-bar-for-mobile-background-0f0f0f-border-top-1px-1f1f1f-height-64px-plus-ios-safe-area-padding-four-tabs-explorer-r-servations-messages-profil-active-tab-icon-text-in-e8c89a-inactive-tab-icon-text-in-555555-show-a-red-badge-on-r-servations-when-there-are-new-pending-bookings-wire-each-tab-to-its-corresponding-screen",
+      "featureTitle": "Add a fixed bottom navigation bar for mobile. Background #0F0F0F, border-top 1px #1F1F1F, height 64px plus iOS safe area padding. Four tabs: [🔍 Explorer] [📅 Réservations] [💬 Messages] [👤 Profil]. Active tab: icon + text in #E8C89A. Inactive tab: icon + text in #555555. Show a red badge on Réservations when there are new/pending bookings. Wire each tab to its corresponding screen.",
       "files": [
+        "frontend/src/components/BottomNav.tsx",
+        "frontend/src/components/ClientDashboard.tsx",
         "frontend/src/components/Explorer.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/NexusOS.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -139,10 +163,38 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-implement-the-6-step-flash-booking-flow-step-1-service-selection-1-tap-step-2-time-slot-selection-with-quick-options-in-1h-in-2h-tonight-tomorrow-plus-full-calendar-step-3-address-input-manual-text-field-with-optional-note-to-the-pro-step-4-booking-summary-recap-service-pro-datetime-address-price-with-edit-confirm-buttons-step-5-nexus-pay-screen-showing-amount-escrow-guarantee-messaging-your-money-is-protected-released-to-pro-after-service-refunded-if-no-show-animated-revolut-qr-code-placeholder-pay-via-revolut-button-with-3s-auto-success-simulation-step-6-post-payment-confirmation-with-pulsing-green-circle-message-request-sent-to-pro-name-the-pro-has-10-minutes-to-confirm-and-a-10-00-countdown-timer",
-      "featureTitle": "Implement the 6-step Flash booking flow: Step 1 — service selection (1 tap); Step 2 — time slot selection with quick options (In 1h, In 2h, Tonight, Tomorrow) plus full calendar; Step 3 — address input (manual text field) with optional note to the pro; Step 4 — booking summary recap (service, pro, datetime, address, price) with Edit / Confirm buttons; Step 5 — NEXUS PAY screen showing amount, escrow guarantee messaging ('Your money is protected / Released to pro after service / Refunded if no-show'), animated Revolut QR code placeholder, 'Pay via Revolut' button with 3s auto-success simulation; Step 6 — post-payment confirmation with pulsing green circle, message 'Request sent to [Pro Name]', '⏱️ The pro has 10 minutes to confirm', and a 10:00 countdown timer.",
+      "featureId": "feature-apply-a-global-inter-typography-system-across-the-entire-app-import-inter-from-google-fonts-apply-h1-28px-bold-ffffff-tracking-1px-h2-22px-semibold-ffffff-body-15px-regular-cccccc-caption-12px-regular-888888-labels-11px-semibold-888888-tracking-2px-uppercase-prices-18px-bold-e8c89a-buttons-14px-bold-0a0a0a-tracking-1px-uppercase-replace-all-existing-font-family-declarations-with-inter",
+      "featureTitle": "Apply a global Inter typography system across the entire app. Import Inter from Google Fonts. Apply: H1 28px Bold #FFFFFF tracking -1px; H2 22px SemiBold #FFFFFF; Body 15px Regular #CCCCCC; Caption 12px Regular #888888; Labels 11px SemiBold #888888 tracking 2px uppercase; Prices 18px Bold #E8C89A; Buttons 14px Bold #0A0A0A tracking 1px uppercase. Replace all existing font-family declarations with Inter.",
       "files": [
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0"
+      ],
+      "testIds": [
+        "REQ-8"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-implement-micro-animations-across-the-app-1-all-buttons-and-tappable-cards-have-active-tap-state-scale-0-96-with-150ms-ease-transition-2-cards-show-a-subtle-elevated-box-shadow-on-hover-tap-3-flash-badges-have-an-infinite-css-pulse-animation-opacity-1-0-6-1-1-5s-4-red-notification-badges-have-a-red-pulse-animation-5-skeleton-loading-states-use-a-golden-shimmer-animation-on-1a1a1a-backgrounds-6-screen-page-transitions-use-a-200ms-fade",
+      "featureTitle": "Implement micro-animations across the app: (1) All buttons and tappable cards have active/tap state scale(0.96) with 150ms ease transition. (2) Cards show a subtle elevated box-shadow on hover/tap. (3) FLASH badges have an infinite CSS pulse animation (opacity 1→0.6→1, 1.5s). (4) Red notification badges have a red pulse animation. (5) Skeleton loading states use a golden shimmer animation on #1A1A1A backgrounds. (6) Screen/page transitions use a 200ms fade.",
+      "files": [
+        "frontend/src/components/Explorer.tsx",
+        "frontend/src/components/GlobalHeader.tsx",
+        "frontend/src/components/ScreenRouter.tsx",
+        "frontend/src/components/Splash.tsx",
+        "frontend/src/index.css",
+        "frontend/tailwind.config.js"
       ],
       "components": [
         "authorization@4.0.0",
@@ -161,11 +213,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-build-the-radar-pro-screen-pro-dashboard-with-react-query-polling-every-10-seconds-include-pulsing-red-badge-on-the-navigation-icon-when-new-pending-requests-exist-tabs-pending-confirmed-history-each-pending-request-card-shows-client-name-rating-service-name-guaranteed-amount-appointment-datetime-distance-from-pro-10-00-countdown-timer-in-red-accept-and-decline-action-buttons-and-a-message-to-client-field-on-accept-mark-booking-confirmed-show-confirmed-send-client-notification-studio-l-confirmed-service-in-xh-ym-show-pro-countdown-to-client-arrival-on-decline-or-timeout-auto-route-to-next-available-pro-show-client-searching-for-another-pro",
-      "featureTitle": "Build the Radar Pro screen (Pro dashboard) with React Query polling every 10 seconds. Include: pulsing red badge on the navigation icon when new pending requests exist, tabs (Pending 🔴 / Confirmed / History). Each pending request card shows: client name + rating, service name + guaranteed amount, appointment datetime, distance from pro, 10:00 countdown timer in red, Accept (✅) and Decline (❌) action buttons, and a message-to-client field. On Accept: mark booking confirmed, show 'Confirmed ✅', send client notification 'Studio Élé confirmed! Service in Xh Ym 🎉', show pro countdown to client arrival. On Decline or timeout: auto-route to next available pro, show client 'Searching for another pro...'.",
+      "featureId": "feature-build-or-fully-redesign-the-pro-detail-screen-client-view-layout-full-width-cover-photo-at-220px-height-circular-80px-profile-photo-with-3px-golden-border-overlapping-the-cover-by-40px-pro-name-in-24px-bold-white-with-48px-margin-top-slogan-in-14px-italic-888-inline-badges-flash-revolut-rating-n-avis-a-score-bar-background-1a1a1a-radius-12px-padding-16px-showing-response-time-acceptance-rate-and-total-prestations-in-three-columns-horizontally-scrollable-service-cards-background-1a1a1a-radius-12px-showing-service-name-bold-white-duration-price-in-gold-optional-before-after-photos-and-badges-populaire-nouveau-promo-a-sticky-bottom-cta-button-r-server-maintenant-x-chf-with-background-e8c89a-text-0a0a0a-bold-full-width-56px-height-radius-0-border-top-1px-rgba-232-200-154-0-3",
+      "featureTitle": "Build or fully redesign the pro detail screen (client view). Layout: full-width cover photo at 220px height; circular 80px profile photo with 3px golden border overlapping the cover by -40px; pro name in 24px Bold white with 48px margin-top; slogan in 14px italic #888; inline badges [⚡ Flash] [💳 Revolut ✅] [⭐ rating] [N avis]; a score bar (background #1A1A1A, radius 12px, padding 16px) showing ⚡response time, ✅ acceptance rate, and 🎯 total prestations in three columns; horizontally scrollable service cards (background #1A1A1A, radius 12px) showing service name Bold white, duration + price in gold, optional before/after photos, and badges [Populaire] [Nouveau] [Promo]; a sticky bottom CTA button '⚡ RÉSERVER MAINTENANT — X CHF' with background #E8C89A, text #0A0A0A Bold, full width, 56px height, radius 0, border-top 1px rgba(232,200,154,0.3).",
       "files": [
-        "frontend/src/components/NexusOS.tsx",
-        "frontend/src/hooks/useQueries.ts"
+        "frontend/src/components/ProviderDetail.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -180,169 +231,6 @@
       ],
       "testIds": [
         "REQ-10"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-the-live-status-shared-timeline-visible-to-both-client-and-pro-showing-booking-lifecycle-steps-request-sent-pro-accepted-payment-secured-service-in-xh-ym-confirm-service-completed-leave-a-review-24h-after-confirmed-completion-prompt-both-parties-client-gets-all-good-report-a-problem-pro-gets-the-same-on-simulate-fund-release-on-show-48h-nexus-mediation-if-no-response-after-48h-auto-release-funds-simulated",
-      "featureTitle": "Implement the Live Status shared timeline visible to both client and pro, showing booking lifecycle steps: Request sent, Pro accepted, Payment secured, Service in Xh Ym, Confirm service completed, Leave a review. 24h after confirmed completion, prompt both parties: client gets '✅ All good!' / '⚠️ Report a problem', pro gets the same. On ✅: simulate fund release. On ⚠️: show '48h NEXUS mediation'. If no response after 48h: auto-release funds (simulated).",
-      "files": [
-        "frontend/src/components/ClientDashboard.tsx",
-        "frontend/src/components/NexusOS.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-11"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-build-the-wallet-pro-screen-showing-available-balance-vs-escrowed-balance-simulated-transfer-to-my-revolut-button-with-visual-confirmation-full-transaction-history-table-service-client-amount-date-status-stats-summary-weekly-monthly-total-and-a-monthly-revenue-bar-chart",
-      "featureTitle": "Build the Wallet Pro screen showing: available balance vs. escrowed balance (🔒), simulated 'Transfer to my Revolut' button with visual confirmation, full transaction history table (service / client / amount / date / status), stats summary (weekly / monthly / total), and a monthly revenue bar chart.",
-      "files": [
-        "frontend/src/components/NexusOS.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-12"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-the-double-review-system-24h-after-a-confirmed-service-prompt-the-client-to-leave-a-public-5-star-rating-comment-for-the-pro-and-prompt-the-pro-to-rate-the-client-internally-5-star-not-shown-publicly-automatically-suspend-a-pro-from-the-explorer-if-their-average-rating-drops-below-3-5",
-      "featureTitle": "Implement the double review system: 24h after a confirmed service, prompt the client to leave a public 5-star rating + comment for the pro, and prompt the pro to rate the client internally (5-star, not shown publicly). Automatically suspend a pro from the Explorer if their average rating drops below 3.5.",
-      "files": [
-        "frontend/src/components/ClientDashboard.tsx",
-        "frontend/src/components/Explorer.tsx",
-        "frontend/src/components/NexusOS.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-13"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-implement-the-notification-center-bell-icon-in-the-top-right-with-a-red-badge-showing-unread-count-a-dropdown-panel-with-notification-history-notification-types-flash-request-received-booking-confirmed-payment-received-released-new-review-dispute-opened-service-reminder-2h-before-simulated-sms-display-show-sms-sent-to-41-in-app-mark-all-as-read-on-open",
-      "featureTitle": "Implement the Notification Center: bell icon 🔔 in the top-right with a red badge showing unread count, a dropdown/panel with notification history. Notification types: ⚡ Flash request received, ✅ Booking confirmed, 💰 Payment received/released, ⭐ New review, ⚠️ Dispute opened, 📅 Service reminder 2h before, 📱 Simulated SMS display (show 'SMS sent to +41...' in-app). Mark all as read on open.",
-      "files": [
-        "frontend/src/components/NotificationCenter.tsx",
-        "frontend/src/hooks/useQueries.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-14"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-seed-6-demo-pro-profiles-in-the-backend-at-canister-initialization-only-if-no-profiles-exist-profiles-1-studio-blade-barber-lausanne-rating-4-9-47-reviews-flash-active-2-barberking-geneva-barber-geneva-rating-4-7-23-reviews-3-studio-l-coiffure-geneva-rating-4-8-31-reviews-4-atelier-fribourg-hair-coiffure-fribourg-rating-4-6-12-reviews-5-glow-by-sofia-esth-tique-lausanne-rating-4-8-19-reviews-6-zen-touch-massage-geneva-rating-4-9-38-reviews-each-profile-has-pre-filled-services-from-their-category-presets-rating-between-4-6-4-9-between-12-47-fake-reviews-a-cover-photo-generated-image-assigned-and-all-required-fields-set-so-they-appear-as-published-profiles-in-the-explorer",
-      "featureTitle": "Seed 6 demo pro profiles in the backend at canister initialization (only if no profiles exist). Profiles: (1) 'Studio Blade' — Barber, Lausanne, rating 4.9, 47 reviews, Flash ACTIVE; (2) 'BarberKing Geneva' — Barber, Geneva, rating 4.7, 23 reviews; (3) 'Studio Élé' — Coiffure, Geneva, rating 4.8, 31 reviews; (4) 'Atelier Fribourg Hair' — Coiffure, Fribourg, rating 4.6, 12 reviews; (5) 'Glow by Sofia' — Esthétique, Lausanne, rating 4.8, 19 reviews; (6) 'Zen Touch' — Massage, Geneva, rating 4.9, 38 reviews. Each profile has: pre-filled services from their category presets, rating between 4.6–4.9, between 12–47 fake reviews, a cover photo (generated image assigned), and all required fields set so they appear as published profiles in the Explorer.",
-      "files": [
-        "frontend/src/components/Explorer.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-15"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-apply-the-nexus-design-system-consistently-across-all-screens-background-0a0a0a-gold-accent-e8c89a-cards-1a1a1a-with-16px-border-radius-primary-text-ffffff-secondary-text-888888-success-green-22c55e-urgent-red-ef4444-pulsing-animated-green-badge-for-flash-status-skeleton-loading-animations-on-all-data-fetching-screens-200ms-ease-in-out-transitions-golden-confetti-on-key-success-events-mobile-first-layout-with-max-width-430px-inter-font",
-      "featureTitle": "Apply the NEXUS design system consistently across all screens: background #0A0A0A, gold accent #E8C89A, cards #1A1A1A with 16px border radius, primary text #FFFFFF, secondary text #888888, success green #22C55E, urgent red #EF4444, pulsing animated green badge for Flash status, skeleton loading animations on all data-fetching screens, 200ms ease-in-out transitions, golden confetti on key success events, mobile-first layout with max-width 430px, Inter font.",
-      "files": [
-        "frontend/src/index.css",
-        "frontend/src/utils/confetti.ts",
-        "frontend/tailwind.config.js"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-16"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-replace-all-gps-geolocation-logic-navigator-geolocation-haversine-calculations-nominatim-geocoding-with-a-city-based-selection-system-use-a-fixed-list-of-10-swiss-romande-cities-geneva-lausanne-fribourg-neuch-tel-sion-montreux-yverdon-nyon-morges-sierre-pros-select-their-city-during-onboarding-clients-select-their-city-in-the-explorer-distance-between-client-and-pro-is-determined-by-a-city-zone-proximity-map-e-g-lausanne-morges-nyon-are-nearby-geneva-nyon-are-nearby-fribourg-neuch-tel-are-nearby-remove-all-imports-and-references-to-usegeolocation-ts-haversine-ts-and-nominatim-ts-from-explorer-and-builder",
-      "featureTitle": "Replace all GPS/geolocation logic (navigator.geolocation, Haversine calculations, Nominatim geocoding) with a city-based selection system. Use a fixed list of 10 Swiss romande cities: Geneva, Lausanne, Fribourg, Neuchâtel, Sion, Montreux, Yverdon, Nyon, Morges, Sierre. Pros select their city during onboarding. Clients select their city in the Explorer. Distance between client and pro is determined by a city-zone proximity map (e.g., Lausanne ↔ Morges ↔ Nyon are 'nearby'; Geneva ↔ Nyon are 'nearby'; Fribourg ↔ Neuchâtel are 'nearby'). Remove all imports and references to useGeolocation.ts, haversine.ts, and nominatim.ts from Explorer and Builder.",
-      "files": [
-        "frontend/src/components/Builder.tsx",
-        "frontend/src/components/Explorer.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0"
-      ],
-      "testIds": [
-        "REQ-17"
       ],
       "confidence": "high"
     }

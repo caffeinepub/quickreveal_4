@@ -6,63 +6,240 @@
 
 @layer base {
   :root {
-    --background: oklch(0.08 0.005 240);
-    --foreground: oklch(0.98 0.002 240);
-    --card: oklch(0.12 0.005 240);
-    --card-foreground: oklch(0.98 0.002 240);
-    --popover: oklch(0.12 0.005 240);
-    --popover-foreground: oklch(0.98 0.002 240);
+    --background: oklch(0.08 0 0);
+    --foreground: oklch(0.92 0 0);
+    --card: oklch(0.11 0 0);
+    --card-foreground: oklch(0.92 0 0);
+    --popover: oklch(0.11 0 0);
+    --popover-foreground: oklch(0.92 0 0);
     --primary: oklch(0.82 0.08 75);
-    --primary-foreground: oklch(0.08 0.005 240);
-    --secondary: oklch(0.18 0.005 240);
-    --secondary-foreground: oklch(0.98 0.002 240);
-    --muted: oklch(0.18 0.005 240);
-    --muted-foreground: oklch(0.55 0.01 240);
+    --primary-foreground: oklch(0.08 0 0);
+    --secondary: oklch(0.15 0 0);
+    --secondary-foreground: oklch(0.92 0 0);
+    --muted: oklch(0.18 0 0);
+    --muted-foreground: oklch(0.55 0 0);
     --accent: oklch(0.82 0.08 75);
-    --accent-foreground: oklch(0.08 0.005 240);
+    --accent-foreground: oklch(0.08 0 0);
     --destructive: oklch(0.55 0.22 25);
-    --destructive-foreground: oklch(0.98 0.002 240);
-    --border: oklch(0.22 0.005 240);
-    --input: oklch(0.18 0.005 240);
+    --destructive-foreground: oklch(0.98 0 0);
+    --border: oklch(0.18 0 0);
+    --input: oklch(0.15 0 0);
     --ring: oklch(0.82 0.08 75);
-    --radius: 1rem;
-    --success: oklch(0.65 0.18 145);
-    --urgent: oklch(0.55 0.22 25);
-    --gold: oklch(0.82 0.08 75);
+    --radius: 0.5rem;
+
+    /* NEXUS custom tokens */
+    --nexus-black: #0A0A0A;
+    --nexus-dark: #111111;
+    --nexus-dark-2: #1A1A1A;
+    --nexus-dark-3: #1F1F1F;
+    --nexus-dark-4: #2A2A2A;
+    --nexus-gold: #E8C89A;
+    --nexus-blue: #4F6EF7;
+    --nexus-green: #22C55E;
+    --nexus-text: #CCCCCC;
+    --nexus-muted: #888888;
+    --nexus-subtle: #555555;
+    --nexus-faint: #333333;
   }
 
-  .dark {
-    --background: oklch(0.08 0.005 240);
-    --foreground: oklch(0.98 0.002 240);
-    --card: oklch(0.12 0.005 240);
-    --card-foreground: oklch(0.98 0.002 240);
-    --popover: oklch(0.12 0.005 240);
-    --popover-foreground: oklch(0.98 0.002 240);
-    --primary: oklch(0.82 0.08 75);
-    --primary-foreground: oklch(0.08 0.005 240);
-    --secondary: oklch(0.18 0.005 240);
-    --secondary-foreground: oklch(0.98 0.002 240);
-    --muted: oklch(0.18 0.005 240);
-    --muted-foreground: oklch(0.55 0.01 240);
-    --accent: oklch(0.82 0.08 75);
-    --accent-foreground: oklch(0.08 0.005 240);
-    --destructive: oklch(0.55 0.22 25);
-    --destructive-foreground: oklch(0.98 0.002 240);
-    --border: oklch(0.22 0.005 240);
-    --input: oklch(0.18 0.005 240);
-    --ring: oklch(0.82 0.08 75);
+  * {
+    @apply border-border;
+    box-sizing: border-box;
+  }
+
+  html {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    background-color: var(--nexus-black);
+    color: var(--nexus-text);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -0.01em;
+    line-height: 1.2;
+  }
+
+  h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #FFFFFF;
+    line-height: 1.3;
+  }
+
+  h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #FFFFFF;
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
+@layer components {
+  /* Typography utilities */
+  .text-nexus-h1 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #FFFFFF;
+    letter-spacing: -0.01em;
   }
-  body {
-    @apply bg-background text-foreground;
+
+  .text-nexus-h2 {
+    font-size: 22px;
+    font-weight: 600;
+    color: #FFFFFF;
+  }
+
+  .text-nexus-body {
+    font-size: 15px;
+    font-weight: 400;
+    color: #CCCCCC;
+  }
+
+  .text-nexus-caption {
+    font-size: 12px;
+    font-weight: 400;
+    color: #888888;
+  }
+
+  .text-nexus-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: #888888;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .text-nexus-price {
+    font-size: 18px;
+    font-weight: 700;
+    color: #E8C89A;
+  }
+
+  .text-nexus-btn {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0A0A0A;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* Button tap animation */
+  .btn-tap {
+    transition: transform 150ms ease-out, filter 150ms ease-out;
+    cursor: pointer;
+  }
+
+  .btn-tap:active {
+    transform: scale(0.96);
+  }
+
+  .btn-tap-gold {
+    transition: transform 150ms ease-out, filter 150ms ease-out, box-shadow 150ms ease-out;
+    cursor: pointer;
+  }
+
+  .btn-tap-gold:active {
+    transform: scale(0.97);
+    filter: brightness(1.1);
+  }
+
+  /* Card hover */
+  .card-hover {
+    transition: box-shadow 200ms ease-out, transform 200ms ease-out;
+  }
+
+  .card-hover:hover {
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    transform: translateY(-2px);
+  }
+
+  /* Screen transition */
+  .screen-transition {
+    animation: screenFadeIn 200ms ease-out forwards;
+  }
+
+  /* Skeleton shimmer */
+  .skeleton-shimmer {
+    background: linear-gradient(
+      90deg,
+      #1A1A1A 0%,
+      #2A2420 40%,
+      #E8C89A22 50%,
+      #2A2420 60%,
+      #1A1A1A 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  /* Scrollable without scrollbar */
+  .scroll-no-bar {
+    overflow-x: auto;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scroll-no-bar::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* NEXUS logo style */
+  .nexus-logo-text {
     font-family: 'Inter', sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
+    font-weight: 900;
+    color: #FFFFFF;
+    letter-spacing: -0.02em;
+  }
+
+  .nexus-logo-dot {
+    color: #4F6EF7;
+  }
+
+  /* Gold separator */
+  .gold-separator {
+    width: 60px;
+    height: 1px;
+    background-color: #E8C89A;
+    margin: 0 auto;
+  }
+
+  /* Flash badge pulse */
+  .flash-badge {
+    animation: flashPulse 1.5s ease-in-out infinite;
+  }
+
+  /* Green dot pulse */
+  .green-dot-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #22C55E;
+    animation: greenPulse 1.5s ease-in-out infinite;
+    display: inline-block;
+    flex-shrink: 0;
+  }
+
+  /* Red badge pulse */
+  .red-badge-pulse {
+    animation: redPulse 2s ease-in-out infinite;
+  }
+
+  /* Safe area bottom padding */
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
   }
 }
 
@@ -70,40 +247,46 @@
   .text-gold {
     color: #E8C89A;
   }
-  .bg-gold {
-    background-color: #E8C89A;
+
+  .text-nexus-blue {
+    color: #4F6EF7;
   }
-  .border-gold {
-    border-color: #E8C89A;
+
+  .text-nexus-green {
+    color: #22C55E;
   }
-  .text-nexus-secondary {
-    color: #888888;
-  }
-  .bg-nexus-card {
-    background-color: #1A1A1A;
-  }
-  .bg-nexus-bg {
+
+  .bg-nexus-black {
     background-color: #0A0A0A;
   }
+
+  .bg-nexus-dark {
+    background-color: #111111;
+  }
+
+  .bg-nexus-dark-2 {
+    background-color: #1A1A1A;
+  }
+
+  .border-nexus {
+    border-color: #1F1F1F;
+  }
+
+  .border-nexus-2 {
+    border-color: #2A2A2A;
+  }
 }
 
-/* Flash badge pulse animation */
-@keyframes flash-pulse {
-  0%, 100% {
+/* Keyframe animations */
+@keyframes screenFadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
     opacity: 1;
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
-  }
-  50% {
-    opacity: 0.8;
-    box-shadow: 0 0 0 8px rgba(34, 197, 94, 0);
   }
 }
 
-.flash-pulse {
-  animation: flash-pulse 2s ease-in-out infinite;
-}
-
-/* Skeleton shimmer */
 @keyframes shimmer {
   0% {
     background-position: -200% 0;
@@ -113,133 +296,59 @@
   }
 }
 
-.skeleton-shimmer {
-  background: linear-gradient(
-    90deg,
-    #1A1A1A 25%,
-    #2A2A2A 50%,
-    #1A1A1A 75%
-  );
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
+@keyframes flashPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
 }
 
-/* Pulsing red badge */
-@keyframes red-pulse {
+@keyframes greenPulse {
   0%, 100% {
     opacity: 1;
     transform: scale(1);
   }
   50% {
     opacity: 0.7;
-    transform: scale(1.1);
+    transform: scale(1.2);
   }
 }
 
-.red-pulse {
-  animation: red-pulse 1.5s ease-in-out infinite;
+@keyframes redPulse {
+  0%, 100% {
+    opacity: 1;
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+  }
+  50% {
+    opacity: 0.9;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
+  }
 }
 
-/* Countdown urgent */
-@keyframes countdown-urgent {
-  0%, 100% { color: #EF4444; }
-  50% { color: #FF6B6B; }
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }
 
-.countdown-urgent {
-  animation: countdown-urgent 1s ease-in-out infinite;
-}
-
-/* Confetti container */
-#confetti-canvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-}
-
-/* Smooth transitions */
+/* Scrollbar global hide for mobile feel */
 * {
-  transition-property: color, background-color, border-color, opacity, transform;
-  transition-duration: 200ms;
-  transition-timing-function: ease-in-out;
+  scrollbar-width: thin;
+  scrollbar-color: #2A2A2A transparent;
 }
 
-/* Scrollbar styling */
-::-webkit-scrollbar {
+*::-webkit-scrollbar {
   width: 4px;
   height: 4px;
 }
-::-webkit-scrollbar-track {
-  background: #0A0A0A;
+
+*::-webkit-scrollbar-track {
+  background: transparent;
 }
-::-webkit-scrollbar-thumb {
-  background: #333;
+
+*::-webkit-scrollbar-thumb {
+  background-color: #2A2A2A;
   border-radius: 2px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #E8C89A;
-}
-
-/* Mobile-first max width */
-.nexus-container {
-  max-width: 430px;
-  margin: 0 auto;
-  min-height: 100vh;
-  background-color: #0A0A0A;
-  position: relative;
-}
-
-/* Green pulsing dot */
-@keyframes green-dot-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.6);
-  }
-  70% {
-    box-shadow: 0 0 0 6px rgba(34, 197, 94, 0);
-  }
-}
-
-.green-dot-pulse {
-  animation: green-dot-pulse 2s ease-in-out infinite;
-}
-
-/* Success circle pulse */
-@keyframes success-circle {
-  0% { transform: scale(0.8); opacity: 0; }
-  50% { transform: scale(1.05); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-.success-circle-anim {
-  animation: success-circle 0.6s ease-out forwards;
-}
-
-/* Slide up animation */
-@keyframes slide-up {
-  from {
-    transform: translateY(20px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-.slide-up {
-  animation: slide-up 0.3s ease-out forwards;
-}
-
-/* Fade in */
-@keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-
-.fade-in {
-  animation: fade-in 0.3s ease-out forwards;
 }

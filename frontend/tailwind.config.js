@@ -9,6 +9,10 @@ export default {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+        inter: ['Inter', 'sans-serif'],
+      },
       colors: {
         background: 'hsl(var(--background))',
         foreground: 'hsl(var(--foreground))',
@@ -43,35 +47,35 @@ export default {
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
-        // NEXUS custom tokens
+        // NEXUS design tokens
         nexus: {
-          bg: '#0A0A0A',
-          card: '#1A1A1A',
+          black: '#0A0A0A',
+          dark: '#111111',
+          dark2: '#1A1A1A',
+          dark3: '#1F1F1F',
+          dark4: '#2A2A2A',
           gold: '#E8C89A',
-          white: '#FFFFFF',
-          secondary: '#888888',
-          success: '#22C55E',
-          urgent: '#EF4444',
-          border: '#2A2A2A',
+          blue: '#4F6EF7',
+          green: '#22C55E',
+          text: '#CCCCCC',
+          muted: '#888888',
+          subtle: '#555555',
+          faint: '#333333',
         },
-      },
-      fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        inter: ['Inter', 'sans-serif'],
       },
       borderRadius: {
         lg: 'var(--radius)',
         md: 'calc(var(--radius) - 2px)',
         sm: 'calc(var(--radius) - 4px)',
-        nexus: '16px',
+        pill: '50px',
+        card: '20px',
+        service: '12px',
       },
       boxShadow: {
-        gold: '0 0 20px rgba(232, 200, 154, 0.3)',
-        'gold-sm': '0 0 10px rgba(232, 200, 154, 0.2)',
+        gold: '0 8px 32px rgba(232, 200, 154, 0.3)',
+        'gold-sm': '0 4px 16px rgba(232, 200, 154, 0.2)',
         card: '0 4px 24px rgba(0, 0, 0, 0.4)',
-      },
-      maxWidth: {
-        nexus: '430px',
+        elevated: '0 8px 32px rgba(0, 0, 0, 0.6)',
       },
       keyframes: {
         'accordion-down': {
@@ -83,26 +87,50 @@ export default {
           to: { height: '0' },
         },
         'flash-pulse': {
-          '0%, 100%': { opacity: '1', boxShadow: '0 0 0 0 rgba(34, 197, 94, 0.7)' },
-          '50%': { opacity: '0.8', boxShadow: '0 0 0 8px rgba(34, 197, 94, 0)' },
+          '0%, 100%': { opacity: '1' },
+          '50%': { opacity: '0.6' },
+        },
+        'red-pulse': {
+          '0%, 100%': {
+            opacity: '1',
+            boxShadow: '0 0 0 0 rgba(239, 68, 68, 0.4)',
+          },
+          '50%': {
+            opacity: '0.9',
+            boxShadow: '0 0 0 4px rgba(239, 68, 68, 0)',
+          },
+        },
+        'green-pulse': {
+          '0%, 100%': { opacity: '1', transform: 'scale(1)' },
+          '50%': { opacity: '0.7', transform: 'scale(1.2)' },
         },
         shimmer: {
           '0%': { backgroundPosition: '-200% 0' },
           '100%': { backgroundPosition: '200% 0' },
         },
-        'red-pulse': {
-          '0%, 100%': { opacity: '1', transform: 'scale(1)' },
-          '50%': { opacity: '0.7', transform: 'scale(1.1)' },
+        'screen-fade': {
+          from: { opacity: '0' },
+          to: { opacity: '1' },
         },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
-        'flash-pulse': 'flash-pulse 2s ease-in-out infinite',
-        shimmer: 'shimmer 1.5s infinite',
-        'red-pulse': 'red-pulse 1.5s ease-in-out infinite',
+        'flash-pulse': 'flash-pulse 1.5s ease-in-out infinite',
+        'red-pulse': 'red-pulse 2s ease-in-out infinite',
+        'green-pulse': 'green-pulse 1.5s ease-in-out infinite',
+        shimmer: 'shimmer 2s infinite',
+        'screen-fade': 'screen-fade 0.2s ease-out',
+      },
+      transitionDuration: {
+        150: '150ms',
+        200: '200ms',
       },
     },
   },
-  plugins: [require('tailwindcss-animate'), require('@tailwindcss/typography')],
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@tailwindcss/typography'),
+    require('@tailwindcss/container-queries'),
+  ],
 };

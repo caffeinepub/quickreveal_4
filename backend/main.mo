@@ -13,9 +13,9 @@ import OutCall "http-outcalls/outcall";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 import Stripe "stripe/stripe";
-import Migration "migration";
 
-(with migration = Migration.run)
+
+
 actor {
   // Mixins
   include MixinStorage();

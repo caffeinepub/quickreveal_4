@@ -1,108 +1,386 @@
-import React, { useState, useMemo } from 'react';
-import { Search, Zap, Star, MapPin, Clock } from 'lucide-react';
+import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { MapPin, ChevronDown, Star, Zap } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import { useAuthContext } from '../context/AuthContext';
-import { SWISS_ROMANDE_CITIES, getDistanceBetweenCities } from '../utils/cityData';
-import { DEMO_PROFILES, DemoProProfile } from '../utils/demoData';
-import NotificationCenter from './NotificationCenter';
-import { Skeleton } from '@/components/ui/skeleton';
+import GlobalHeader from './GlobalHeader';
+import BottomNav from './BottomNav';
 
-const CATEGORY_FILTERS = ['Tous', 'Barber', 'Coiffure', 'Esthétique', 'Massage'];
+const DEMO_PROS = [
+  {
+    id: 'julien-rossi',
+    brandName: 'Julien Rossi',
+    slogan: 'Barber premium à domicile',
+    category: 'Barber',
+    city: 'Lausanne',
+    rating: 4.9,
+    reviewCount: 47,
+    responseTime: '3 min',
+    minPrice: 35,
+    isFlash: true,
+    hasRevolut: true,
+    coverPhoto: '/assets/generated/barber-lausanne-cover.dim_1200x400.png',
+    profilePhoto: '/assets/generated/provider-julien-rossi.dim_800x600.png',
+    bio: 'Spécialiste coupe homme et barbe depuis 10 ans.',
+    services: [
+      { id: 's1', name: 'Coupe homme', duration: 45, price: 45, badges: ['Populaire'] },
+      { id: 's2', name: 'Barbe complète', duration: 30, price: 35, badges: [] },
+      { id: 's3', name: 'Coupe + Barbe', duration: 75, price: 70, badges: ['Promo'] },
+    ],
+    acceptanceRate: 97,
+    totalPrestations: 124,
+  },
+  {
+    id: 'lucie-esthetics',
+    brandName: 'Lucie Esthetics',
+    slogan: 'Beauté & bien-être à domicile',
+    category: 'Esthétique',
+    city: 'Genève',
+    rating: 4.8,
+    reviewCount: 63,
+    responseTime: '5 min',
+    minPrice: 55,
+    isFlash: true,
+    hasRevolut: true,
+    coverPhoto: '/assets/generated/esthetique-lausanne-cover.dim_1200x400.png',
+    profilePhoto: '/assets/generated/provider-lucie-esthetics.dim_800x600.png',
+    bio: 'Esthéticienne diplômée, spécialiste soins visage et corps.',
+    services: [
+      { id: 's1', name: 'Soin visage', duration: 60, price: 75, badges: ['Populaire'] },
+      { id: 's2', name: 'Épilation jambes', duration: 45, price: 55, badges: [] },
+      { id: 's3', name: 'Manucure', duration: 30, price: 40, badges: ['Nouveau'] },
+    ],
+    acceptanceRate: 95,
+    totalPrestations: 89,
+  },
+  {
+    id: 'sophiane-hair',
+    brandName: 'Sophiane Hair',
+    slogan: 'Coiffure créative & tendance',
+    category: 'Coiffure',
+    city: 'Lausanne',
+    rating: 4.7,
+    reviewCount: 38,
+    responseTime: '8 min',
+    minPrice: 60,
+    isFlash: false,
+    hasRevolut: false,
+    coverPhoto: '/assets/generated/coiffure-geneva-cover.dim_1200x400.png',
+    profilePhoto: '/assets/generated/provider-sophiane-hair.dim_800x600.png',
+    bio: 'Coiffeuse passionnée, spécialiste colorations et coupes femme.',
+    services: [
+      { id: 's1', name: 'Coupe femme', duration: 60, price: 80, badges: ['Populaire'] },
+      { id: 's2', name: 'Coloration', duration: 120, price: 120, badges: [] },
+      { id: 's3', name: 'Brushing', duration: 45, price: 60, badges: [] },
+    ],
+    acceptanceRate: 92,
+    totalPrestations: 67,
+  },
+  {
+    id: 'zen-touch',
+    brandName: 'Zen Touch',
+    slogan: 'Massage & relaxation premium',
+    category: 'Massage',
+    city: 'Genève',
+    rating: 5.0,
+    reviewCount: 29,
+    responseTime: '10 min',
+    minPrice: 80,
+    isFlash: true,
+    hasRevolut: true,
+    coverPhoto: '/assets/generated/massage-geneva-cover.dim_1200x400.png',
+    profilePhoto: '/assets/generated/provider-zen-touch.dim_800x600.png',
+    bio: 'Masseur certifié, techniques suédoises et thaïlandaises.',
+    services: [
+      { id: 's1', name: 'Massage relaxant 60min', duration: 60, price: 90, badges: ['Populaire'] },
+      { id: 's2', name: 'Massage sportif', duration: 45, price: 80, badges: [] },
+      { id: 's3', name: 'Massage duo', duration: 90, price: 160, badges: ['Nouveau'] },
+    ],
+    acceptanceRate: 100,
+    totalPrestations: 45,
+  },
+  {
+    id: 'noura-beauty',
+    brandName: 'Noura Beauty',
+    slogan: 'Maquillage & soins orientaux',
+    category: 'Esthétique',
+    city: 'Fribourg',
+    rating: 4.6,
+    reviewCount: 21,
+    responseTime: '15 min',
+    minPrice: 45,
+    isFlash: false,
+    hasRevolut: false,
+    coverPhoto: '/assets/generated/coiffure-fribourg-cover.dim_1200x400.png',
+    profilePhoto: '/assets/generated/provider-noura-beauty.dim_800x600.png',
+    bio: 'Maquilleuse professionnelle, spécialiste mariages et événements.',
+    services: [
+      { id: 's1', name: 'Maquillage événement', duration: 60, price: 85, badges: ['Populaire'] },
+      { id: 's2', name: 'Soin hammam', duration: 90, price: 95, badges: ['Nouveau'] },
+      { id: 's3', name: 'Henné', duration: 45, price: 45, badges: [] },
+    ],
+    acceptanceRate: 88,
+    totalPrestations: 34,
+  },
+  {
+    id: 'barber-geneva',
+    brandName: 'Mageste Labs',
+    slogan: 'Barber shop haut de gamme',
+    category: 'Barber',
+    city: 'Genève',
+    rating: 4.8,
+    reviewCount: 55,
+    responseTime: '5 min',
+    minPrice: 40,
+    isFlash: true,
+    hasRevolut: true,
+    coverPhoto: '/assets/generated/barber-geneva-cover.dim_1200x400.png',
+    profilePhoto: '/assets/generated/provider-mageste-labs.dim_800x600.png',
+    bio: 'Barbier expert, spécialiste dégradés et soins barbe.',
+    services: [
+      { id: 's1', name: 'Dégradé américain', duration: 45, price: 50, badges: ['Populaire'] },
+      { id: 's2', name: 'Rasage traditionnel', duration: 30, price: 40, badges: [] },
+      { id: 's3', name: 'Coupe + Rasage', duration: 75, price: 80, badges: ['Promo'] },
+    ],
+    acceptanceRate: 96,
+    totalPrestations: 112,
+  },
+];
 
-function ProCardSkeleton() {
+const SWISS_CITIES = [
+  'Lausanne', 'Genève', 'Fribourg', 'Neuchâtel', 'Sion',
+  'Montreux', 'Vevey', 'Yverdon-les-Bains', 'Nyon', 'Morges',
+  'Renens', 'Biel/Bienne', 'La Chaux-de-Fonds', 'Delémont',
+];
+
+const CATEGORIES = [
+  { id: 'all', label: 'Tous', emoji: '' },
+  { id: 'flash', label: 'Flash', emoji: '⚡' },
+  { id: 'Barber', label: 'Barber', emoji: '✂️' },
+  { id: 'Coiffure', label: 'Coiffure', emoji: '💇' },
+  { id: 'Esthétique', label: 'Esthétique', emoji: '💅' },
+  { id: 'Massage', label: 'Massage', emoji: '🤲' },
+];
+
+type DemoPro = typeof DEMO_PROS[0];
+
+function SkeletonCard() {
   return (
-    <div className="bg-nexus-card border border-nexus-border rounded-nexus overflow-hidden">
-      <Skeleton className="w-full h-32" style={{ background: '#2A2A2A' }} />
-      <div className="p-4 flex flex-col gap-2">
-        <Skeleton className="h-4 w-3/4" style={{ background: '#2A2A2A' }} />
-        <Skeleton className="h-3 w-1/2" style={{ background: '#2A2A2A' }} />
-        <Skeleton className="h-3 w-2/3" style={{ background: '#2A2A2A' }} />
-        <Skeleton className="h-10 w-full mt-2" style={{ background: '#2A2A2A' }} />
+    <div
+      style={{
+        borderRadius: '20px',
+        overflow: 'hidden',
+        marginBottom: '16px',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+      }}
+    >
+      <div className="skeleton-shimmer" style={{ width: '100%', height: '180px' }} />
+      <div style={{ backgroundColor: '#111111', padding: '16px' }}>
+        <div className="skeleton-shimmer" style={{ height: '20px', borderRadius: '4px', marginBottom: '8px', width: '60%' }} />
+        <div className="skeleton-shimmer" style={{ height: '14px', borderRadius: '4px', marginBottom: '12px', width: '40%' }} />
+        <div className="skeleton-shimmer" style={{ height: '14px', borderRadius: '4px', marginBottom: '16px', width: '80%' }} />
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div className="skeleton-shimmer" style={{ height: '20px', borderRadius: '4px', width: '30%' }} />
+          <div className="skeleton-shimmer" style={{ height: '40px', borderRadius: '50px', width: '35%' }} />
+        </div>
       </div>
     </div>
   );
 }
 
-function FlashBadge() {
+function FlashCard({ pro, onPress }: { pro: DemoPro; onPress: () => void }) {
   return (
-    <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold" style={{ background: 'rgba(34,197,94,0.15)', color: '#22C55E', border: '1px solid rgba(34,197,94,0.3)' }}>
-      <span className="w-1.5 h-1.5 rounded-full bg-nexus-success flash-pulse inline-block" />
-      FLASH
-    </span>
+    <button
+      onClick={onPress}
+      className="btn-tap"
+      style={{
+        flexShrink: 0,
+        width: '160px',
+        height: '200px',
+        borderRadius: '16px',
+        overflow: 'hidden',
+        position: 'relative',
+        border: 'none',
+        cursor: 'pointer',
+        padding: 0,
+      }}
+    >
+      <img
+        src={pro.coverPhoto}
+        alt={pro.brandName}
+        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85) 100%)',
+        }}
+      />
+      <div
+        className="flash-badge"
+        style={{
+          position: 'absolute',
+          top: '10px',
+          left: '10px',
+          backgroundColor: '#22C55E',
+          color: '#FFFFFF',
+          fontSize: '10px',
+          fontWeight: 700,
+          fontFamily: "'Inter', sans-serif",
+          padding: '4px 10px',
+          borderRadius: '50px',
+          letterSpacing: '0.05em',
+        }}
+      >
+        FLASH
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          bottom: '12px',
+          left: '12px',
+          right: '12px',
+          textAlign: 'left',
+        }}
+      >
+        <div
+          style={{
+            color: '#FFFFFF',
+            fontWeight: 700,
+            fontSize: '14px',
+            fontFamily: "'Inter', sans-serif",
+            marginBottom: '2px',
+          }}
+        >
+          {pro.brandName}
+        </div>
+        <div style={{ color: '#CCCCCC', fontSize: '12px', fontFamily: "'Inter', sans-serif" }}>
+          {pro.city}
+        </div>
+      </div>
+    </button>
   );
 }
 
-function ProCard({ pro, clientCity, onSelect }: { pro: DemoProProfile; clientCity: string; onSelect: (pro: DemoProProfile) => void }) {
-  const distanceKm = getDistanceBetweenCities(clientCity, pro.city);
-  const distanceLabel = distanceKm === 0 ? 'Même ville' : `${distanceKm} km`;
-
+function ProCard({ pro, onPress, onBook }: { pro: DemoPro; onPress: () => void; onBook: () => void }) {
   return (
     <div
-      className="bg-nexus-card border border-nexus-border rounded-nexus overflow-hidden cursor-pointer hover:border-nexus-gold transition-all active:scale-98"
-      onClick={() => onSelect(pro)}
+      className="card-hover"
+      style={{
+        borderRadius: '20px',
+        overflow: 'hidden',
+        marginBottom: '16px',
+        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+        backgroundColor: '#111111',
+      }}
     >
-      {/* Cover */}
-      <div className="relative h-36 overflow-hidden">
+      <div style={{ position: 'relative', width: '100%', height: '180px' }}>
         <img
-          src={pro.coverImage}
+          src={pro.coverPhoto}
           alt={pro.brandName}
-          className="w-full h-full object-cover"
-          onError={e => {
-            (e.target as HTMLImageElement).src = '/assets/generated/studio-cover-template.dim_1200x400.png';
-          }}
+          style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex gap-1">
-          {pro.isFlashActive && <FlashBadge />}
-        </div>
-
-        {/* Revolut badge */}
-        <div className="absolute top-2 right-2">
-          <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ background: 'rgba(0,0,0,0.6)', color: '#E8C89A', border: '1px solid rgba(232,200,154,0.3)' }}>
-            💳 Revolut ✅
-          </span>
-        </div>
+        {pro.isFlash && (
+          <div
+            className="flash-badge"
+            style={{
+              position: 'absolute',
+              top: '12px',
+              left: '12px',
+              backgroundColor: '#22C55E',
+              color: '#FFFFFF',
+              fontSize: '11px',
+              fontWeight: 700,
+              fontFamily: "'Inter', sans-serif",
+              padding: '5px 12px',
+              borderRadius: '50px',
+              letterSpacing: '0.05em',
+            }}
+          >
+            ⚡ FLASH
+          </div>
+        )}
+        {pro.hasRevolut && (
+          <div
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              backgroundColor: 'rgba(0,0,0,0.6)',
+              color: '#FFFFFF',
+              fontSize: '11px',
+              fontWeight: 500,
+              fontFamily: "'Inter', sans-serif",
+              padding: '5px 10px',
+              borderRadius: '50px',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            Revolut ✅
+          </div>
+        )}
       </div>
 
-      {/* Content */}
-      <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <h3 className="text-white font-bold text-base leading-tight">{pro.brandName}</h3>
-            <p className="text-nexus-secondary text-xs mt-0.5">{pro.category}</p>
-          </div>
-          <div className="flex-shrink-0 ml-2">
-            <div className="flex items-center gap-1">
-              <Star size={12} className="text-nexus-gold fill-nexus-gold" />
-              <span className="text-white text-sm font-bold">{pro.rating}</span>
-              <span className="text-nexus-secondary text-xs">({pro.reviewCount})</span>
-            </div>
+      <div
+        style={{ backgroundColor: '#111111', padding: '16px', cursor: 'pointer' }}
+        onClick={onPress}
+      >
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
+          <span style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '18px', fontFamily: "'Inter', sans-serif" }}>
+            {pro.brandName}
+          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+            <Star size={14} fill="#E8C89A" color="#E8C89A" />
+            <span style={{ color: '#E8C89A', fontWeight: 700, fontSize: '14px', fontFamily: "'Inter', sans-serif" }}>
+              {pro.rating}
+            </span>
           </div>
         </div>
 
-        <div className="flex items-center gap-3 mb-3 text-xs text-nexus-secondary">
-          <span className="flex items-center gap-1">
-            <MapPin size={11} />
-            {distanceLabel}
+        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+          <span style={{ color: '#888888', fontSize: '14px', fontFamily: "'Inter', sans-serif" }}>
+            {pro.category}
           </span>
-          <span className="flex items-center gap-1">
-            <Clock size={11} />
-            Répond en {pro.responseTime}
+          <span style={{ color: '#666666', fontSize: '12px', fontFamily: "'Inter', sans-serif" }}>
+            ({pro.reviewCount} avis)
           </span>
         </div>
 
-        <div className="flex items-center justify-between">
-          <span className="text-nexus-secondary text-xs">
-            À partir de <span className="text-white font-bold">{pro.startingPrice} CHF</span>
+        <div style={{ display: 'flex', gap: '16px', marginBottom: '14px' }}>
+          <span style={{ color: '#666666', fontSize: '12px', fontFamily: "'Inter', sans-serif" }}>
+            📍 {pro.city}
+          </span>
+          <span style={{ color: '#666666', fontSize: '12px', fontFamily: "'Inter', sans-serif" }}>
+            ⚡ Répond {pro.responseTime}
+          </span>
+        </div>
+
+        <div style={{ height: '1px', backgroundColor: '#1F1F1F', marginBottom: '14px' }} />
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <span style={{ color: '#E8C89A', fontWeight: 700, fontSize: '18px', fontFamily: "'Inter', sans-serif" }}>
+            À partir de {pro.minPrice} CHF
           </span>
           <button
-            className="px-4 py-2 rounded-full text-xs font-bold transition-all hover:opacity-90 active:scale-95"
-            style={{ background: '#E8C89A', color: '#0A0A0A' }}
-            onClick={e => { e.stopPropagation(); onSelect(pro); }}
+            onClick={(e) => { e.stopPropagation(); onBook(); }}
+            className="btn-tap"
+            style={{
+              backgroundColor: '#E8C89A',
+              color: '#0A0A0A',
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 700,
+              fontSize: '13px',
+              letterSpacing: '0.05em',
+              textTransform: 'uppercase',
+              border: 'none',
+              borderRadius: '50px',
+              padding: '10px 18px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '4px',
+            }}
           >
-            ⚡ RÉSERVER
+            RÉSERVER <Zap size={13} />
           </button>
         </div>
       </div>
@@ -111,192 +389,319 @@ function ProCard({ pro, clientCity, onSelect }: { pro: DemoProProfile; clientCit
 }
 
 export default function Explorer() {
-  const { navigate, appRole } = useAppContext();
-  const { isAuthenticated } = useAuthContext();
-  const [selectedCity, setSelectedCity] = useState('Lausanne');
-  const [selectedCategory, setSelectedCategory] = useState('Tous');
-  const [distanceFilter, setDistanceFilter] = useState(50);
-  const [showFlashOnly, setShowFlashOnly] = useState(false);
+  const { navigate, bookings } = useAppContext();
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCity, setSelectedCity] = useState('');
+  const [maxDistance, setMaxDistance] = useState(50);
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [showDistanceSlider, setShowDistanceSlider] = useState(false);
   const [isLoading] = useState(false);
+  const cityInputRef = useRef<HTMLDivElement>(null);
 
-  const flashPros = useMemo(() => DEMO_PROFILES.filter(p => p.isFlashActive), []);
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (cityInputRef.current && !cityInputRef.current.contains(e.target as Node)) {
+        setShowCityDropdown(false);
+      }
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, []);
+
+  const hasPendingBookings = useMemo(
+    () => bookings?.some((b) => b.status === 'pending') ?? false,
+    [bookings]
+  );
 
   const filteredPros = useMemo(() => {
-    return DEMO_PROFILES.filter(pro => {
-      if (selectedCategory !== 'Tous' && pro.category !== selectedCategory) return false;
-      if (showFlashOnly && !pro.isFlashActive) return false;
-      const dist = getDistanceBetweenCities(selectedCity, pro.city);
-      if (dist > distanceFilter) return false;
+    return DEMO_PROS.filter((pro) => {
+      if (selectedCategory === 'flash') return pro.isFlash;
+      if (selectedCategory !== 'all' && pro.category !== selectedCategory) return false;
+      if (selectedCity && pro.city !== selectedCity) return false;
       return true;
     });
-  }, [selectedCity, selectedCategory, distanceFilter, showFlashOnly]);
+  }, [selectedCategory, selectedCity]);
 
-  const handleProSelect = (pro: DemoProProfile) => {
+  const flashPros = useMemo(() => DEMO_PROS.filter((p) => p.isFlash), []);
+
+  const handleProPress = (pro: DemoPro) => {
+    navigate('providerDetail', { provider: pro });
+  };
+
+  const handleBook = (pro: DemoPro) => {
     navigate('providerDetail', { provider: pro });
   };
 
   return (
-    <div style={{ background: '#0A0A0A', minHeight: '100vh', paddingBottom: '80px' }}>
-      {/* Header */}
-      <div style={{ position: 'sticky', top: 0, zIndex: 30, padding: '12px 16px', background: '#0A0A0A', borderBottom: '1px solid #1A1A1A' }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
-          <h1 style={{ fontSize: '20px', fontWeight: 900, color: '#E8C89A' }}>
-            NEXUS<span style={{ display: 'inline-block', width: '5px', height: '5px', background: '#3B82F6', borderRadius: '50%', marginLeft: '2px', marginBottom: '6px', verticalAlign: 'bottom' }} />
-          </h1>
-          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-            <NotificationCenter />
-            {isAuthenticated ? (
-              <>
-                {appRole === 'professional' && (
-                  <button onClick={() => navigate('nexusOS')} style={{ background: '#1A1A1A', border: '1px solid rgba(232,200,154,0.3)', borderRadius: '20px', color: '#E8C89A', fontSize: '11px', fontWeight: 700, padding: '6px 12px', cursor: 'pointer' }}>
-                    Espace Pro
-                  </button>
-                )}
-                <button onClick={() => navigate('clientDashboard')} style={{ background: '#1A1A1A', border: '1px solid #333', borderRadius: '20px', color: '#888', fontSize: '11px', fontWeight: 700, padding: '6px 12px', cursor: 'pointer' }}>
-                  Mes résa
-                </button>
-              </>
-            ) : (
-              <button onClick={() => navigate('splash')} style={{ background: '#E8C89A', border: 'none', borderRadius: '20px', color: '#0A0A0A', fontSize: '11px', fontWeight: 700, padding: '6px 14px', cursor: 'pointer' }}>
-                Se connecter
-              </button>
-            )}
-          </div>
-        </div>
+    <div
+      className="screen-transition"
+      style={{ minHeight: '100dvh', backgroundColor: '#0A0A0A', paddingTop: '56px', paddingBottom: '80px' }}
+    >
+      <GlobalHeader hasNotifications={hasPendingBookings} />
 
-        {/* Search header */}
-        <p style={{ color: '#888', fontSize: '13px', marginBottom: '10px' }}>Quel service cherchez-vous ?</p>
-
-        {/* City selector */}
-        <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-          <div style={{ position: 'relative', flex: 1 }}>
-            <MapPin size={14} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: '#E8C89A' }} />
-            <select
+      <div style={{ padding: '20px 16px 0' }}>
+        {/* Search bar */}
+        <div ref={cityInputRef} style={{ position: 'relative', marginBottom: '16px' }}>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              backgroundColor: '#1A1A1A',
+              border: '1px solid #2A2A2A',
+              borderRadius: '14px',
+              padding: '0 14px',
+              height: '50px',
+              gap: '10px',
+            }}
+          >
+            <MapPin size={18} color="#E8C89A" />
+            <input
+              type="text"
+              placeholder="Votre ville..."
               value={selectedCity}
-              onChange={e => setSelectedCity(e.target.value)}
-              style={{ width: '100%', background: '#1A1A1A', border: '1px solid #333', borderRadius: '10px', padding: '8px 10px 8px 28px', color: '#fff', fontSize: '13px', appearance: 'none', cursor: 'pointer' }}
+              onChange={(e) => setSelectedCity(e.target.value)}
+              onFocus={() => setShowCityDropdown(true)}
+              style={{
+                flex: 1,
+                background: 'none',
+                border: 'none',
+                outline: 'none',
+                color: '#CCCCCC',
+                fontFamily: "'Inter', sans-serif",
+                fontSize: '15px',
+              }}
+            />
+            <button
+              onClick={() => setShowDistanceSlider(!showDistanceSlider)}
+              style={{
+                backgroundColor: '#E8C89A',
+                color: '#0A0A0A',
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: '12px',
+                border: 'none',
+                borderRadius: '50px',
+                padding: '5px 12px',
+                cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
             >
-              {SWISS_ROMANDE_CITIES.map(city => (
-                <option key={city} value={city}>{city}</option>
+              ≤ {maxDistance} km
+              <ChevronDown size={12} />
+            </button>
+          </div>
+
+          {/* City dropdown */}
+          {showCityDropdown && (
+            <div
+              style={{
+                position: 'absolute',
+                top: '54px',
+                left: 0,
+                right: 0,
+                backgroundColor: '#1A1A1A',
+                border: '1px solid #2A2A2A',
+                borderRadius: '14px',
+                zIndex: 50,
+                overflow: 'hidden',
+                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
+                maxHeight: '240px',
+                overflowY: 'auto',
+              }}
+            >
+              {SWISS_CITIES.filter((c) =>
+                !selectedCity || c.toLowerCase().includes(selectedCity.toLowerCase())
+              ).map((city) => (
+                <button
+                  key={city}
+                  onClick={() => { setSelectedCity(city); setShowCityDropdown(false); }}
+                  style={{
+                    width: '100%',
+                    textAlign: 'left',
+                    padding: '12px 16px',
+                    background: 'none',
+                    border: 'none',
+                    borderBottom: '1px solid #2A2A2A',
+                    color: '#CCCCCC',
+                    fontFamily: "'Inter', sans-serif",
+                    fontSize: '15px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px',
+                  }}
+                >
+                  <MapPin size={14} color="#E8C89A" />
+                  {city}
+                </button>
               ))}
-            </select>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#1A1A1A', border: '1px solid #333', borderRadius: '10px', padding: '8px 12px', fontSize: '12px', color: '#888', whiteSpace: 'nowrap' }}>
-            <span>≤ {distanceFilter} km</span>
-          </div>
+            </div>
+          )}
+
+          {/* Distance slider */}
+          {showDistanceSlider && (
+            <div
+              style={{
+                marginTop: '8px',
+                backgroundColor: '#1A1A1A',
+                border: '1px solid #2A2A2A',
+                borderRadius: '14px',
+                padding: '16px',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
+                <span style={{ color: '#888888', fontSize: '13px', fontFamily: "'Inter', sans-serif" }}>
+                  Distance maximale
+                </span>
+                <span style={{ color: '#E8C89A', fontWeight: 700, fontSize: '13px', fontFamily: "'Inter', sans-serif" }}>
+                  {maxDistance} km
+                </span>
+              </div>
+              <input
+                type="range"
+                min={5}
+                max={50}
+                step={5}
+                value={maxDistance}
+                onChange={(e) => setMaxDistance(Number(e.target.value))}
+                style={{ width: '100%', accentColor: '#E8C89A' }}
+              />
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
+                <span style={{ color: '#555555', fontSize: '11px', fontFamily: "'Inter', sans-serif" }}>5 km</span>
+                <span style={{ color: '#555555', fontSize: '11px', fontFamily: "'Inter', sans-serif" }}>50 km</span>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Category filters */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px' }}>
-          {CATEGORY_FILTERS.map(cat => (
-            <button
-              key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              style={{
-                flexShrink: 0,
-                padding: '6px 14px',
-                borderRadius: '20px',
-                fontSize: '12px',
-                fontWeight: 600,
-                cursor: 'pointer',
-                border: 'none',
-                background: selectedCategory === cat ? '#E8C89A' : '#1A1A1A',
-                color: selectedCategory === cat ? '#0A0A0A' : '#666',
-                transition: 'all 200ms',
-              }}
-            >
-              {cat}
-            </button>
-          ))}
-          <button
-            onClick={() => setShowFlashOnly(!showFlashOnly)}
-            style={{
-              flexShrink: 0,
-              padding: '6px 14px',
-              borderRadius: '20px',
-              fontSize: '12px',
-              fontWeight: 600,
-              cursor: 'pointer',
-              border: showFlashOnly ? '1px solid #22C55E' : 'none',
-              background: showFlashOnly ? 'rgba(34,197,94,0.15)' : '#1A1A1A',
-              color: showFlashOnly ? '#22C55E' : '#666',
-              transition: 'all 200ms',
-            }}
-          >
-            ⚡ Flash
-          </button>
+        <div
+          className="scroll-no-bar"
+          style={{ display: 'flex', gap: '8px', marginBottom: '24px', paddingBottom: '4px' }}
+        >
+          {CATEGORIES.map((cat) => {
+            const isActive = selectedCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => setSelectedCategory(cat.id)}
+                className="btn-tap"
+                style={{
+                  flexShrink: 0,
+                  backgroundColor: isActive ? '#E8C89A' : '#1A1A1A',
+                  color: isActive ? '#0A0A0A' : '#888888',
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: isActive ? 700 : 400,
+                  fontSize: '14px',
+                  border: isActive ? 'none' : '1px solid #2A2A2A',
+                  borderRadius: '50px',
+                  padding: '10px 20px',
+                  cursor: 'pointer',
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {cat.emoji && <span style={{ marginRight: '4px' }}>{cat.emoji}</span>}
+                {cat.label}
+              </button>
+            );
+          })}
         </div>
-      </div>
 
-      <div style={{ padding: '16px' }}>
         {/* Flash section */}
-        {flashPros.length > 0 && !showFlashOnly && (
-          <div style={{ marginBottom: '24px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '12px' }}>
-              <div className="w-2 h-2 rounded-full bg-nexus-success flash-pulse" />
-              <h2 style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#22C55E' }}>
-                Disponibles MAINTENANT
-              </h2>
+        {(selectedCategory === 'all' || selectedCategory === 'flash') && flashPros.length > 0 && (
+          <div style={{ marginBottom: '28px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
+              <span className="green-dot-pulse" />
+              <span
+                style={{
+                  color: '#22C55E',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  fontFamily: "'Inter', sans-serif",
+                  letterSpacing: '2px',
+                  textTransform: 'uppercase',
+                }}
+              >
+                DISPONIBLES MAINTENANT
+              </span>
             </div>
-            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px' }}>
-              {flashPros.map(pro => (
-                <div
-                  key={pro.id}
-                  onClick={() => handleProSelect(pro)}
-                  style={{ flexShrink: 0, width: '160px', background: '#1A1A1A', borderRadius: '12px', overflow: 'hidden', cursor: 'pointer', border: '1px solid rgba(34,197,94,0.3)' }}
-                >
-                  <div style={{ position: 'relative', height: '80px' }}>
-                    <img src={pro.coverImage} alt={pro.brandName} style={{ width: '100%', height: '100%', objectFit: 'cover' }} onError={e => { (e.target as HTMLImageElement).src = '/assets/generated/studio-cover-template.dim_1200x400.png'; }} />
-                    <div style={{ position: 'absolute', top: '4px', left: '4px' }}>
-                      <FlashBadge />
-                    </div>
-                  </div>
-                  <div style={{ padding: '8px' }}>
-                    <div style={{ fontWeight: 700, fontSize: '12px', color: '#fff', marginBottom: '2px' }}>{pro.brandName}</div>
-                    <div style={{ fontSize: '11px', color: '#888' }}>{pro.city}</div>
-                  </div>
-                </div>
+            <div
+              className="scroll-no-bar"
+              style={{ display: 'flex', gap: '12px', paddingBottom: '4px' }}
+            >
+              {flashPros.map((pro) => (
+                <FlashCard key={pro.id} pro={pro} onPress={() => handleProPress(pro)} />
               ))}
             </div>
           </div>
         )}
 
-        {/* Main grid */}
-        <div style={{ marginBottom: '12px' }}>
-          <h2 style={{ fontSize: '14px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#666', marginBottom: '12px' }}>
-            {filteredPros.length} professionnel{filteredPros.length !== 1 ? 's' : ''} trouvé{filteredPros.length !== 1 ? 's' : ''}
+        {/* Main pro list */}
+        <div style={{ marginBottom: '8px' }}>
+          <h2
+            style={{
+              color: '#FFFFFF',
+              fontSize: '22px',
+              fontWeight: 600,
+              fontFamily: "'Inter', sans-serif",
+              marginBottom: '16px',
+            }}
+          >
+            {selectedCity ? `Pros à ${selectedCity}` : 'Tous les pros'}
           </h2>
+
+          {isLoading ? (
+            <>
+              <SkeletonCard />
+              <SkeletonCard />
+              <SkeletonCard />
+            </>
+          ) : filteredPros.length === 0 ? (
+            <div
+              style={{
+                textAlign: 'center',
+                padding: '48px 24px',
+                color: '#555555',
+                fontFamily: "'Inter', sans-serif",
+              }}
+            >
+              <div style={{ fontSize: '40px', marginBottom: '16px' }}>🔍</div>
+              <p style={{ fontSize: '16px', color: '#888888' }}>Aucun pro trouvé</p>
+              <p style={{ fontSize: '14px', marginTop: '8px' }}>Essayez une autre ville ou catégorie</p>
+            </div>
+          ) : (
+            filteredPros.map((pro) => (
+              <ProCard
+                key={pro.id}
+                pro={pro}
+                onPress={() => handleProPress(pro)}
+                onBook={() => handleBook(pro)}
+              />
+            ))
+          )}
         </div>
 
-        {isLoading ? (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-            {[1, 2, 3].map(i => <ProCardSkeleton key={i} />)}
-          </div>
-        ) : filteredPros.length === 0 ? (
-          <div style={{ background: '#1A1A1A', borderRadius: '16px', padding: '40px', textAlign: 'center', border: '1px solid #222' }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>🔍</div>
-            <p style={{ color: '#666', fontSize: '14px', marginBottom: '8px' }}>Aucun professionnel trouvé</p>
-            <p style={{ color: '#444', fontSize: '12px' }}>Essayez d'élargir votre rayon ou de changer de ville</p>
-          </div>
-        ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '12px' }}>
-            {filteredPros.map(pro => (
-              <ProCard key={pro.id} pro={pro} clientCity={selectedCity} onSelect={handleProSelect} />
-            ))}
-          </div>
-        )}
+        {/* Footer */}
+        <footer style={{ padding: '24px 0 8px', textAlign: 'center' }}>
+          <p style={{ color: '#333333', fontSize: '11px', fontFamily: "'Inter', sans-serif" }}>
+            Built with ❤️ using{' '}
+            <a
+              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{ color: '#555555' }}
+            >
+              caffeine.ai
+            </a>{' '}
+            · © {new Date().getFullYear()} NEXUS
+          </p>
+        </footer>
       </div>
 
-      {/* Footer */}
-      <footer style={{ padding: '16px 20px', borderTop: '1px solid #1A1A1A', textAlign: 'center', marginTop: '20px' }}>
-        <p style={{ color: '#333', fontSize: '11px' }}>
-          Built with ❤️ using{' '}
-          <a href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`} target="_blank" rel="noopener noreferrer" style={{ color: '#555' }}>
-            caffeine.ai
-          </a>{' '}
-          · © {new Date().getFullYear()} NEXUS
-        </p>
-      </footer>
+      <BottomNav activeTab="explorer" hasPendingBookings={hasPendingBookings} />
     </div>
   );
 }

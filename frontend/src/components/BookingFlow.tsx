@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useAuthContext } from '../context/AuthContext';
-import { useCreateBookingRequest } from '../hooks/useQueries';
 import { ChevronLeft, Check, CreditCard, Loader2 } from 'lucide-react';
 
 interface LocalService {
@@ -53,11 +52,10 @@ function generateNextDays(count: number): DayInfo[] {
   return days;
 }
 
-// Golden confetti animation
 function ConfettiAnimation() {
   const pieces = Array.from({ length: 30 }, (_, i) => i);
   return (
-    <div className="confetti-container" style={{ pointerEvents: 'none' }}>
+    <div style={{ pointerEvents: 'none', position: 'fixed', inset: 0, zIndex: 9999 }}>
       {pieces.map((i) => (
         <div
           key={i}
@@ -69,7 +67,6 @@ function ConfettiAnimation() {
             height: `${Math.random() * 8 + 4}px`,
             background: Math.random() > 0.5 ? '#E8C89A' : '#c9a870',
             borderRadius: Math.random() > 0.5 ? '50%' : '2px',
-            animation: `confettiFall ${Math.random() * 2 + 2}s ease-in ${Math.random() * 1}s forwards`,
             opacity: 0,
           }}
         />
@@ -79,9 +76,8 @@ function ConfettiAnimation() {
 }
 
 export default function BookingFlow() {
-  const { navigate, screenParams } = useAppContext();
+  const { navigate, screenParams, addNotification, setBookings } = useAppContext();
   const { isAuthenticated } = useAuthContext();
-  const createBooking = useCreateBookingRequest();
 
   const provider = screenParams?.provider as LocalProvider | undefined;
   const initialService = screenParams?.service as LocalService | undefined;
@@ -91,8 +87,6 @@ export default function BookingFlow() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [address, setAddress] = useState('');
-  const [clientName, setClientName] = useState('');
-  const [clientPhone, setClientPhone] = useState('');
   const [cardNumber, setCardNumber] = useState('');
   const [cardExpiry, setCardExpiry] = useState('');
   const [cardCvc, setCardCvc] = useState('');
@@ -119,7 +113,7 @@ export default function BookingFlow() {
             style={{
               background: '#E8C89A',
               border: 'none',
-              borderRadius: '10px',
+              borderRadius: '50px',
               padding: '12px 24px',
               color: '#0a0a0a',
               fontWeight: 700,
@@ -135,10 +129,21 @@ export default function BookingFlow() {
 
   if (!isAuthenticated && step !== 'service') {
     return (
-      <div className="modal-overlay">
-        <div className="modal-content p-6 text-center">
-          <h3 className="text-lg font-bold mb-2">Connectez-vous pour continuer</h3>
-          <p className="text-sm mb-4" style={{ color: '#666' }}>
+      <div
+        style={{
+          background: '#0A0A0A',
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '24px',
+        }}
+      >
+        <div style={{ maxWidth: '360px', width: '100%', textAlign: 'center' }}>
+          <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px', color: '#fff' }}>
+            Connectez-vous pour continuer
+          </h3>
+          <p style={{ fontSize: '14px', marginBottom: '24px', color: '#666' }}>
             Vous devez être connecté pour effectuer une réservation
           </p>
           <button
@@ -147,11 +152,12 @@ export default function BookingFlow() {
               width: '100%',
               background: '#E8C89A',
               border: 'none',
-              borderRadius: '10px',
-              padding: '12px',
+              borderRadius: '50px',
+              padding: '14px',
               color: '#0a0a0a',
               fontWeight: 700,
               cursor: 'pointer',
+              marginBottom: '10px',
             }}
           >
             Se connecter
@@ -162,12 +168,11 @@ export default function BookingFlow() {
               width: '100%',
               background: 'transparent',
               border: '1px solid #333',
-              borderRadius: '10px',
+              borderRadius: '50px',
               padding: '12px',
               color: '#666',
               fontWeight: 600,
               cursor: 'pointer',
-              marginTop: '8px',
             }}
           >
             Annuler
@@ -177,21 +182,37 @@ export default function BookingFlow() {
     );
   }
 
+  // Simulate booking locally — demo providers use string IDs, not on-chain Principals
   const handlePayAndConfirm = async () => {
     setSubmitting(true);
     try {
-      await createBooking.mutateAsync({
+      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
+
+      // Add a local booking to context
+      const newBooking = {
+        id: `booking-${Date.now()}`,
         proId: provider.id,
-        serviceId: selectedService?.id ?? 'unknown',
+        proName: provider.name,
+        serviceName: selectedService?.name ?? 'Service',
+        servicePrice: selectedService?.priceDomicile ?? selectedService?.priceStudio ?? 0,
         date: selectedDate ?? '',
         timeSlot: selectedTime ?? '',
         address: address || provider.studioAddress || '',
+        status: 'pending' as const,
+        createdAt: Date.now(),
+      };
+
+      setBookings((prev) => [newBooking, ...prev]);
+
+      addNotification({
+        type: 'confirmed',
+        message: `✅ Demande envoyée à ${provider.name}`,
       });
+
       setStep('confirmation');
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 4000);
     } catch {
-      // Simulate success for demo
       setStep('confirmation');
       setShowConfetti(true);
       setTimeout(() => setShowConfetti(false), 4000);
@@ -231,7 +252,7 @@ export default function BookingFlow() {
         }}
       >
         {showConfetti && <ConfettiAnimation />}
-        <div style={{ maxWidth: '360px', width: '100%', animation: 'fadeIn 300ms ease-out' }}>
+        <div style={{ maxWidth: '360px', width: '100%' }}>
           <div
             style={{
               width: '80px',
@@ -247,12 +268,12 @@ export default function BookingFlow() {
           >
             <Check size={36} style={{ color: '#E8C89A' }} />
           </div>
-          <h2 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '12px' }}>
+          <h2 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '12px', color: '#fff' }}>
             Demande envoyée ! ✨
           </h2>
           <p style={{ color: '#ccc', marginBottom: '8px', fontSize: '15px' }}>
             Votre demande a été envoyée à{' '}
-            <span style={{ color: '#E8C89A', fontWeight: 700 }}>{provider.name}</span> ✨
+            <span style={{ color: '#E8C89A', fontWeight: 700 }}>{provider.name}</span>
           </p>
           <p style={{ color: '#666', fontSize: '13px', marginBottom: '32px' }}>
             Vous recevrez une confirmation dès que le professionnel accepte votre demande.
@@ -296,7 +317,7 @@ export default function BookingFlow() {
               width: '100%',
               background: '#E8C89A',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '50px',
               padding: '14px',
               color: '#0a0a0a',
               fontWeight: 700,
@@ -313,7 +334,7 @@ export default function BookingFlow() {
               width: '100%',
               background: 'transparent',
               border: '1px solid #333',
-              borderRadius: '12px',
+              borderRadius: '50px',
               padding: '12px',
               color: '#666',
               fontWeight: 600,
@@ -347,7 +368,7 @@ export default function BookingFlow() {
           >
             <ChevronLeft size={18} />
           </button>
-          <h1 style={{ fontWeight: 900, fontSize: '18px' }}>Paiement sécurisé</h1>
+          <h1 style={{ fontWeight: 900, fontSize: '18px', color: '#fff' }}>Paiement sécurisé</h1>
         </div>
 
         <div style={{ padding: '24px 20px', maxWidth: '400px', margin: '0 auto' }}>
@@ -364,7 +385,7 @@ export default function BookingFlow() {
             }}
           >
             <div>
-              <div style={{ fontWeight: 600, fontSize: '14px' }}>{selectedService?.name}</div>
+              <div style={{ fontWeight: 600, fontSize: '14px', color: '#fff' }}>{selectedService?.name}</div>
               <div style={{ fontSize: '12px', color: '#666' }}>
                 {provider.name} · {selectedDate} à {selectedTime}
               </div>
@@ -380,12 +401,21 @@ export default function BookingFlow() {
             </label>
             <div style={{ position: 'relative' }}>
               <input
-                className="input-field"
                 placeholder="1234 5678 9012 3456"
                 value={cardNumber}
                 onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
                 maxLength={19}
-                style={{ paddingRight: '44px' }}
+                style={{
+                  width: '100%',
+                  background: '#1A1A1A',
+                  border: '1px solid #2A2A2A',
+                  borderRadius: '10px',
+                  padding: '12px 44px 12px 14px',
+                  color: '#fff',
+                  fontSize: '15px',
+                  fontFamily: "'Inter', sans-serif",
+                  outline: 'none',
+                }}
               />
               <CreditCard
                 size={18}
@@ -400,11 +430,21 @@ export default function BookingFlow() {
                 Expiration
               </label>
               <input
-                className="input-field"
                 placeholder="MM/AA"
                 value={cardExpiry}
                 onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
                 maxLength={5}
+                style={{
+                  width: '100%',
+                  background: '#1A1A1A',
+                  border: '1px solid #2A2A2A',
+                  borderRadius: '10px',
+                  padding: '12px 14px',
+                  color: '#fff',
+                  fontSize: '15px',
+                  fontFamily: "'Inter', sans-serif",
+                  outline: 'none',
+                }}
               />
             </div>
             <div>
@@ -412,11 +452,21 @@ export default function BookingFlow() {
                 CVC
               </label>
               <input
-                className="input-field"
                 placeholder="123"
                 value={cardCvc}
                 onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 3))}
                 maxLength={3}
+                style={{
+                  width: '100%',
+                  background: '#1A1A1A',
+                  border: '1px solid #2A2A2A',
+                  borderRadius: '10px',
+                  padding: '12px 14px',
+                  color: '#fff',
+                  fontSize: '15px',
+                  fontFamily: "'Inter', sans-serif",
+                  outline: 'none',
+                }}
               />
             </div>
           </div>
@@ -424,11 +474,12 @@ export default function BookingFlow() {
           <button
             onClick={handlePayAndConfirm}
             disabled={submitting}
+            className="btn-tap-gold"
             style={{
               width: '100%',
               background: '#E8C89A',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '50px',
               padding: '16px',
               color: '#0a0a0a',
               fontWeight: 700,
@@ -438,9 +489,15 @@ export default function BookingFlow() {
               justifyContent: 'center',
               gap: '8px',
               fontSize: '15px',
+              opacity: submitting ? 0.7 : 1,
             }}
           >
-            {submitting ? <Loader2 size={18} style={{ animation: 'spin 1s linear infinite' }} /> : null}
+            {submitting ? (
+              <Loader2
+                size={18}
+                style={{ animation: 'spin 1s linear infinite' }}
+              />
+            ) : null}
             Confirmer et Payer
           </button>
 
@@ -471,7 +528,7 @@ export default function BookingFlow() {
           >
             <ChevronLeft size={18} />
           </button>
-          <h1 style={{ fontWeight: 900, fontSize: '18px' }}>Récapitulatif</h1>
+          <h1 style={{ fontWeight: 900, fontSize: '18px', color: '#fff' }}>Récapitulatif</h1>
         </div>
 
         <div style={{ padding: '24px 20px', maxWidth: '400px', margin: '0 auto' }}>
@@ -502,7 +559,7 @@ export default function BookingFlow() {
                 />
               </div>
               <div>
-                <div style={{ fontWeight: 700 }}>{provider.name}</div>
+                <div style={{ fontWeight: 700, color: '#fff' }}>{provider.name}</div>
                 <div style={{ fontSize: '13px', color: '#888' }}>{provider.category}</div>
               </div>
             </div>
@@ -526,7 +583,7 @@ export default function BookingFlow() {
                   }}
                 >
                   <span style={{ color: '#666' }}>{label}</span>
-                  <span style={{ fontWeight: 500, maxWidth: '60%', textAlign: 'right' }}>{value}</span>
+                  <span style={{ fontWeight: 500, maxWidth: '60%', textAlign: 'right', color: '#fff' }}>{value}</span>
                 </div>
               ))}
             </div>
@@ -536,25 +593,24 @@ export default function BookingFlow() {
                 display: 'flex',
                 justifyContent: 'space-between',
                 alignItems: 'center',
+                marginTop: '16px',
                 paddingTop: '12px',
-                marginTop: '4px',
-                borderTop: '1px solid #222',
+                borderTop: '1px solid #333',
               }}
             >
-              <span style={{ fontWeight: 700 }}>Total</span>
-              <span style={{ fontSize: '24px', fontWeight: 900, color: '#E8C89A' }}>
-                {totalPrice} CHF
-              </span>
+              <span style={{ fontWeight: 700, fontSize: '16px', color: '#fff' }}>Total</span>
+              <span style={{ fontWeight: 900, fontSize: '22px', color: '#E8C89A' }}>{totalPrice} CHF</span>
             </div>
           </div>
 
           <button
             onClick={() => setStep('payment')}
+            className="btn-tap-gold"
             style={{
               width: '100%',
               background: '#E8C89A',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '50px',
               padding: '16px',
               color: '#0a0a0a',
               fontWeight: 700,
@@ -562,7 +618,7 @@ export default function BookingFlow() {
               fontSize: '15px',
             }}
           >
-            Confirmer et Payer →
+            Procéder au paiement →
           </button>
         </div>
       </div>
@@ -588,68 +644,56 @@ export default function BookingFlow() {
           >
             <ChevronLeft size={18} />
           </button>
-          <h1 style={{ fontWeight: 900, fontSize: '18px' }}>Vos coordonnées</h1>
+          <h1 style={{ fontWeight: 900, fontSize: '18px', color: '#fff' }}>Votre adresse</h1>
         </div>
 
         <div style={{ padding: '24px 20px', maxWidth: '400px', margin: '0 auto' }}>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 500, color: '#888', display: 'block', marginBottom: '8px' }}>
-              Votre nom
-            </label>
-            <input
-              className="input-field"
-              placeholder="Prénom Nom"
-              value={clientName}
-              onChange={(e) => setClientName(e.target.value)}
-            />
-          </div>
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 500, color: '#888', display: 'block', marginBottom: '8px' }}>
-              Téléphone
-            </label>
-            <input
-              className="input-field"
-              placeholder="+41 XX XXX XX XX"
-              value={clientPhone}
-              onChange={(e) => setClientPhone(e.target.value)}
-            />
-          </div>
-          {provider.modes.includes('domicile') && (
-            <div style={{ marginBottom: '24px' }}>
-              <label style={{ fontSize: '13px', fontWeight: 500, color: '#888', display: 'block', marginBottom: '8px' }}>
-                Adresse de prestation
-              </label>
-              <input
-                className="input-field"
-                placeholder="Rue, Numéro, Ville"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-              />
-            </div>
-          )}
-
-          <button
-            onClick={() => setStep('recap')}
+          <p style={{ color: '#888', fontSize: '14px', marginBottom: '20px' }}>
+            Où souhaitez-vous recevoir le professionnel ?
+          </p>
+          <textarea
+            placeholder="Entrez votre adresse complète..."
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+            rows={4}
             style={{
               width: '100%',
-              background: '#E8C89A',
-              border: 'none',
+              background: '#1A1A1A',
+              border: '1px solid #2A2A2A',
               borderRadius: '12px',
+              padding: '14px',
+              color: '#fff',
+              fontSize: '15px',
+              fontFamily: "'Inter', sans-serif",
+              outline: 'none',
+              resize: 'none',
+              marginBottom: '20px',
+            }}
+          />
+          <button
+            onClick={() => setStep('recap')}
+            disabled={!address.trim()}
+            className="btn-tap-gold"
+            style={{
+              width: '100%',
+              background: address.trim() ? '#E8C89A' : '#222',
+              border: 'none',
+              borderRadius: '50px',
               padding: '16px',
-              color: '#0a0a0a',
+              color: address.trim() ? '#0a0a0a' : '#444',
               fontWeight: 700,
-              cursor: 'pointer',
-              fontSize: '14px',
+              cursor: address.trim() ? 'pointer' : 'not-allowed',
+              fontSize: '15px',
             }}
           >
-            Voir le récapitulatif →
+            Continuer →
           </button>
         </div>
       </div>
     );
   }
 
-  // ── DATE/TIME ─────────────────────────────────────────────────────────────
+  // ── DATETIME ──────────────────────────────────────────────────────────────
   if (step === 'datetime') {
     return (
       <div style={{ background: '#0A0A0A', minHeight: '100vh' }}>
@@ -663,103 +707,113 @@ export default function BookingFlow() {
           }}
         >
           <button
-            onClick={() => navigate('providerDetail', { provider })}
+            onClick={() => setStep('service')}
             style={{ background: '#1A1A1A', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff' }}
           >
             <ChevronLeft size={18} />
           </button>
-          <div>
-            <h1 style={{ fontWeight: 900, fontSize: '18px' }}>Choisir la date</h1>
-            <p style={{ fontSize: '12px', color: '#666' }}>
-              {selectedService?.name} · {provider.name}
-            </p>
-          </div>
+          <h1 style={{ fontWeight: 900, fontSize: '18px', color: '#fff' }}>Date & Heure</h1>
         </div>
 
-        <div style={{ padding: '24px 20px', maxWidth: '400px', margin: '0 auto' }}>
-          {/* Days */}
-          <div style={{ marginBottom: '24px' }}>
-            <p style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#666', marginBottom: '12px' }}>
-              Jour
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-              {days.map((day) => (
-                <button
-                  key={day.dateStr}
-                  onClick={() => setSelectedDate(day.dateStr)}
-                  style={{
-                    padding: '12px 8px',
-                    borderRadius: '12px',
-                    textAlign: 'center',
-                    cursor: 'pointer',
-                    border: 'none',
-                    background: selectedDate === day.dateStr ? '#E8C89A' : '#1A1A1A',
-                    outline: `1px solid ${selectedDate === day.dateStr ? '#E8C89A' : '#333'}`,
-                    color: selectedDate === day.dateStr ? '#0A0A0A' : '#fff',
-                    transition: 'all 200ms',
-                  }}
-                >
-                  <div
-                    style={{
-                      fontSize: '10px',
-                      fontWeight: 700,
-                      color: selectedDate === day.dateStr ? '#0A0A0A' : '#666',
-                      marginBottom: '4px',
-                    }}
-                  >
-                    {day.label}
-                  </div>
-                  <div style={{ fontSize: '18px', fontWeight: 900 }}>{day.num}</div>
-                </button>
-              ))}
-            </div>
+        <div style={{ padding: '24px 20px' }}>
+          <p
+            style={{
+              color: '#888',
+              fontSize: '13px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: '12px',
+            }}
+          >
+            Choisissez une date
+          </p>
+          <div
+            style={{
+              display: 'flex',
+              gap: '8px',
+              overflowX: 'auto',
+              paddingBottom: '8px',
+              marginBottom: '24px',
+              scrollbarWidth: 'none',
+            }}
+          >
+            {days.map((day) => (
+              <button
+                key={day.dateStr}
+                onClick={() => setSelectedDate(day.dateStr)}
+                style={{
+                  flexShrink: 0,
+                  width: '60px',
+                  padding: '12px 8px',
+                  borderRadius: '12px',
+                  border: 'none',
+                  background: selectedDate === day.dateStr ? '#E8C89A' : '#1A1A1A',
+                  color: selectedDate === day.dateStr ? '#0A0A0A' : '#888',
+                  cursor: 'pointer',
+                  textAlign: 'center',
+                }}
+              >
+                <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{day.label}</div>
+                <div style={{ fontSize: '18px', fontWeight: 700 }}>{day.num}</div>
+              </button>
+            ))}
           </div>
 
-          {/* Time slots */}
-          {selectedDate && (
-            <div style={{ marginBottom: '24px' }}>
-              <p style={{ fontSize: '11px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#666', marginBottom: '12px' }}>
-                Heure
-              </p>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-                {TIME_SLOTS.map((slot) => (
-                  <button
-                    key={slot}
-                    onClick={() => setSelectedTime(slot)}
-                    style={{
-                      padding: '8px 4px',
-                      borderRadius: '8px',
-                      fontSize: '13px',
-                      fontWeight: 500,
-                      textAlign: 'center',
-                      cursor: 'pointer',
-                      border: 'none',
-                      background: selectedTime === slot ? '#E8C89A' : '#1A1A1A',
-                      outline: `1px solid ${selectedTime === slot ? '#E8C89A' : '#333'}`,
-                      color: selectedTime === slot ? '#0A0A0A' : '#fff',
-                      transition: 'all 200ms',
-                    }}
-                  >
-                    {slot}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
+          <p
+            style={{
+              color: '#888',
+              fontSize: '13px',
+              fontWeight: 600,
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              marginBottom: '12px',
+            }}
+          >
+            Choisissez une heure
+          </p>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '8px',
+              marginBottom: '24px',
+            }}
+          >
+            {TIME_SLOTS.map((slot) => (
+              <button
+                key={slot}
+                onClick={() => setSelectedTime(slot)}
+                style={{
+                  padding: '10px 4px',
+                  borderRadius: '10px',
+                  border: 'none',
+                  background: selectedTime === slot ? '#E8C89A' : '#1A1A1A',
+                  color: selectedTime === slot ? '#0A0A0A' : '#888',
+                  fontSize: '13px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                {slot}
+              </button>
+            ))}
+          </div>
 
           <button
             onClick={() => setStep('address')}
             disabled={!selectedDate || !selectedTime}
+            className="btn-tap-gold"
             style={{
               width: '100%',
               background: selectedDate && selectedTime ? '#E8C89A' : '#222',
               border: 'none',
-              borderRadius: '12px',
+              borderRadius: '50px',
               padding: '16px',
               color: selectedDate && selectedTime ? '#0a0a0a' : '#444',
               fontWeight: 700,
               cursor: selectedDate && selectedTime ? 'pointer' : 'not-allowed',
-              fontSize: '14px',
+              fontSize: '15px',
             }}
           >
             Continuer →
@@ -782,51 +836,107 @@ export default function BookingFlow() {
         }}
       >
         <button
-          onClick={() => navigate('providerDetail', { provider })}
+          onClick={() => navigate('providerDetail')}
           style={{ background: '#1A1A1A', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff' }}
         >
           <ChevronLeft size={18} />
         </button>
-        <div>
-          <h1 style={{ fontWeight: 900, fontSize: '18px' }}>Choisir un service</h1>
-          <p style={{ fontSize: '12px', color: '#666' }}>{provider.name}</p>
-        </div>
+        <h1 style={{ fontWeight: 900, fontSize: '18px', color: '#fff' }}>Choisir un service</h1>
       </div>
 
-      <div style={{ padding: '24px 20px', maxWidth: '400px', margin: '0 auto' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {[
-            { id: 's1', name: 'Service standard', priceStudio: 50, priceDomicile: 65, duration: '45 min' },
-            { id: 's2', name: 'Service premium', priceStudio: 80, priceDomicile: 100, duration: '60 min' },
-          ].map((service) => (
-            <button
-              key={service.id}
-              onClick={() => {
-                setSelectedService(service);
-                setStep('datetime');
-              }}
-              style={{
-                background: '#1A1A1A',
-                border: '1px solid #333',
-                borderRadius: '16px',
-                padding: '16px',
-                textAlign: 'left',
-                cursor: 'pointer',
-                transition: 'all 200ms',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontWeight: 600, fontSize: '15px', color: '#fff' }}>{service.name}</div>
-                  <div style={{ fontSize: '12px', color: '#666', marginTop: '2px' }}>{service.duration}</div>
-                </div>
-                <div style={{ fontWeight: 700, color: '#E8C89A', fontSize: '16px' }}>
-                  {service.priceStudio} CHF
-                </div>
-              </div>
-            </button>
-          ))}
+      <div style={{ padding: '24px 20px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+          <div
+            style={{
+              width: '48px',
+              height: '48px',
+              borderRadius: '12px',
+              overflow: 'hidden',
+              background: '#222',
+              flexShrink: 0,
+            }}
+          >
+            <img
+              src={provider.coverPhotoUrl}
+              alt={provider.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          </div>
+          <div>
+            <div style={{ fontWeight: 700, color: '#fff', fontSize: '16px' }}>{provider.name}</div>
+            <div style={{ fontSize: '13px', color: '#888' }}>{provider.category}</div>
+          </div>
         </div>
+
+        <p
+          style={{
+            color: '#888',
+            fontSize: '13px',
+            fontWeight: 600,
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            marginBottom: '16px',
+          }}
+        >
+          Services disponibles
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+          {/* Fallback services if none passed */}
+          {[
+            { id: 's1', name: 'Service standard', priceStudio: 50, priceDomicile: 60, duration: '45 min' },
+            { id: 's2', name: 'Service premium', priceStudio: 80, priceDomicile: 90, duration: '60 min' },
+          ].map((service) => {
+            const isSelected = selectedService?.id === service.id;
+            const price = service.priceDomicile ?? service.priceStudio ?? 0;
+            return (
+              <button
+                key={service.id}
+                onClick={() => setSelectedService(service)}
+                style={{
+                  background: isSelected ? 'rgba(232,200,154,0.08)' : '#1A1A1A',
+                  border: `1px solid ${isSelected ? '#E8C89A' : '#2A2A2A'}`,
+                  borderRadius: '16px',
+                  padding: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
+                    {service.name}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#666' }}>{service.duration}</div>
+                </div>
+                <div style={{ fontSize: '20px', fontWeight: 800, color: '#E8C89A', flexShrink: 0, marginLeft: '12px' }}>
+                  {price} CHF
+                </div>
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          onClick={() => selectedService && setStep('datetime')}
+          disabled={!selectedService}
+          className="btn-tap-gold"
+          style={{
+            width: '100%',
+            background: selectedService ? '#E8C89A' : '#222',
+            border: 'none',
+            borderRadius: '50px',
+            padding: '16px',
+            color: selectedService ? '#0a0a0a' : '#444',
+            fontWeight: 700,
+            cursor: selectedService ? 'pointer' : 'not-allowed',
+            fontSize: '15px',
+          }}
+        >
+          Continuer →
+        </button>
       </div>
     </div>
   );

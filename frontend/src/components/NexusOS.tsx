@@ -1,316 +1,325 @@
 import React, { useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useAppContext } from '../context/AppContext';
-import { useAuthContext } from '../context/AuthContext';
-import { useGetBookingsByProfessional, useUpdateBookingStatus } from '../hooks/useQueries';
-import { BookingStatus } from '../backend';
-import { Check, X, TrendingUp, Edit, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import NotificationCenter from './NotificationCenter';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
+import GlobalHeader from './GlobalHeader';
+import BottomNav from './BottomNav';
+import type { LocalBooking } from '../context/AppContext';
 
-type ProTab = 'radar' | 'wallet' | 'portfolio' | 'agenda';
+type TabId = 'radar' | 'wallet' | 'portfolio' | 'agenda';
 
 export default function NexusOS() {
-  const { navigate, proProfile, walletBalance, escrowBalance } = useAppContext();
-  const { logout, principal } = useAuthContext();
-  const [activeTab, setActiveTab] = useState<ProTab>('radar');
-  const [radarSubTab, setRadarSubTab] = useState<'pending' | 'confirmed' | 'history'>('pending');
+  const { navigate, bookings, proProfile } = useAppContext();
+  const { clear } = useInternetIdentity();
+  const queryClient = useQueryClient();
+  const [activeTab, setActiveTab] = useState<TabId>('radar');
 
-  const { data: bookings } = useGetBookingsByProfessional(principal);
-  const updateStatus = useUpdateBookingStatus();
-
-  const pendingBookings = bookings?.filter((b) => (b.status as unknown as string) === BookingStatus.pending) ?? [];
-  const confirmedBookings = bookings?.filter((b) => (b.status as unknown as string) === BookingStatus.confirmed) ?? [];
-  const cancelledBookings = bookings?.filter((b) => (b.status as unknown as string) === BookingStatus.cancelled) ?? [];
-  const pendingCount = pendingBookings.length;
-
-  // Demo requests for display
-  const DEMO_REQUESTS = [
-    { id: 'br1', clientName: 'Sophie Martin', clientRating: 4.8, service: 'Coupe homme', date: 'Aujourd\'hui', time: '20:00', location: '1,8 km de vous', price: 55 },
-    { id: 'br2', clientName: 'Marc Dubois', clientRating: 4.5, service: 'Barbe', date: 'Demain', time: '10:30', location: '3,2 km de vous', price: 25 },
-  ];
-
-  const trialDaysLeft = proProfile.trialStartDate
-    ? Math.max(0, 7 - Math.floor((Date.now() - proProfile.trialStartDate) / 86400000))
-    : 7;
+  const pendingBookings = bookings?.filter((b) => b.status === 'pending') ?? [];
+  const hasPendingBookings = pendingBookings.length > 0;
 
   const handleLogout = async () => {
-    await logout();
+    await clear();
+    queryClient.clear();
     navigate('splash');
   };
 
-  const handleAccept = async (bookingId: string) => {
-    try {
-      await updateStatus.mutateAsync({ bookingId, status: BookingStatus.confirmed });
-      toast.success('Réservation acceptée ✅');
-    } catch {
-      toast.success('Réservation acceptée ✅');
-    }
-  };
-
-  const handleRefuse = async (bookingId: string) => {
-    try {
-      await updateStatus.mutateAsync({ bookingId, status: BookingStatus.cancelled });
-      toast.error('Réservation refusée');
-    } catch {
-      toast.error('Réservation refusée');
-    }
-  };
+  const tabs: { id: TabId; label: string; emoji: string }[] = [
+    { id: 'radar', label: 'RADAR', emoji: '📡' },
+    { id: 'wallet', label: 'WALLET', emoji: '💰' },
+    { id: 'portfolio', label: 'PORTFOLIO', emoji: '🎨' },
+    { id: 'agenda', label: 'AGENDA', emoji: '📅' },
+  ];
 
   return (
-    <div style={{ background: '#0A0A0A', minHeight: '100vh' }}>
-      {/* Header */}
-      <div style={{ padding: '16px 20px', borderBottom: '1px solid #1A1A1A', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ fontFamily: 'Inter, sans-serif', fontSize: '20px', fontWeight: 900, color: '#E8C89A', cursor: 'pointer' }} onClick={() => navigate('explorer')}>
-          NEXUS<span style={{ display: 'inline-block', width: '6px', height: '6px', background: '#3B82F6', borderRadius: '50%', marginLeft: '3px', marginBottom: '8px', verticalAlign: 'bottom' }} />
-        </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {proProfile.subscriptionActive && (
-            <div style={{ background: 'rgba(232,200,154,0.1)', border: '1px solid rgba(232,200,154,0.2)', borderRadius: '20px', padding: '4px 10px', fontSize: '11px', fontWeight: 700, color: '#E8C89A' }}>
-              Essai gratuit : J-{trialDaysLeft}
-            </div>
-          )}
-          <NotificationCenter />
-          <button onClick={() => navigate('explorer')} style={{ background: '#1A1A1A', border: '1px solid #333', borderRadius: '20px', color: '#888', fontSize: '11px', fontWeight: 700, padding: '6px 12px', cursor: 'pointer' }}>
-            ⇄ Client
-          </button>
-          <button onClick={handleLogout} style={{ background: 'transparent', border: '1px solid #333', borderRadius: '20px', color: '#555', fontSize: '11px', fontWeight: 700, padding: '6px 12px', cursor: 'pointer' }}>
-            Déco
-          </button>
-        </div>
-      </div>
+    <div
+      className="screen-transition"
+      style={{ minHeight: '100dvh', backgroundColor: '#0A0A0A', paddingTop: '56px', paddingBottom: '80px' }}
+    >
+      <GlobalHeader hasNotifications={hasPendingBookings} />
 
-      {/* Page title */}
-      <div style={{ padding: '16px 20px 0' }}>
-        <h1 style={{ fontSize: '22px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.5px' }}>Mon Business</h1>
-      </div>
-
-      {/* Tabs */}
-      <div style={{ display: 'flex', borderBottom: '1px solid #1A1A1A', padding: '0 20px', marginTop: '8px' }}>
-        {(['radar', 'wallet', 'portfolio', 'agenda'] as ProTab[]).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
+      <div style={{ padding: '24px 16px 0' }}>
+        {/* Pro header */}
+        <div style={{ marginBottom: '24px' }}>
+          <h1
             style={{
-              background: 'transparent',
-              border: 'none',
-              borderBottom: activeTab === tab ? '2px solid #E8C89A' : '2px solid transparent',
-              color: activeTab === tab ? '#E8C89A' : '#555',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '12px',
+              color: '#FFFFFF',
+              fontSize: '28px',
               fontWeight: 700,
-              textTransform: 'uppercase',
-              letterSpacing: '0.08em',
-              padding: '12px 16px',
-              cursor: 'pointer',
-              transition: 'all 200ms ease-in-out',
-              position: 'relative',
+              fontFamily: "'Inter', sans-serif",
+              letterSpacing: '-0.01em',
+              marginBottom: '4px',
             }}
           >
-            {tab === 'radar' ? 'RADAR' : tab === 'wallet' ? 'WALLET' : tab === 'portfolio' ? 'PORTFOLIO' : 'AGENDA'}
-            {tab === 'radar' && pendingCount > 0 && (
-              <span style={{ position: 'absolute', top: '8px', right: '4px', width: '8px', height: '8px', borderRadius: '50%', background: '#ef4444', display: 'inline-block' }} className="red-pulse" />
-            )}
-          </button>
-        ))}
-      </div>
+            Espace Pro
+          </h1>
+          <p style={{ color: '#888888', fontSize: '15px', fontFamily: "'Inter', sans-serif" }}>
+            {proProfile?.brandName ?? 'Professionnel'}
+          </p>
+        </div>
 
-      {/* Tab Content */}
-      <div style={{ padding: '20px' }}>
+        {/* Stats row */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr 1fr',
+            gap: '12px',
+            marginBottom: '24px',
+          }}
+        >
+          {[
+            { label: 'Demandes', value: pendingBookings.length.toString(), color: '#E8C89A' },
+            { label: 'Ce mois', value: '0 CHF', color: '#22C55E' },
+            { label: 'Note', value: '—', color: '#4F6EF7' },
+          ].map((stat) => (
+            <div
+              key={stat.label}
+              style={{
+                backgroundColor: '#111111',
+                borderRadius: '12px',
+                padding: '14px 12px',
+                textAlign: 'center',
+                border: '1px solid #1F1F1F',
+              }}
+            >
+              <div
+                style={{
+                  color: stat.color,
+                  fontWeight: 700,
+                  fontSize: '20px',
+                  fontFamily: "'Inter', sans-serif",
+                  marginBottom: '4px',
+                }}
+              >
+                {stat.value}
+              </div>
+              <div style={{ color: '#555555', fontSize: '11px', fontFamily: "'Inter', sans-serif", letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+                {stat.label}
+              </div>
+            </div>
+          ))}
+        </div>
 
-        {/* RADAR */}
+        {/* Tabs */}
+        <div
+          className="scroll-no-bar"
+          style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}
+        >
+          {tabs.map((tab) => {
+            const isActive = activeTab === tab.id;
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className="btn-tap"
+                style={{
+                  flexShrink: 0,
+                  backgroundColor: isActive ? '#E8C89A' : '#1A1A1A',
+                  color: isActive ? '#0A0A0A' : '#888888',
+                  fontFamily: "'Inter', sans-serif",
+                  fontWeight: isActive ? 700 : 400,
+                  fontSize: '13px',
+                  letterSpacing: '0.05em',
+                  border: isActive ? 'none' : '1px solid #2A2A2A',
+                  borderRadius: '50px',
+                  padding: '10px 18px',
+                  cursor: 'pointer',
+                  position: 'relative',
+                }}
+              >
+                {tab.emoji} {tab.label}
+                {tab.id === 'radar' && hasPendingBookings && (
+                  <span
+                    className="red-badge-pulse"
+                    style={{
+                      position: 'absolute',
+                      top: '4px',
+                      right: '4px',
+                      width: '8px',
+                      height: '8px',
+                      backgroundColor: '#EF4444',
+                      borderRadius: '50%',
+                      border: '1.5px solid #0A0A0A',
+                    }}
+                  />
+                )}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* Tab content */}
         {activeTab === 'radar' && (
           <div>
-            <div style={{ display: 'flex', gap: '8px', marginBottom: '20px' }}>
-              {(['pending', 'confirmed', 'history'] as const).map((sub) => (
-                <button
-                  key={sub}
-                  onClick={() => setRadarSubTab(sub)}
+            {pendingBookings.length === 0 ? (
+              <div
+                style={{
+                  textAlign: 'center',
+                  padding: '48px 24px',
+                  color: '#555555',
+                  fontFamily: "'Inter', sans-serif",
+                }}
+              >
+                <div style={{ fontSize: '40px', marginBottom: '16px' }}>📡</div>
+                <p style={{ fontSize: '16px', color: '#888888', fontWeight: 600, marginBottom: '8px' }}>
+                  Aucune demande en attente
+                </p>
+                <p style={{ fontSize: '14px' }}>Les nouvelles réservations apparaîtront ici</p>
+              </div>
+            ) : (
+              pendingBookings.map((booking: LocalBooking) => (
+                <div
+                  key={booking.id}
                   style={{
-                    padding: '6px 14px',
-                    borderRadius: '20px',
-                    fontSize: '12px',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    border: 'none',
-                    background: radarSubTab === sub ? '#E8C89A' : '#1A1A1A',
-                    color: radarSubTab === sub ? '#0A0A0A' : '#666',
-                    transition: 'all 200ms',
+                    backgroundColor: '#111111',
+                    borderRadius: '16px',
+                    padding: '16px',
+                    marginBottom: '12px',
+                    border: '1px solid #1F1F1F',
                   }}
                 >
-                  {sub === 'pending' ? `En attente${pendingCount > 0 ? ` (${pendingCount})` : ''}` : sub === 'confirmed' ? 'Confirmées' : 'Historique'}
-                </button>
-              ))}
-            </div>
-
-            {radarSubTab === 'pending' && (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {DEMO_REQUESTS.map((req) => (
-                  <div key={req.id} style={{ background: '#1A1A1A', borderRadius: '16px', padding: '18px', border: '1px solid #222' }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: '#E8C89A', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#0A0A0A', fontWeight: 900, fontSize: '13px' }}>
-                          {req.clientName.charAt(0)}
-                        </div>
-                        <div>
-                          <div style={{ fontWeight: 700, fontSize: '14px' }}>{req.clientName}</div>
-                          <div style={{ fontSize: '11px', color: '#888' }}>⭐ {req.clientRating}</div>
-                        </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '12px' }}>
+                    <div>
+                      <div style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '16px', fontFamily: "'Inter', sans-serif", marginBottom: '4px' }}>
+                        {booking.clientName ?? 'Client'}
                       </div>
-                      <div style={{ fontWeight: 900, fontSize: '18px', color: '#E8C89A' }}>{req.price} CHF</div>
+                      <div style={{ color: '#888888', fontSize: '14px', fontFamily: "'Inter', sans-serif" }}>
+                        {booking.serviceName ?? 'Service'}
+                      </div>
                     </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', padding: '10px', background: 'rgba(255,255,255,0.03)', borderRadius: '8px', marginBottom: '12px', fontSize: '12px' }}>
-                      <div><div style={{ color: '#444', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Service</div><div style={{ fontWeight: 600 }}>{req.service}</div></div>
-                      <div><div style={{ color: '#444', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Heure</div><div style={{ fontWeight: 600 }}>{req.date} {req.time}</div></div>
-                      <div><div style={{ color: '#444', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: '2px' }}>Distance</div><div style={{ fontWeight: 600 }}>{req.location}</div></div>
-                    </div>
-
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                      <button onClick={() => handleAccept(req.id)} style={{ flex: 1, background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.3)', borderRadius: '10px', padding: '10px', color: '#4ade80', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                        <Check size={14} /> ✅ ACCEPTER
-                      </button>
-                      <button onClick={() => handleRefuse(req.id)} style={{ flex: 1, background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.3)', borderRadius: '10px', padding: '10px', color: '#f87171', fontWeight: 700, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
-                        <X size={14} /> ❌ DÉCLINER
-                      </button>
-                    </div>
+                    <span
+                      style={{
+                        backgroundColor: 'rgba(232,200,154,0.1)',
+                        color: '#E8C89A',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        fontFamily: "'Inter', sans-serif",
+                        padding: '4px 10px',
+                        borderRadius: '50px',
+                        border: '1px solid rgba(232,200,154,0.2)',
+                      }}
+                    >
+                      En attente
+                    </span>
                   </div>
-                ))}
-              </div>
-            )}
-
-            {radarSubTab === 'confirmed' && (
-              <div style={{ background: '#1A1A1A', borderRadius: '16px', padding: '40px', textAlign: 'center', border: '1px solid #222' }}>
-                <div style={{ fontSize: '40px', marginBottom: '12px' }}>📅</div>
-                <p style={{ color: '#444', fontSize: '14px' }}>Aucun rendez-vous confirmé</p>
-              </div>
-            )}
-
-            {radarSubTab === 'history' && (
-              <div style={{ background: '#1A1A1A', borderRadius: '16px', padding: '40px', textAlign: 'center', border: '1px solid #222' }}>
-                <div style={{ fontSize: '40px', marginBottom: '12px' }}>📋</div>
-                <p style={{ color: '#444', fontSize: '14px' }}>Aucun historique disponible</p>
-              </div>
+                  <div style={{ display: 'flex', gap: '16px', marginBottom: '14px' }}>
+                    <span style={{ color: '#666666', fontSize: '13px', fontFamily: "'Inter', sans-serif" }}>
+                      📅 {booking.date ?? '—'}
+                    </span>
+                    <span style={{ color: '#666666', fontSize: '13px', fontFamily: "'Inter', sans-serif" }}>
+                      🕐 {booking.timeSlot ?? '—'}
+                    </span>
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      className="btn-tap"
+                      style={{
+                        flex: 1,
+                        backgroundColor: '#22C55E',
+                        color: '#FFFFFF',
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        border: 'none',
+                        borderRadius: '50px',
+                        padding: '10px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ✓ Accepter
+                    </button>
+                    <button
+                      className="btn-tap"
+                      style={{
+                        flex: 1,
+                        backgroundColor: 'rgba(239,68,68,0.1)',
+                        color: '#EF4444',
+                        fontFamily: "'Inter', sans-serif",
+                        fontWeight: 700,
+                        fontSize: '13px',
+                        border: '1px solid rgba(239,68,68,0.3)',
+                        borderRadius: '50px',
+                        padding: '10px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      ✕ Refuser
+                    </button>
+                  </div>
+                </div>
+              ))
             )}
           </div>
         )}
 
-        {/* WALLET */}
         {activeTab === 'wallet' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div style={{ background: 'linear-gradient(135deg, rgba(232,200,154,0.15), rgba(232,200,154,0.05))', border: '1px solid rgba(232,200,154,0.2)', borderRadius: '20px', padding: '24px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-                <div>
-                  <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Disponible</div>
-                  <div style={{ fontSize: '36px', fontWeight: 900, color: '#E8C89A' }}>{walletBalance} CHF</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '12px', color: '#888', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.08em' }}>🔒 En séquestre</div>
-                  <div style={{ fontSize: '24px', fontWeight: 700, color: '#888' }}>{escrowBalance} CHF</div>
-                </div>
-              </div>
-              <button style={{ marginTop: '16px', width: '100%', background: '#E8C89A', border: 'none', borderRadius: '10px', padding: '12px', color: '#0A0A0A', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}>
-                💳 Virer sur mon Revolut
-              </button>
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '12px' }}>
-              {[
-                { label: 'Cette semaine', value: '55 CHF' },
-                { label: 'Ce mois', value: '295 CHF' },
-                { label: 'Total', value: '295 CHF' },
-              ].map((stat) => (
-                <div key={stat.label} style={{ background: '#1A1A1A', borderRadius: '12px', padding: '14px', textAlign: 'center', border: '1px solid #222' }}>
-                  <div style={{ fontWeight: 700, fontSize: '14px', color: '#E8C89A' }}>{stat.value}</div>
-                  <div style={{ fontSize: '10px', color: '#555', marginTop: '4px' }}>{stat.label}</div>
-                </div>
-              ))}
-            </div>
-
-            <div style={{ background: '#1A1A1A', borderRadius: '16px', padding: '20px', border: '1px solid #222' }}>
-              <h3 style={{ fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: '#666', marginBottom: '12px' }}>Historique</h3>
-              {[
-                { service: 'Coupe homme', client: 'Sophie M.', amount: 55, date: 'Aujourd\'hui', status: 'En séquestre' },
-                { service: 'Barbe', client: 'Marc D.', amount: 25, date: 'Hier', status: 'Libéré' },
-              ].map((tx, i) => (
-                <div key={i} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '10px 0', borderBottom: '1px solid #222' }}>
-                  <div>
-                    <div style={{ fontWeight: 600, fontSize: '13px' }}>{tx.service}</div>
-                    <div style={{ fontSize: '11px', color: '#666' }}>{tx.client} · {tx.date}</div>
-                  </div>
-                  <div style={{ textAlign: 'right' }}>
-                    <div style={{ fontWeight: 700, color: '#E8C89A', fontSize: '14px' }}>+{tx.amount} CHF</div>
-                    <div style={{ fontSize: '10px', color: '#555' }}>{tx.status}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div style={{ textAlign: 'center', padding: '48px 24px', color: '#555555', fontFamily: "'Inter', sans-serif" }}>
+            <div style={{ fontSize: '40px', marginBottom: '16px' }}>💰</div>
+            <p style={{ fontSize: '16px', color: '#888888', fontWeight: 600, marginBottom: '8px' }}>Revenus</p>
+            <p style={{ color: '#E8C89A', fontWeight: 700, fontSize: '32px', fontFamily: "'Inter', sans-serif" }}>0 CHF</p>
+            <p style={{ fontSize: '14px', marginTop: '8px' }}>Ce mois-ci</p>
           </div>
         )}
 
-        {/* PORTFOLIO */}
         {activeTab === 'portfolio' && (
-          <div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: 700 }}>Mon Espace Pro</h2>
-              <button onClick={() => navigate('builder')} style={{ background: '#E8C89A', border: 'none', borderRadius: '10px', padding: '8px 16px', color: '#0A0A0A', fontWeight: 700, fontSize: '12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                <Edit size={14} />
-                Modifier
-              </button>
-            </div>
-
-            <div style={{ background: '#1A1A1A', borderRadius: '16px', padding: '20px', border: '1px solid #222', marginBottom: '16px' }}>
-              {proProfile.brandName ? (
-                <div>
-                  <div style={{ fontWeight: 700, fontSize: '18px', marginBottom: '4px' }}>{proProfile.brandName}</div>
-                  <div style={{ fontSize: '13px', color: '#888', marginBottom: '8px' }}>{proProfile.category} · {proProfile.city}</div>
-                  {proProfile.slogan && <div style={{ fontSize: '13px', color: '#E8C89A', fontStyle: 'italic' }}>{proProfile.slogan}</div>}
-                </div>
-              ) : (
-                <div style={{ textAlign: 'center', padding: '20px' }}>
-                  <p style={{ color: '#444', fontSize: '14px', marginBottom: '12px' }}>Votre profil n'est pas encore configuré</p>
-                  <button onClick={() => navigate('builder')} style={{ background: '#E8C89A', border: 'none', borderRadius: '10px', padding: '10px 20px', color: '#0A0A0A', fontWeight: 700, fontSize: '13px', cursor: 'pointer' }}>
-                    Configurer mon profil
-                  </button>
-                </div>
-              )}
-            </div>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              {[
-                { icon: '⭐', label: 'Note', value: '—' },
-                { icon: '⚡', label: 'Réponse', value: '—' },
-                { icon: '✅', label: 'Acceptation', value: '—' },
-                { icon: '🎯', label: 'Prestations', value: '0' },
-              ].map((stat, i) => (
-                <div key={i} style={{ background: '#1A1A1A', borderRadius: '12px', padding: '16px', textAlign: 'center', border: '1px solid #222' }}>
-                  <div style={{ fontSize: '24px', marginBottom: '4px' }}>{stat.icon}</div>
-                  <div style={{ fontWeight: 700, fontSize: '18px', color: '#E8C89A' }}>{stat.value}</div>
-                  <div style={{ fontSize: '10px', color: '#555', marginTop: '4px' }}>{stat.label}</div>
-                </div>
-              ))}
-            </div>
+          <div style={{ textAlign: 'center', padding: '48px 24px', color: '#555555', fontFamily: "'Inter', sans-serif" }}>
+            <div style={{ fontSize: '40px', marginBottom: '16px' }}>🎨</div>
+            <p style={{ fontSize: '16px', color: '#888888', fontWeight: 600, marginBottom: '8px' }}>Portfolio</p>
+            <p style={{ fontSize: '14px' }}>Ajoutez vos photos de travaux</p>
+            <button
+              onClick={() => navigate('builder')}
+              className="btn-tap"
+              style={{
+                marginTop: '20px',
+                backgroundColor: '#E8C89A',
+                color: '#0A0A0A',
+                fontFamily: "'Inter', sans-serif",
+                fontWeight: 700,
+                fontSize: '14px',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+                border: 'none',
+                borderRadius: '50px',
+                padding: '14px 28px',
+                cursor: 'pointer',
+              }}
+            >
+              Modifier le profil
+            </button>
           </div>
         )}
 
-        {/* AGENDA */}
         {activeTab === 'agenda' && (
-          <div style={{ background: '#1A1A1A', borderRadius: '16px', padding: '40px', textAlign: 'center', border: '1px solid #222' }}>
-            <div style={{ fontSize: '40px', marginBottom: '12px' }}>📅</div>
-            <p style={{ color: '#444', fontSize: '14px' }}>Votre agenda apparaîtra ici</p>
+          <div style={{ textAlign: 'center', padding: '48px 24px', color: '#555555', fontFamily: "'Inter', sans-serif" }}>
+            <div style={{ fontSize: '40px', marginBottom: '16px' }}>📅</div>
+            <p style={{ fontSize: '16px', color: '#888888', fontWeight: 600, marginBottom: '8px' }}>Agenda</p>
+            <p style={{ fontSize: '14px' }}>Gérez vos disponibilités</p>
           </div>
         )}
+
+        {/* Logout */}
+        <div style={{ marginTop: '32px', paddingBottom: '16px' }}>
+          <button
+            onClick={handleLogout}
+            className="btn-tap"
+            style={{
+              width: '100%',
+              backgroundColor: 'transparent',
+              color: '#555555',
+              fontFamily: "'Inter', sans-serif",
+              fontWeight: 500,
+              fontSize: '14px',
+              border: '1px solid #1F1F1F',
+              borderRadius: '12px',
+              padding: '14px',
+              cursor: 'pointer',
+            }}
+          >
+            Se déconnecter
+          </button>
+        </div>
       </div>
 
-      {/* Footer */}
-      <footer style={{ padding: '16px 20px', borderTop: '1px solid #1A1A1A', textAlign: 'center' }}>
-        <p style={{ color: '#333', fontSize: '11px' }}>
-          Built with ❤️ using{' '}
-          <a href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`} target="_blank" rel="noopener noreferrer" style={{ color: '#555' }}>
-            caffeine.ai
-          </a>{' '}
-          · © {new Date().getFullYear()} NEXUS
-        </p>
-      </footer>
+      <BottomNav activeTab="reservations" hasPendingBookings={hasPendingBookings} />
     </div>
   );
 }

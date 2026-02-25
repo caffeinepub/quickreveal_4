@@ -1,124 +1,179 @@
-import React, { useEffect, useState } from 'react';
-import { useProContext } from '../context/ProContext';
-import { IconCheck, IconStar } from './icons/Icons';
+import React, { useEffect, useRef, useState } from 'react';
+import Confetti from './Confetti';
 
-export interface SubscriptionSuccessProps {
-  onSuccessComplete: () => void;
+interface SubscriptionSuccessProps {
+  onComplete: () => void;
 }
 
-export default function SubscriptionSuccess({ onSuccessComplete }: SubscriptionSuccessProps) {
-  const { setProActif } = useProContext();
+export default function SubscriptionSuccess({ onComplete }: SubscriptionSuccessProps) {
   const [progress, setProgress] = useState(0);
-  const [phase, setPhase] = useState<'loading' | 'done'>('loading');
+  const [phase, setPhase] = useState<'loading' | 'success'>('loading');
+  const mountedRef = useRef(true);
 
   useEffect(() => {
-    const startTime = Date.now();
-    const duration = 3500;
-    const interval = setInterval(() => {
-      const elapsed = Date.now() - startTime;
-      const pct = Math.min((elapsed / duration) * 100, 100);
-      setProgress(pct);
-      if (pct >= 100) {
-        clearInterval(interval);
-        setPhase('done');
-      }
-    }, 50);
+    mountedRef.current = true;
 
-    const timer = setTimeout(() => {
-      setProActif(true);
-      onSuccessComplete();
+    // Phase 1: progress bar over 2s (2000ms / 40ms = 50 steps of 2%)
+    const interval = setInterval(() => {
+      if (!mountedRef.current) return;
+      setProgress((p) => {
+        if (p >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return p + 2;
+      });
+    }, 40);
+
+    // Phase 2: show success at 2s
+    const t1 = setTimeout(() => {
+      if (!mountedRef.current) return;
+      setPhase('success');
+    }, 2000);
+
+    // Phase 3: call onComplete at 4.5s
+    const t2 = setTimeout(() => {
+      if (!mountedRef.current) return;
+      onComplete();
     }, 4500);
 
+    // CRITICAL CLEANUP
     return () => {
+      mountedRef.current = false;
       clearInterval(interval);
-      clearTimeout(timer);
+      clearTimeout(t1);
+      clearTimeout(t2);
     };
-  }, []);
+  }, []); // empty deps — runs once only
 
   return (
     <div style={{
       position: 'fixed',
       inset: 0,
-      background: 'var(--void)',
+      background: '#050507',
+      zIndex: 9999,
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: 32,
-      zIndex: 2000,
     }}>
-      {/* Animated circle */}
+      {/* Progress bar top */}
       <div style={{
-        width: 100,
-        height: 100,
-        borderRadius: '50%',
-        background: phase === 'done'
-          ? 'rgba(242,208,107,0.2)'
-          : 'rgba(242,208,107,0.08)',
-        border: `2px solid ${phase === 'done' ? 'var(--gold)' : 'rgba(242,208,107,0.3)'}`,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginBottom: 32,
-        transition: 'all 0.5s ease',
-      }}>
-        {phase === 'done' ? (
-          <IconCheck size={40} color="var(--gold)" />
-        ) : (
-          <IconStar size={36} color="var(--gold)" />
-        )}
-      </div>
-
-      <span style={{
-        fontFamily: 'Inter',
-        fontSize: 24,
-        fontWeight: 700,
-        color: 'var(--t1)',
-        textAlign: 'center',
-        marginBottom: 12,
-      }}>
-        {phase === 'done' ? 'Profil active !' : 'Activation en cours...'}
-      </span>
-
-      <span style={{
-        fontFamily: 'Inter',
-        fontSize: 14,
-        color: 'var(--t4)',
-        textAlign: 'center',
-        marginBottom: 40,
-        lineHeight: 1.5,
-      }}>
-        {phase === 'done'
-          ? 'Votre profil est maintenant visible dans l\'Explorer.'
-          : 'Configuration de votre espace professionnel...'}
-      </span>
-
-      {/* Progress bar */}
-      <div style={{
-        width: '100%',
-        maxWidth: 280,
-        height: 4,
-        background: 'rgba(255,255,255,0.08)',
-        borderRadius: 2,
-        overflow: 'hidden',
+        position: 'absolute',
+        top: 0,
+        left: 0,
+        right: 0,
+        height: 3,
+        background: '#1C1C26',
       }}>
         <div style={{
           height: '100%',
           width: `${progress}%`,
-          background: 'var(--gold)',
-          borderRadius: 2,
-          transition: 'width 0.1s linear',
+          background: '#F2D06B',
+          transition: 'width 40ms linear',
         }} />
       </div>
 
-      <span style={{
-        fontFamily: 'Inter',
-        fontSize: 12,
-        color: 'var(--t4)',
-        marginTop: 12,
-      }}>
-        {Math.round(progress)}%
-      </span>
+      {phase === 'loading' && (
+        <>
+          <div style={{
+            width: 48,
+            height: 48,
+            border: '2px solid #1C1C26',
+            borderTopColor: '#F2D06B',
+            borderRadius: '50%',
+            animation: 'nexusSpin 1s linear infinite',
+          }} />
+          <p style={{
+            fontFamily: 'Inter',
+            fontWeight: 600,
+            fontSize: 16,
+            color: '#9898B4',
+            marginTop: 20,
+          }}>
+            Activation en cours...
+          </p>
+        </>
+      )}
+
+      {phase === 'success' && (
+        <>
+          <Confetti />
+
+          <div style={{
+            width: 80,
+            height: 80,
+            borderRadius: '50%',
+            background: 'rgba(0,217,122,0.1)',
+            border: '2px solid #00D97A',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            animation: 'nexusScaleIn 400ms ease-out',
+          }}>
+            <svg
+              width="32"
+              height="32"
+              viewBox="0 0 24 24"
+              stroke="#00D97A"
+              strokeWidth="2"
+              fill="none"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                strokeDasharray: 60,
+                strokeDashoffset: 0,
+                animation: 'nexusDrawCheck 600ms ease-out',
+              }}
+            >
+              <polyline points="20 6 9 17 4 12" />
+            </svg>
+          </div>
+
+          <p style={{
+            fontFamily: 'Inter',
+            fontWeight: 800,
+            fontSize: 28,
+            color: '#F4F4F8',
+            marginTop: 24,
+            textAlign: 'center',
+          }}>
+            Profil active
+          </p>
+          <p style={{
+            fontFamily: 'Inter',
+            fontWeight: 400,
+            fontSize: 15,
+            color: '#9898B4',
+            marginTop: 8,
+            textAlign: 'center',
+            padding: '0 32px',
+            lineHeight: 1.6,
+          }}>
+            Vous etes maintenant visible par les clients de votre zone.
+          </p>
+        </>
+      )}
+
+      <style>{`
+        @keyframes nexusSpin {
+          to { transform: rotate(360deg); }
+        }
+        @keyframes nexusScaleIn {
+          from {
+            transform: scale(0.5);
+            opacity: 0;
+          }
+          to {
+            transform: scale(1);
+            opacity: 1;
+          }
+        }
+        @keyframes nexusDrawCheck {
+          from { stroke-dashoffset: 60; }
+          to { stroke-dashoffset: 0; }
+        }
+      `}</style>
     </div>
   );
 }

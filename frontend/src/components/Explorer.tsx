@@ -1,115 +1,122 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { DEMO_PROS } from '../data/mockData';
-import { IconSearch, IconStar } from './icons/Icons';
+import { DEMO_PROS } from '../utils/demoData';
+import { IconSearch, IconStar, IconFlash } from './icons/Icons';
 
-const CATEGORIES = ['Tous', 'Barber', 'Coiffure', 'Esthetique', 'Massage'];
+const CATEGORIES = [
+  { id: 'all', label: 'Tous' },
+  { id: 'barber', label: 'Barbier' },
+  { id: 'coiffure', label: 'Coiffure' },
+  { id: 'esthetique', label: 'Esthetique' },
+  { id: 'massage', label: 'Massage' },
+];
 
 export default function Explorer() {
   const { navigateTo, setSelectedPro } = useAppContext();
-  const [activeCategory, setActiveCategory] = useState('Tous');
+  const [activeCategory, setActiveCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filteredPros = DEMO_PROS.filter(pro => {
-    const matchCat = activeCategory === 'Tous' || pro.categorie.toLowerCase() === activeCategory.toLowerCase();
-    const matchSearch = !searchQuery ||
-      pro.prenom.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      pro.ville.toLowerCase().includes(searchQuery.toLowerCase());
+  const filteredPros = DEMO_PROS.filter((p) => {
+    const matchCat = activeCategory === 'all' || p.categorie === activeCategory;
+    const matchSearch =
+      !searchQuery ||
+      p.prenom.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.ville.toLowerCase().includes(searchQuery.toLowerCase());
     return matchCat && matchSearch;
   });
 
+  const handleProClick = (pro: typeof DEMO_PROS[0]) => {
+    setSelectedPro(pro as any);
+    navigateTo('proFiche');
+  };
+
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--void)', paddingBottom: '80px' }}>
-      {/* Header */}
-      <div style={{ padding: '20px 20px 0' }}>
-        <h1 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 900, fontSize: '28px', color: 'var(--t1)', letterSpacing: '-0.04em', marginBottom: '16px' }}>
-          Explorer
-        </h1>
+    <div style={{ minHeight: '100vh', background: 'var(--void)', paddingBottom: 80, fontFamily: 'Inter, sans-serif' }}>
+      <div style={{ padding: '52px 20px 20px' }}>
+        <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--t1)', marginBottom: 4 }}>Explorer</h1>
+        <p style={{ fontSize: 14, color: 'var(--t4)', marginBottom: 20 }}>Professionnels disponibles pres de vous</p>
 
         {/* Search */}
-        <div style={{ position: 'relative', marginBottom: '16px' }}>
-          <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}>
-            <IconSearch size={16} color="var(--t4)" />
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'var(--d2)', borderRadius: 14, padding: '12px 16px', border: '1px solid rgba(255,255,255,0.06)', marginBottom: 16 }}>
+          <IconSearch size={18} color="var(--t4)" />
           <input
-            type="text"
-            placeholder="Rechercher..."
             value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            style={{ width: '100%', height: '46px', background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '12px', paddingLeft: '40px', paddingRight: '16px', fontFamily: 'Inter, sans-serif', fontSize: '14px', color: 'var(--t1)', outline: 'none', boxSizing: 'border-box' }}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Rechercher..."
+            style={{ flex: 1, background: 'none', border: 'none', outline: 'none', color: 'var(--t1)', fontFamily: 'Inter, sans-serif', fontSize: 15 }}
           />
         </div>
 
-        {/* Category filters */}
-        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', marginBottom: '20px', scrollbarWidth: 'none' }}>
-          {CATEGORIES.map(cat => (
+        {/* Categories */}
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', scrollbarWidth: 'none', marginBottom: 24 }}>
+          {CATEGORIES.map((cat) => (
             <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
+              key={cat.id}
+              onClick={() => setActiveCategory(cat.id)}
               style={{
                 flexShrink: 0,
-                height: '34px',
-                padding: '0 16px',
-                borderRadius: '999px',
-                border: `1px solid ${activeCategory === cat ? 'var(--gold)' : 'var(--edge1)'}`,
-                background: activeCategory === cat ? 'rgba(242,208,107,0.1)' : 'var(--d2)',
-                color: activeCategory === cat ? 'var(--gold)' : 'var(--t3)',
+                padding: '8px 16px',
+                borderRadius: 20,
+                border: activeCategory === cat.id ? 'none' : '1px solid rgba(255,255,255,0.08)',
+                background: activeCategory === cat.id ? '#F2D06B' : 'var(--d2)',
+                color: activeCategory === cat.id ? '#050507' : 'var(--t3)',
                 fontFamily: 'Inter, sans-serif',
-                fontWeight: activeCategory === cat ? 600 : 400,
-                fontSize: '13px',
+                fontWeight: activeCategory === cat.id ? 700 : 500,
+                fontSize: 13,
                 cursor: 'pointer',
               }}
             >
-              {cat}
+              {cat.label}
             </button>
           ))}
         </div>
       </div>
 
       {/* Pro list */}
-      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-        {filteredPros.map(pro => (
-          <button
+      <div style={{ padding: '0 20px' }}>
+        {filteredPros.map((pro) => (
+          <div
             key={pro.id}
-            onClick={() => {
-              setSelectedPro(pro);
-              navigateTo('providerDetail');
-            }}
+            onClick={() => handleProClick(pro)}
             style={{
-              width: '100%',
-              background: 'transparent',
-              border: 'none',
-              borderBottom: '1px solid var(--edge1)',
-              padding: '16px 0',
-              cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
-              gap: '14px',
-              textAlign: 'left',
+              gap: 14,
+              padding: '14px 0',
+              borderBottom: '1px solid rgba(255,255,255,0.04)',
+              cursor: 'pointer',
             }}
           >
             {/* Avatar */}
-            <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: pro.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '18px', color: 'var(--t1)' }}>{pro.initials}</span>
+            <div style={{ width: 52, height: 52, borderRadius: 14, overflow: 'hidden', flexShrink: 0, background: pro.gradient }}>
+              <img
+                src={pro.coverUrl}
+                alt={pro.prenom}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }}
+              />
             </div>
+
+            {/* Info */}
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '15px', color: 'var(--t1)', marginBottom: '2px' }}>
-                {pro.prenom} {pro.nom}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 2 }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: 'var(--t1)' }}>{pro.prenom} {pro.nom}</span>
+                {pro.flashActif && <IconFlash size={12} color="#F2D06B" />}
               </div>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '12px', color: 'var(--t3)', marginBottom: '4px' }}>
-                {pro.categorie} · {pro.ville}
-              </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                <IconStar size={11} color="var(--gold)" />
-                <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '12px', color: 'var(--gold)' }}>{pro.note}</span>
-              </div>
+              <div style={{ fontSize: 12, color: 'var(--t3)' }}>{pro.categorie} · {pro.ville}</div>
             </div>
+
+            {/* Right */}
             <div style={{ textAlign: 'right', flexShrink: 0 }}>
-              {/* Use startingPrice (new field name) */}
-              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '15px', color: 'var(--t1)' }}>des {pro.startingPrice}</div>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '11px', color: 'var(--t3)' }}>CHF</div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 3, justifyContent: 'flex-end', marginBottom: 2 }}>
+                <IconStar size={11} color="#F2D06B" />
+                <span style={{ fontSize: 13, fontWeight: 700, color: 'var(--t1)' }}>{pro.note}</span>
+              </div>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: 15, color: 'var(--t1)' }}>
+                des {pro.prixDepuis} CHF
+              </div>
             </div>
-          </button>
+          </div>
         ))}
       </div>
     </div>

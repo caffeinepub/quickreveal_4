@@ -1,166 +1,356 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { IconArrowLeft, IconStar, IconClock, IconFlash, IconCheck } from './icons/Icons';
-
-function useCountUp(target: number, duration: number, start: boolean) {
-  const [value, setValue] = useState(0);
-  useEffect(() => {
-    if (!start) return;
-    let startTime: number | null = null;
-    const step = (timestamp: number) => {
-      if (!startTime) startTime = timestamp;
-      const progress = Math.min((timestamp - startTime) / duration, 1);
-      const eased = 1 - Math.pow(1 - progress, 3);
-      setValue(Math.round(eased * target));
-      if (progress < 1) requestAnimationFrame(step);
-    };
-    requestAnimationFrame(step);
-  }, [target, duration, start]);
-  return value;
-}
+import { IconArrowLeft, IconStar, IconFlash, IconClock } from './icons/Icons';
 
 export default function ProFiche() {
-  const { selectedPro, setCurrentScreen } = useAppContext();
-  const [animStart, setAnimStart] = useState(false);
-
-  useEffect(() => {
-    const t = setTimeout(() => setAnimStart(true), 200);
-    return () => clearTimeout(t);
-  }, []);
-
-  // Use new field names from utils/demoData DemoPro type
-  const note = useCountUp(selectedPro ? Math.round(selectedPro.note * 10) : 0, 800, animStart);
-  const avis = useCountUp(selectedPro?.avis ?? 0, 800, animStart);
-  // responseTime is a string like "2 min", extract numeric part for count-up
-  const responseTimeNum = parseInt(selectedPro?.responseTime ?? '0', 10) || 0;
-  const reponse = useCountUp(responseTimeNum, 800, animStart);
-  const acceptation = useCountUp(selectedPro?.acceptanceRate ?? 0, 800, animStart);
-  const prestations = useCountUp(selectedPro?.serviceCount ?? 0, 800, animStart);
+  const { selectedPro, navigateTo } = useAppContext();
+  const [selectedService, setSelectedService] = useState<string | null>(null);
 
   if (!selectedPro) {
-    return (
-      <div style={{ minHeight: '100vh', background: 'var(--void)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <button onClick={() => setCurrentScreen('explorerV2')} style={{ color: 'var(--gold)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: '14px' }}>
-          Retour a l'explorer
-        </button>
-      </div>
-    );
+    navigateTo('explorerV2');
+    return null;
   }
 
-  const services = selectedPro.services ?? [
-    { nom: 'Coupe homme', prix: selectedPro.startingPrice, duree: 30, badge: undefined },
-  ];
+  const pro = selectedPro;
+  const services = pro.services ?? [];
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--void)', paddingBottom: '100px' }}>
-      {/* Cover */}
-      <div style={{ height: '240px', background: selectedPro.gradient, position: 'relative', overflow: 'hidden' }}>
+    <div style={{
+      minHeight: '100%',
+      background: 'var(--void)',
+      paddingBottom: 100,
+      fontFamily: 'Inter, sans-serif',
+    }}>
+      {/* Cover image */}
+      <div style={{
+        position: 'relative',
+        height: 270,
+        overflow: 'hidden',
+        background: pro.gradient || 'var(--d2)',
+      }}>
+        <img
+          src={pro.coverUrl}
+          alt={pro.prenom}
+          style={{
+            width: '100%',
+            height: '100%',
+            objectFit: 'cover',
+            objectPosition: 'top center',
+            display: 'block',
+          }}
+          onError={(e) => {
+            (e.target as HTMLImageElement).style.display = 'none';
+          }}
+        />
+
+        {/* Grain overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.03,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E")`,
+          backgroundSize: '128px 128px',
+        }} />
+
+        {/* Dark gradient overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'linear-gradient(180deg, transparent 0%, rgba(5,5,7,0.98) 100%)',
+        }} />
+
+        {/* Back button */}
         <button
-          onClick={() => setCurrentScreen('explorerV2')}
-          style={{ position: 'absolute', top: '16px', left: '16px', width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
+          onClick={() => navigateTo('explorerV2')}
+          style={{
+            position: 'absolute',
+            top: 52,
+            left: 16,
+            width: 36,
+            height: 36,
+            borderRadius: '50%',
+            background: 'rgba(5,5,7,0.6)',
+            border: '1px solid rgba(255,255,255,0.1)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 10,
+          }}
         >
           <IconArrowLeft size={18} color="var(--t1)" />
         </button>
-        {selectedPro.isFlash && (
-          <div style={{ position: 'absolute', top: '16px', right: '16px', background: 'var(--alert)', borderRadius: '999px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-            <IconFlash size={12} color="#fff" />
-            <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '11px', color: '#fff', letterSpacing: '0.05em' }}>FLASH</span>
+
+        {/* Flash badge */}
+        {pro.flashActif && (
+          <div style={{
+            position: 'absolute',
+            top: 52,
+            right: 16,
+            background: '#F2D06B',
+            borderRadius: 10,
+            padding: '4px 10px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: 4,
+            zIndex: 10,
+          }}>
+            <IconFlash size={12} color="#050507" />
+            <span style={{
+              fontFamily: 'Inter',
+              fontWeight: 800,
+              fontSize: 11,
+              color: '#050507',
+              letterSpacing: '0.5px',
+            }}>
+              FLASH
+            </span>
           </div>
         )}
-        {/* Avatar */}
-        <div style={{ position: 'absolute', bottom: '-28px', left: '20px', width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', border: '3px solid var(--void)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '24px', color: 'var(--t1)' }}>{selectedPro.initials}</span>
+
+        {/* Pro info at bottom of cover */}
+        <div style={{
+          position: 'absolute',
+          bottom: 20,
+          left: 20,
+          right: 20,
+          zIndex: 10,
+        }}>
+          <div style={{
+            fontFamily: 'Inter',
+            fontWeight: 900,
+            fontSize: 26,
+            color: 'var(--t1)',
+            letterSpacing: '-0.5px',
+            marginBottom: 4,
+          }}>
+            {pro.prenom} {pro.nom}
+          </div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: 10,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <IconStar size={13} color="#F2D06B" />
+              <span style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 13, color: 'var(--t1)' }}>
+                {pro.note}
+              </span>
+              <span style={{ fontFamily: 'Inter', fontSize: 12, color: 'rgba(255,255,255,0.6)' }}>
+                ({pro.nbAvis} avis)
+              </span>
+            </div>
+            <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: 12 }}>·</span>
+            <span style={{ fontFamily: 'Inter', fontSize: 13, color: 'rgba(255,255,255,0.7)' }}>
+              {pro.categorie} · {pro.ville}
+            </span>
+          </div>
         </div>
       </div>
 
-      <div style={{ padding: '44px 20px 0' }}>
-        {/* Name & info */}
-        <h1 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '24px', color: 'var(--t1)', letterSpacing: '-0.03em', marginBottom: '4px' }}>
-          {selectedPro.prenom} {selectedPro.nom}
-        </h1>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '13px', color: 'var(--t3)', marginBottom: '20px' }}>
-          {selectedPro.categorie} · {selectedPro.ville}
-        </p>
-
-        {/* Stats bar */}
-        <div style={{ display: 'flex', gap: '0', background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '16px', overflow: 'hidden', marginBottom: '24px' }}>
+      {/* Content */}
+      <div style={{ padding: '20px' }}>
+        {/* Stats row */}
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr 1fr',
+          gap: 10,
+          marginBottom: 24,
+        }}>
           {[
-            { label: 'NOTE', value: (note / 10).toFixed(1), color: 'var(--gold)' },
-            { label: 'AVIS', value: avis.toString(), color: 'var(--t1)' },
-            { label: 'REPONSE', value: `${reponse}min`, color: 'var(--flash)' },
-            { label: 'ACCEPT.', value: `${acceptation}%`, color: 'var(--t1)' },
-            { label: 'PRESTA.', value: prestations.toString(), color: 'var(--t1)' },
-          ].map((stat, i, arr) => (
-            <div key={stat.label} style={{ flex: 1, padding: '14px 8px', textAlign: 'center', borderRight: i < arr.length - 1 ? '1px solid var(--edge1)' : 'none' }}>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '16px', color: stat.color, marginBottom: '2px' }}>{stat.value}</div>
-              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '9px', color: 'var(--t4)', letterSpacing: '0.08em' }}>{stat.label}</div>
+            { label: 'Acceptation', value: pro.acceptation ? `${pro.acceptation}%` : '—' },
+            { label: 'Prestations', value: pro.nbPrestations ? `${pro.nbPrestations}` : '—' },
+            { label: 'Reponse', value: pro.reponseMins ? `${pro.reponseMins}min` : '—' },
+          ].map((stat, i) => (
+            <div key={i} style={{
+              background: 'var(--d2)',
+              borderRadius: 12,
+              padding: '12px 8px',
+              textAlign: 'center',
+              border: '1px solid var(--d3)',
+            }}>
+              <div style={{
+                fontFamily: 'Inter',
+                fontWeight: 800,
+                fontSize: 16,
+                color: 'var(--t1)',
+                marginBottom: 2,
+              }}>
+                {stat.value}
+              </div>
+              <div style={{
+                fontFamily: 'Inter',
+                fontSize: 10,
+                color: 'var(--t4)',
+                textTransform: 'uppercase' as const,
+                letterSpacing: '0.5px',
+              }}>
+                {stat.label}
+              </div>
             </div>
           ))}
         </div>
 
-        {/* Slogan & bio */}
-        {selectedPro.slogan && (
-          <p style={{ fontFamily: 'Inter, sans-serif', fontStyle: 'italic', fontWeight: 500, fontSize: '15px', color: 'var(--t2)', marginBottom: '12px' }}>
-            "{selectedPro.slogan}"
-          </p>
+        {/* Slogan */}
+        {pro.slogan && (
+          <div style={{
+            fontFamily: 'Inter',
+            fontStyle: 'italic',
+            fontSize: 15,
+            color: '#F2D06B',
+            marginBottom: 16,
+            lineHeight: 1.4,
+          }}>
+            "{pro.slogan}"
+          </div>
         )}
-        {selectedPro.bio && (
-          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', color: 'var(--t3)', lineHeight: 1.6, marginBottom: '28px' }}>
-            {selectedPro.bio}
-          </p>
+
+        {/* Bio */}
+        {pro.bio && (
+          <div style={{
+            fontFamily: 'Inter',
+            fontSize: 14,
+            color: 'var(--t3)',
+            lineHeight: 1.6,
+            marginBottom: 28,
+          }}>
+            {pro.bio}
+          </div>
         )}
 
         {/* Services */}
-        <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '18px', color: 'var(--t1)', marginBottom: '16px' }}>
-          Services
-        </h2>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {services.map((service, i) => (
-            <div
-              key={i}
-              style={{ background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '16px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
-            >
-              <div style={{ flex: 1 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '15px', color: 'var(--t1)' }}>{service.nom}</span>
-                  {service.badge && (
-                    <span style={{
-                      fontFamily: 'Inter, sans-serif',
-                      fontWeight: 600,
-                      fontSize: '10px',
-                      padding: '2px 8px',
-                      borderRadius: '999px',
-                      background: service.badge.toLowerCase() === 'populaire' ? 'rgba(242,208,107,0.12)' : 'rgba(0,217,122,0.12)',
-                      color: service.badge.toLowerCase() === 'populaire' ? 'var(--gold)' : 'var(--flash)',
-                      border: `1px solid ${service.badge.toLowerCase() === 'populaire' ? 'rgba(242,208,107,0.2)' : 'rgba(0,217,122,0.2)'}`,
-                      letterSpacing: '0.04em',
-                      textTransform: 'uppercase',
-                    }}>
-                      {service.badge}
-                    </span>
-                  )}
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <IconClock size={12} color="var(--t4)" />
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '12px', color: 'var(--t4)' }}>{service.duree} min</span>
-                </div>
-              </div>
-              <div style={{ textAlign: 'right' }}>
-                <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '18px', color: 'var(--gold)' }}>{service.prix}</span>
-                <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '13px', color: 'var(--t3)' }}> CHF</span>
-              </div>
+        {services.length > 0 && (
+          <>
+            <div style={{
+              fontFamily: 'Inter',
+              fontWeight: 700,
+              fontSize: 13,
+              color: 'var(--t3)',
+              letterSpacing: '1px',
+              textTransform: 'uppercase' as const,
+              marginBottom: 14,
+            }}>
+              Services
             </div>
-          ))}
-        </div>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 28 }}>
+              {services.map((service) => (
+                <div
+                  key={service.id}
+                  onClick={() => setSelectedService(selectedService === service.id ? null : service.id)}
+                  style={{
+                    background: selectedService === service.id ? 'rgba(242,208,107,0.06)' : 'var(--d2)',
+                    borderRadius: 14,
+                    overflow: 'hidden',
+                    border: selectedService === service.id
+                      ? '1px solid rgba(242,208,107,0.3)'
+                      : '1px solid var(--d3)',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                >
+                  {/* Service image */}
+                  {service.imageUrl && (
+                    <div style={{ height: 120, overflow: 'hidden', position: 'relative' }}>
+                      <img
+                        src={service.imageUrl}
+                        alt={service.nom}
+                        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
+                        onError={(e) => {
+                          const parent = (e.target as HTMLImageElement).parentElement;
+                          if (parent) parent.style.display = 'none';
+                        }}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        inset: 0,
+                        background: 'linear-gradient(180deg, transparent 40%, rgba(5,5,7,0.7) 100%)',
+                      }} />
+                    </div>
+                  )}
+
+                  <div style={{ padding: '14px 16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div>
+                        <div style={{ fontFamily: 'Inter', fontWeight: 700, fontSize: 15, color: 'var(--t1)', marginBottom: 2 }}>
+                          {service.nom}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <IconClock size={11} color="var(--t4)" />
+                          <span style={{ fontFamily: 'Inter', fontSize: 12, color: 'var(--t4)' }}>
+                            {service.duree} min
+                          </span>
+                        </div>
+                      </div>
+                      <div style={{ fontFamily: 'Inter', fontWeight: 800, fontSize: 16, color: '#F2D06B' }}>
+                        {service.prix} CHF
+                      </div>
+                    </div>
+
+                    {selectedService === service.id && (
+                      <div style={{ marginTop: 10 }}>
+                        <div style={{ fontFamily: 'Inter', fontSize: 13, color: 'var(--t3)', lineHeight: 1.5, marginBottom: 12 }}>
+                          {service.description}
+                        </div>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigateTo('bookingFlow');
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            background: '#F2D06B',
+                            border: 'none',
+                            borderRadius: 12,
+                            color: '#050507',
+                            fontFamily: 'Inter',
+                            fontWeight: 800,
+                            fontSize: 14,
+                            cursor: 'pointer',
+                          }}
+                        >
+                          Reserver ce service
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
-      {/* Sticky CTA */}
-      <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '430px', padding: '16px 20px', background: 'rgba(5,5,7,0.97)', backdropFilter: 'blur(20px)', borderTop: '1px solid var(--edge1)', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}>
+      {/* CTA bottom */}
+      <div style={{
+        position: 'fixed',
+        bottom: 0,
+        left: '50%',
+        transform: 'translateX(-50%)',
+        width: '100%',
+        maxWidth: 430,
+        padding: '16px 20px 32px',
+        background: 'linear-gradient(180deg, transparent 0%, var(--void) 40%)',
+        zIndex: 50,
+      }}>
         <button
-          onClick={() => setCurrentScreen('bookingFlow')}
-          style={{ width: '100%', height: '56px', background: 'var(--gold)', color: '#050507', border: 'none', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '15px', letterSpacing: '0.04em', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '0 4px 20px rgba(242,208,107,0.25)' }}
+          onClick={() => navigateTo('bookingFlow')}
+          style={{
+            width: '100%',
+            padding: '18px',
+            background: '#F2D06B',
+            border: 'none',
+            borderRadius: 16,
+            color: '#050507',
+            fontFamily: 'Inter',
+            fontWeight: 800,
+            fontSize: 16,
+            cursor: 'pointer',
+            letterSpacing: '0.3px',
+          }}
         >
-          Reserver maintenant
+          Reserver · des {pro.prixDepuis} CHF
         </button>
       </div>
     </div>

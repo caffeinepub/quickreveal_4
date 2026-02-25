@@ -1,193 +1,206 @@
 import React, { useState } from 'react';
-import { useAppContext } from '../context/AppContext';
-import { IconCheck } from './icons/Icons';
 
-const BENEFITS = [
-  'Visibilite illimitee sur NEXUS',
-  'Demandes Flash en temps reel',
-  'Paiements TWINT instantanes',
-  'Agenda et gestion des RDV',
-  'Statistiques et revenus detailles',
-  'Support prioritaire 7j sur 7',
-];
+interface SubscriptionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSubscribe: () => void;
+}
 
-export default function SubscriptionModal() {
-  const { closeSubscriptionModal, navigateTo } = useAppContext();
-  const [email, setEmail] = useState('');
-  const [emailFocused, setEmailFocused] = useState(false);
+export default function SubscriptionModal({ isOpen, onClose, onSubscribe }: SubscriptionModalProps) {
   const [loading, setLoading] = useState(false);
 
-  const handleStart = async () => {
+  if (!isOpen) return null;
+
+  const handleStart = () => {
+    if (loading) return;
     setLoading(true);
-    await new Promise(r => setTimeout(r, 800));
-    setLoading(false);
-    closeSubscriptionModal();
-    navigateTo('proSuccess');
+    // Simulate 800ms then trigger success flow — no API calls
+    setTimeout(() => {
+      onClose();
+      onSubscribe();
+    }, 800);
   };
+
+  const benefits = [
+    'Profil visible par des milliers de clients autour de vous',
+    'Reservations instantanees 24h/24',
+    'Paiements garantis NEXUS PAY',
+    'Notifications temps reel',
+    'Zero commission les 7 premiers jours',
+  ];
 
   return (
     <div
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 50,
         background: 'rgba(5,5,7,0.95)',
-        overflowY: 'auto',
+        zIndex: 1000,
         display: 'flex',
-        alignItems: 'flex-start',
-        justifyContent: 'center',
-        padding: '0 20px 40px',
+        alignItems: 'flex-end',
       }}
-      onClick={(e) => { if (e.target === e.currentTarget) closeSubscriptionModal(); }}
+      onClick={onClose}
     >
-      <div style={{
-        background: 'var(--d2)',
-        border: '1px solid var(--gold-edge)',
-        borderRadius: '28px',
-        padding: '32px',
-        maxWidth: '420px',
-        width: '100%',
-        marginTop: '10vh',
-      }}>
-        {/* Pill */}
-        <div style={{ display: 'inline-flex', alignItems: 'center' }}>
-          <span style={{
-            background: 'rgba(0,217,122,0.08)',
-            border: '1px solid rgba(0,217,122,0.2)',
-            borderRadius: '999px',
-            padding: '6px 16px',
-            fontFamily: 'Inter, sans-serif',
-            fontWeight: 600,
-            fontSize: '11px',
-            color: 'var(--flash)',
-            letterSpacing: '0.1em',
-          }}>
-            7 JOURS GRATUITS
-          </span>
-        </div>
-
-        {/* Heading */}
-        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '32px', color: 'var(--t1)', marginTop: '16px' }}>
-          Essai gratuit
-        </div>
-        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '16px', color: 'var(--t2)', marginTop: '6px' }}>
-          puis 19.90 CHF/mois
+      <div
+        style={{
+          width: '100%',
+          background: '#0D0D13',
+          borderRadius: '28px 28px 0 0',
+          border: '1px solid rgba(242,208,107,0.12)',
+          borderBottom: 'none',
+          padding: '32px 24px 48px',
+          animation: 'nexusSlideUp 300ms ease-out',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Title row */}
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'flex-start',
+          marginBottom: 8,
+        }}>
+          <div>
+            <p style={{
+              fontFamily: 'Inter',
+              fontWeight: 800,
+              fontSize: 24,
+              color: '#F4F4F8',
+              letterSpacing: '-0.03em',
+              margin: 0,
+            }}>
+              LANCER MON SERVICE
+            </p>
+            <p style={{
+              fontFamily: 'Inter',
+              fontWeight: 400,
+              fontSize: 14,
+              color: '#F2D06B',
+              marginTop: 4,
+              marginBottom: 0,
+            }}>
+              7 jours gratuits · Sans engagement
+            </p>
+          </div>
+          <button
+            onClick={onClose}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#54546C',
+              cursor: 'pointer',
+              fontSize: 20,
+              padding: 4,
+              lineHeight: 1,
+            }}
+          >
+            ×
+          </button>
         </div>
 
         {/* Benefits */}
-        <div style={{
-          background: 'var(--d3)',
-          border: '1px solid var(--edge1)',
-          borderRadius: '16px',
-          padding: '20px',
-          marginTop: '20px',
-        }}>
-          {BENEFITS.map((benefit, i) => (
-            <div
-              key={i}
-              style={{
+        <div style={{ marginTop: 24, marginBottom: 28 }}>
+          {benefits.map((item, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 14,
+              marginBottom: 18,
+            }}>
+              <div style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: 'rgba(242,208,107,0.1)',
+                border: '1px solid rgba(242,208,107,0.2)',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '12px',
-                padding: '12px 0',
-                borderBottom: i < BENEFITS.length - 1 ? '1px solid var(--edge1)' : 'none',
-              }}
-            >
-              <div style={{ flexShrink: 0 }}>
-                <IconCheck size={16} color="var(--flash)" />
+                justifyContent: 'center',
+                flexShrink: 0,
+                marginTop: 1,
+              }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" stroke="#F2D06B" strokeWidth="2.5" fill="none">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
               </div>
-              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '14px', color: 'var(--t2)' }}>
-                {benefit}
+              <span style={{
+                fontFamily: 'Inter',
+                fontWeight: 400,
+                fontSize: 15,
+                color: '#9898B4',
+                lineHeight: 1.5,
+              }}>
+                {item}
               </span>
             </div>
           ))}
         </div>
 
-        {/* Email */}
-        <label style={{
-          display: 'block',
-          fontFamily: 'Inter, sans-serif',
-          fontWeight: 600,
-          fontSize: '12px',
-          color: 'var(--t3)',
-          marginTop: '20px',
-          marginBottom: '8px',
-          letterSpacing: '0.06em',
-        }}>
-          Adresse email
-        </label>
-        <input
-          type="email"
-          value={email}
-          onChange={e => setEmail(e.target.value)}
-          onFocus={() => setEmailFocused(true)}
-          onBlur={() => setEmailFocused(false)}
-          placeholder="votre@email.com"
-          style={{
-            width: '100%',
-            height: '52px',
-            background: 'var(--d3)',
-            border: `1px solid ${emailFocused ? 'var(--gold)' : 'var(--d4)'}`,
-            borderRadius: '12px',
-            padding: '0 16px',
-            fontFamily: 'Inter, sans-serif',
-            fontWeight: 500,
-            fontSize: '15px',
-            color: 'var(--t1)',
-            outline: 'none',
-            boxSizing: 'border-box',
-            boxShadow: emailFocused ? '0 0 0 3px rgba(242,208,107,0.15)' : 'none',
-            transition: 'border 200ms, box-shadow 200ms',
-          }}
-        />
-
-        {/* CTA */}
+        {/* Main CTA button */}
         <button
           onClick={handleStart}
           disabled={loading}
           style={{
             width: '100%',
-            height: '58px',
-            background: '#F2D06B',
-            color: '#050507',
+            height: 58,
+            borderRadius: 16,
             border: 'none',
-            borderRadius: '14px',
-            fontFamily: 'Inter, sans-serif',
-            fontWeight: 700,
-            fontSize: '14px',
-            letterSpacing: '0.08em',
-            textTransform: 'uppercase',
             cursor: loading ? 'not-allowed' : 'pointer',
-            marginTop: '20px',
-            boxShadow: '0 8px 32px rgba(242,208,107,0.25)',
-            opacity: loading ? 0.7 : 1,
+            background: loading ? '#1C1C26' : '#F2D06B',
+            color: loading ? '#54546C' : '#050507',
+            fontFamily: 'Inter',
+            fontWeight: 700,
+            fontSize: 16,
+            letterSpacing: '0.02em',
+            transition: 'all 200ms',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '10px',
-            transition: 'opacity 200ms',
+            gap: 8,
           }}
         >
-          {loading && (
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#050507" strokeWidth="2" strokeLinecap="round" style={{ animation: 'spin 1s linear infinite', flexShrink: 0 }}>
-              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-            </svg>
+          {loading ? (
+            <>
+              <div style={{
+                width: 18,
+                height: 18,
+                border: '2px solid #54546C',
+                borderTopColor: '#9898B4',
+                borderRadius: '50%',
+                animation: 'nexusModalSpin 1s linear infinite',
+              }} />
+              Activation...
+            </>
+          ) : (
+            'Commencer 7 jours gratuits'
           )}
-          Commencer l essai gratuit
         </button>
 
-        {/* Disclaimer */}
-        <div style={{
-          fontFamily: 'Inter, sans-serif',
-          fontWeight: 400,
-          fontSize: '12px',
-          color: 'var(--t3)',
-          textAlign: 'center',
-          marginTop: '12px',
-        }}>
-          Aucun prelevement pendant 7 jours.
-        </div>
+        <p
+          style={{
+            fontFamily: 'Inter',
+            fontWeight: 400,
+            fontSize: 13,
+            color: '#54546C',
+            textAlign: 'center',
+            marginTop: 14,
+            cursor: 'pointer',
+          }}
+          onClick={onClose}
+        >
+          Pas maintenant
+        </p>
       </div>
+
+      <style>{`
+        @keyframes nexusSlideUp {
+          from { transform: translateY(100%); }
+          to { transform: translateY(0); }
+        }
+        @keyframes nexusModalSpin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

@@ -1,219 +1,46 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T18:27:30.278Z",
+  "generatedAt": "2026-02-25T20:31:18.935Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 15,
-    "implemented": 14,
+    "total": 3,
+    "implemented": 3,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Create a global ProContext and ProProvider that holds proActif (boolean), setProActif, proData (object with fields: prenom='Alexandre', ville='Lausanne', categorie='barber', iban='', photos=[], services=[], flashActif=false, slogan='', bio=''), and setProData. ProProvider must wrap all pro screens so state persists across tab navigation.",
+        "summary": "Create a new file `frontend/src/components/ProApp.tsx` as a fully self-contained React component (no React Router, no external navigation libs). It must include all pro-space screens and sub-components inline or imported locally: Dashboard, Radar, Wallet, Business, Subscription Modal, and Subscription Success animation. Navigation between these screens must be driven exclusively by `useState`. The component must export `ProApp` as a default export.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/context/ProContext.tsx"
+          "frontend/src/components/ProApp.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/context/ProContext.tsx"
-        ]
-      },
-      {
-        "id": "REQ-10",
-        "summary": "Update the Flash Live card layout (168x228px, borderRadius:20) to use <img> with objectFit:'cover' for the pro coverUrl, with an onError fallback that hides the image and restores the gradient background. The dark overlay div must be absolutely positioned over the image. Flash badge (top-left), rating (top-right), and pro info (bottom) must all render above the overlay.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ExplorerV2.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ExplorerV2.tsx"
-        ]
-      },
-      {
-        "id": "REQ-11",
-        "summary": "Update Explorer list card avatars (44px circular) to display the pro's coverUrl as a circular <img> with objectFit:'cover' when available, falling back to gradient background with initials when coverUrl is absent or fails to load.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/Explorer.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/Explorer.tsx"
-        ]
-      },
-      {
-        "id": "REQ-12",
-        "summary": "Update the pro profile cover (height 270px) to render the pro's coverUrl as a full-width <img> with objectFit:'cover' and objectPosition:'top center', with an onError handler that hides the image. Add a subtle noise/grain overlay (3% opacity SVG pattern) and a dark gradient overlay (linear-gradient(180deg, transparent 0%, rgba(5,5,7,0.98) 100%)) absolutely positioned over the image.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ProProfile.tsx",
-          "frontend/src/components/ProFiche.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ProProfile.tsx",
-          "frontend/src/components/ProFiche.tsx"
-        ]
-      },
-      {
-        "id": "REQ-13",
-        "summary": "Ensure the 'Start free trial' (Commencer l essai gratuit) button always has background #F2D06B and color #050507. Never render gold text on a gold background. Remove any conditional styling that could produce gold-on-gold text.",
-        "status": "missing",
-        "plannedFiles": [
-          "frontend/src/components/SubscriptionModal.tsx",
-          "frontend/src/components/ProSubscriptionModal.tsx",
-          "frontend/src/components/SubscriptionScreen.tsx"
-        ],
-        "matchedFiles": []
-      },
-      {
-        "id": "REQ-14",
-        "summary": "Verify that the Wallet 30-second cooldown works correctly after tapping 'Transfer to my account'. The button must be disabled for 30 seconds after tap, show a countdown, and the balance must be zeroed. Ensure this functionality is not broken by the ProContext/ProLayout refactor.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/WalletPro.tsx",
-          "frontend/src/components/WalletScreen.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/WalletPro.tsx"
-        ]
-      },
-      {
-        "id": "REQ-15",
-        "summary": "Remove all emoji characters from any pro-space component code (ProLayout, BusinessScreen, ProTabBar, WalletPro, RadarPro, DashboardScreen, SubscriptionModal, SubscriptionSuccess). Use only SVG icon components (from Icons.tsx) or plain text labels.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ProLayout.tsx",
-          "frontend/src/components/BusinessScreen.tsx",
-          "frontend/src/components/ProTabBar.tsx",
-          "frontend/src/components/WalletPro.tsx",
-          "frontend/src/components/RadarPro.tsx",
-          "frontend/src/components/DashboardScreen.tsx",
-          "frontend/src/components/SubscriptionModal.tsx",
-          "frontend/src/components/SubscriptionSuccess.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ProLayout.tsx",
-          "frontend/src/components/BusinessScreen.tsx",
-          "frontend/src/components/ProTabBar.tsx",
-          "frontend/src/components/WalletPro.tsx",
-          "frontend/src/components/RadarPro.tsx",
-          "frontend/src/components/DashboardScreen.tsx",
-          "frontend/src/components/SubscriptionSuccess.tsx"
+          "frontend/src/components/ProApp.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Refactor ProLayout to use useState('dashboard') for activeTab and render the 4 pro screens (RadarScreen, WalletScreen, DashboardScreen, BusinessScreen) via conditional rendering — NOT React Router. ProLayout must be a fixed full-screen container with flex column layout, with the content area (flex:1, overflowY:'auto') and ProTabBar at the bottom. ProTabBar receives active and onChange props.",
+        "summary": "In `frontend/src/components/ProApp.tsx`, define a color constants object `C` that includes the value `t4: '#2E2E3E'`. Use `C.t4` for the `IconCamera` fill color and for all other very subtle/discrete UI elements (placeholder text, dividers, inactive icon strokes, secondary backgrounds, etc.).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ProLayout.tsx",
-          "frontend/src/components/ProTabBar.tsx",
-          "frontend/src/components/NexusOS.tsx"
+          "frontend/src/components/ProApp.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/ProLayout.tsx",
-          "frontend/src/components/ProTabBar.tsx",
-          "frontend/src/components/NexusOS.tsx"
+          "frontend/src/components/ProApp.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Refactor BusinessScreen (MonBusiness) to use useState('identite') for activeSubTab with 4 sub-tabs: Identite / Paiement / Services / Galerie. Each sub-tab content is rendered via conditional rendering only (no routing). Sub-tab state must NOT reset when switching between sub-tabs — all data is held in ProContext.",
+        "summary": "In `frontend/src/components/RoleSelection.tsx` (or `RoleSelectionV2.tsx`, whichever is currently active in ScreenRouter), replace the navigation target for the 'Professionnel' role selection with a render of `<ProApp />`. The old broken pro space component must no longer be rendered when the user selects 'Professionnel'. Import ProApp from `./ProApp` and render it in place of the previous pro route/component.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/BusinessScreen.tsx",
-          "frontend/src/components/MonBusiness.tsx"
+          "frontend/src/components/RoleSelectionV2.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/BusinessScreen.tsx",
-          "frontend/src/components/MonBusiness.tsx"
-        ]
-      },
-      {
-        "id": "REQ-4",
-        "summary": "Replace the existing photo upload implementation in the Galerie sub-tab with the ref-based approach: use an array of 4 useRef(null) for file inputs, handleSlotClick triggers the corresponding hidden input, handleFileChange validates type (must be image/*) and size (max 10MB), reads as base64 via FileReader and stores in proData.photos[index] via ProContext setProData. Each slot renders a hidden <input type='file' accept='image/*'>, shows the uploaded image with objectFit:'cover' and a remove button (IconX, stopPropagation), or shows an empty slot with dashed border, IconCamera, and 'Add' label. Remove button sets photos[index] to null.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/BusinessScreen.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/BusinessScreen.tsx"
-        ]
-      },
-      {
-        "id": "REQ-5",
-        "summary": "Fix the subscription flow: SubscriptionSuccess must use a useEffect with a 4500ms timer that calls setProActif(true) via ProContext and then calls an onSuccessComplete callback prop. The parent that renders SubscriptionSuccess must pass onSuccessComplete as () => setActiveTab('dashboard') so the navigation goes to the Dashboard tab in ProLayout — NOT via React Router route change.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/SubscriptionSuccess.tsx",
-          "frontend/src/components/BusinessScreen.tsx",
-          "frontend/src/components/ProLayout.tsx",
-          "frontend/src/components/DashboardScreen.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/SubscriptionSuccess.tsx",
-          "frontend/src/components/BusinessScreen.tsx",
-          "frontend/src/components/ProLayout.tsx",
-          "frontend/src/components/DashboardScreen.tsx"
-        ]
-      },
-      {
-        "id": "REQ-6",
-        "summary": "Fix the 'Activer mon profil' button in the Galerie sub-tab: the button must be enabled and visible when photos.filter(Boolean).length >= 3, regardless of IBAN value. IBAN is not required in demo mode. Do not block activation based on IBAN being empty.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/BusinessScreen.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/BusinessScreen.tsx"
-        ]
-      },
-      {
-        "id": "REQ-7",
-        "summary": "Replace the colored gradient backgrounds on Explorer pro cards with real Unsplash images using the exact URLs provided. Add a coverUrl field to each demo pro data entry with the following values: Studio Blade → https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&h=500&fit=crop&q=80, Karim Cuts → https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=400&h=500&fit=crop&q=80, Tom Barber → https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=400&h=500&fit=crop&q=80, Elise Coiffure → https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=500&fit=crop&q=80, Sarah Style → https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=400&h=500&fit=crop&q=80, Nadia Beauty → https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&h=500&fit=crop&q=80, Clara Nails → https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&h=500&fit=crop&q=80, Zen by Marco → https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&h=500&fit=crop&q=80.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/utils/demoData.ts",
-          "frontend/src/data/mockData.ts"
-        ],
-        "matchedFiles": [
-          "frontend/src/utils/demoData.ts",
-          "frontend/src/data/mockData.ts"
-        ]
-      },
-      {
-        "id": "REQ-8",
-        "summary": "Apply a mandatory dark overlay on all pro card images: linear-gradient(180deg, rgba(5,5,7,0.1) 0%, rgba(5,5,7,0.92) 100%) positioned absolute with inset:0 over the image. This applies to Flash Live cards (168x228px), Explorer list cards, and the Pro profile cover (270px height). Text content (badges, name, info) must sit above the overlay using z-index stacking.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ExplorerV2.tsx",
-          "frontend/src/components/Explorer.tsx",
-          "frontend/src/components/ProProfile.tsx",
-          "frontend/src/components/ProFiche.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ExplorerV2.tsx",
-          "frontend/src/components/Explorer.tsx",
-          "frontend/src/components/ProProfile.tsx",
-          "frontend/src/components/ProFiche.tsx"
-        ]
-      },
-      {
-        "id": "REQ-9",
-        "summary": "Add service-level image URLs to all demo service data entries by category. Barber services: 'Coupe homme' → https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=200&fit=crop&q=80, 'Degrade premium' → https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=300&h=200&fit=crop&q=80, 'Coupe + Barbe' → https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=300&h=200&fit=crop&q=80, 'Barbe design' → https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=300&h=200&fit=crop&q=80, 'Rasage traditionnel' → https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?w=300&h=200&fit=crop&q=80. Coiffure services: 'Coupe femme' → https://images.unsplash.com/photo-1562322140-8baeececf3df?w=300&h=200&fit=crop&q=80, 'Couleur' → https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&h=200&fit=crop&q=80, 'Meches' → https://images.unsplash.com/photo-1492106087820-71f1a00d2b11?w=300&h=200&fit=crop&q=80, 'Brushing' → https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=300&h=200&fit=crop&q=80. Esthetique services: 'Soin visage' → https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=200&fit=crop&q=80, 'Manucure' → https://images.unsplash.com/photo-1604654894610-df63bc536371?w=300&h=200&fit=crop&q=80, 'Pedicure' → https://images.unsplash.com/photo-1519751138087-5bf79df62d5b?w=300&h=200&fit=crop&q=80, 'Pose gel' → https://images.unsplash.com/photo-1604654894610-df63bc536371?w=300&h=200&fit=crop&q=80. Massage services: 'Massage relaxant' → https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=300&h=200&fit=crop&q=80, 'Massage sportif' → https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=300&h=200&fit=crop&q=80, 'Massage duo' → https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=300&h=200&fit=crop&q=80. Display these images on Explorer service cards and in pro profile service lists.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/utils/servicePresets.ts",
-          "frontend/src/utils/demoData.ts",
-          "frontend/src/components/ProProfile.tsx",
-          "frontend/src/components/ProFiche.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/utils/demoData.ts",
-          "frontend/src/components/ProProfile.tsx",
-          "frontend/src/components/ProFiche.tsx"
+          "frontend/src/components/RoleSelectionV2.tsx"
         ]
       }
     ]
@@ -223,26 +50,9 @@
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/BookingFlow.tsx",
-    "frontend/src/components/Builder.tsx",
-    "frontend/src/components/BusinessScreen.tsx",
-    "frontend/src/components/DashboardScreen.tsx",
-    "frontend/src/components/Explorer.tsx",
-    "frontend/src/components/ExplorerV2.tsx",
-    "frontend/src/components/MonBusiness.tsx",
-    "frontend/src/components/NexusOS.tsx",
-    "frontend/src/components/ProFiche.tsx",
-    "frontend/src/components/ProLayout.tsx",
-    "frontend/src/components/ProProfile.tsx",
-    "frontend/src/components/ProTabBar.tsx",
-    "frontend/src/components/ProviderDetail.tsx",
-    "frontend/src/components/RadarPro.tsx",
+    "frontend/src/components/ProApp.tsx",
+    "frontend/src/components/RoleSelectionV2.tsx",
     "frontend/src/components/ScreenRouter.tsx",
-    "frontend/src/components/SubscriptionSuccess.tsx",
-    "frontend/src/components/WalletPro.tsx",
-    "frontend/src/context/ProContext.tsx",
-    "frontend/src/data/mockData.ts",
-    "frontend/src/utils/demoData.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

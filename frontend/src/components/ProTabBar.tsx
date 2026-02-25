@@ -1,28 +1,27 @@
 import React from 'react';
 import { IconRadar, IconWallet, IconDashboard, IconBusiness } from './icons/Icons';
 
-export interface ProTabBarProps {
+interface ProTabBarProps {
   active: string;
   onChange: (tab: string) => void;
-  proActif?: boolean;
 }
 
-const TABS = [
+const tabs = [
   { id: 'radar', label: 'Radar', Icon: IconRadar },
   { id: 'wallet', label: 'Wallet', Icon: IconWallet },
   { id: 'dashboard', label: 'Dashboard', Icon: IconDashboard },
   { id: 'business', label: 'Business', Icon: IconBusiness },
 ];
 
-export default function ProTabBar({ active, onChange, proActif }: ProTabBarProps) {
+export default function ProTabBar({ active, onChange }: ProTabBarProps) {
   return (
     <div style={{
       display: 'flex',
-      background: 'var(--d2)',
+      background: 'var(--d1)',
       borderTop: '1px solid rgba(255,255,255,0.06)',
       paddingBottom: 'env(safe-area-inset-bottom, 0px)',
     }}>
-      {TABS.map(({ id, label, Icon }) => {
+      {tabs.map(({ id, label, Icon }) => {
         const isActive = active === id;
         return (
           <button
@@ -39,34 +38,21 @@ export default function ProTabBar({ active, onChange, proActif }: ProTabBarProps
               border: 'none',
               cursor: 'pointer',
               gap: 4,
-              position: 'relative',
             }}
           >
             <Icon
               size={22}
-              color={isActive ? 'var(--gold)' : 'var(--t4)'}
+              color={isActive ? '#F2D06B' : '#54546C'}
             />
             <span style={{
-              fontFamily: 'Inter',
+              fontFamily: 'Inter, sans-serif',
               fontSize: 10,
               fontWeight: isActive ? 600 : 400,
-              color: isActive ? 'var(--gold)' : 'var(--t4)',
+              color: isActive ? '#F2D06B' : '#54546C',
               letterSpacing: '0.02em',
             }}>
               {label}
             </span>
-            {id === 'dashboard' && proActif && (
-              <div style={{
-                position: 'absolute',
-                top: 6,
-                right: '50%',
-                marginRight: -14,
-                width: 5,
-                height: 5,
-                borderRadius: '50%',
-                background: 'var(--gold)',
-              }} />
-            )}
           </button>
         );
       })}

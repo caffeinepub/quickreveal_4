@@ -144,3 +144,8 @@ html, body {
   from { height: 0; }
   to { height: var(--bar-height); }
 }
+
+@keyframes pulseDot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.8); }
+}

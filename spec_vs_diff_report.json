@@ -1,105 +1,33 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T18:27:30.270Z",
-  "summary": "The diff implements the core pro space refactor (ProContext, ProLayout, BusinessScreen, SubscriptionSuccess, WalletPro, ProTabBar, DashboardScreen) and adds Unsplash image URLs to demo data. However, several client-facing visual requirements (REQ-8 overlays on Explorer/Flash cards, REQ-10 Flash Live card image rendering, REQ-11 Explorer list circular avatars, REQ-12 pro profile cover with grain overlay, REQ-9 service image display in Explorer/ProFiche cards) are not implemented in the modified Explorer/ProFiche/ProProfile components. REQ-13 (subscription button styling) and REQ-15 (emoji removal) cannot be fully confirmed from truncated diffs.",
+  "generatedAt": "2026-02-25T20:31:18.931Z",
+  "summary": "The diff implements all three requirements: ProApp.tsx is created as a self-contained component with useState navigation, the C object with t4:'#2E2E3E' is defined, and RoleSelectionV2.tsx is updated to render <ProApp /> when 'Professionnel' is selected. However, the truncated ProApp.tsx makes it impossible to fully verify all AC items (e.g., IconCamera using C.t4, all discrete elements referencing C.t4, Subscription Success animation completeness). The ScreenRouter.tsx modification adds a ProApp import and uses it for several case routes — this was not requested and touches an existing file, though it does not break functionality.",
   "missing_requirements": [
     {
-      "id": "REQ-8",
-      "requirement": "Apply a mandatory dark overlay (linear-gradient(180deg, rgba(5,5,7,0.1) 0%, rgba(5,5,7,0.92) 100%)) absolutely positioned over all pro card images on Flash Live cards, Explorer list cards, and Pro profile cover.",
-      "reason": "ExplorerV2.tsx and ProFiche.tsx diffs still use gradient backgrounds (pro.gradient) with no img + overlay pattern. The overlay div is not visible in the modified Explorer or ProFiche card rendering code.",
+      "id": "REQ-2",
+      "requirement": "IconCamera SVG uses C.t4 as its fill/stroke color; all visually discrete elements (inactive icons, dividers, placeholder text) reference C.t4",
+      "reason": "The ProApp.tsx file is truncated before the IconCamera SVG definition and the full icon/UI rendering code is cut off, so it cannot be confirmed that C.t4 is used for IconCamera fill/stroke and all discrete UI elements. The C object definition is present with t4:'#2E2E3E', but the actual usage cannot be verified from the truncated diff.",
       "evidence": [
-        "frontend/src/components/ExplorerV2.tsx",
-        "frontend/src/components/ProFiche.tsx",
-        "frontend/src/components/ProProfile.tsx"
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "requirement": "Update Flash Live card layout (168x228px) to use img with objectFit cover for coverUrl, with onError fallback and dark overlay. Flash badge, rating, and pro info must render above the overlay.",
-      "reason": "No Flash Live card component appears to have been modified in the diff to add img rendering with the overlay. ExplorerV2.tsx flash card section still appears to use gradient background styling.",
-      "evidence": [
-        "frontend/src/components/ExplorerV2.tsx"
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "requirement": "Update Explorer list card avatars (44px circular) to display pro coverUrl as a circular img with objectFit cover, falling back to gradient + initials.",
-      "reason": "ExplorerV2.tsx diff shows the avatar still using a plain gradient background div with initials rather than a conditional img element for coverUrl.",
-      "evidence": [
-        "frontend/src/components/ExplorerV2.tsx"
-      ]
-    },
-    {
-      "id": "REQ-12",
-      "requirement": "Update pro profile cover (height 270px) to render coverUrl as full-width img with objectFit cover and objectPosition top center, plus grain overlay (3% opacity SVG pattern) and dark gradient overlay.",
-      "reason": "ProFiche.tsx and ProProfile.tsx still use background: selectedPro.gradient / background: pro.gradient for the cover div with no img tag, no grain overlay, and no gradient overlay implementation visible in the diff.",
-      "evidence": [
-        "frontend/src/components/ProFiche.tsx",
-        "frontend/src/components/ProProfile.tsx"
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "requirement": "Display service-level Unsplash images on Explorer service cards and in pro profile service lists with objectFit cover and onError fallback.",
-      "reason": "While imageUrl fields are added to service data in demoData.ts, the service card rendering in ExplorerV2.tsx, ProFiche.tsx, and ProProfile.tsx does not appear to have been updated to display these images.",
-      "evidence": [
-        "frontend/src/components/ExplorerV2.tsx",
-        "frontend/src/components/ProFiche.tsx",
-        "frontend/src/components/ProProfile.tsx",
-        "frontend/src/utils/demoData.ts"
-      ]
-    },
-    {
-      "id": "REQ-13",
-      "requirement": "Ensure the Commencer l essai gratuit button always has background #F2D06B and color #050507, with no conditional styling that could produce gold-on-gold text.",
-      "reason": "SubscriptionModal is lazy-loaded in ScreenRouter but no diff content for SubscriptionModal.tsx is provided, so the button styling fix cannot be confirmed.",
-      "evidence": [
-        "frontend/src/components/ScreenRouter.tsx"
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "requirement": "Remove all emoji characters from pro-space components including SubscriptionModal. Use only SVG icon components.",
-      "reason": "SubscriptionModal.tsx diff content is not shown; cannot verify emoji removal there. Other components appear to use SVG icons but SubscriptionModal cannot be confirmed.",
-      "evidence": [
-        "frontend/src/components/ScreenRouter.tsx"
+        "frontend/src/components/ProApp.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "walletCooldownEnd state added to ProContext, persisting wallet cooldown across tab navigation via ProContext rather than local WalletPro state alone.",
-      "reason": "REQ-14 only asked to verify the 30-second cooldown is not broken by the refactor; it did not explicitly request moving cooldown state into ProContext. The implementation adds walletCooldownEnd and setWalletCooldownEnd to ProContext beyond what was strictly specified.",
+      "description": "ScreenRouter.tsx was modified to import and use ProApp directly for multiple screen cases (proOnboarding, proSuccess, radarPro, walletPro)",
+      "reason": "The build request explicitly states 'Do not modify or rebuild the existing client navigation flow in App.tsx or ScreenRouter.tsx' as a hard constraint. ScreenRouter.tsx was modified to add a ProApp import and use it in several switch cases, which was not requested and violates the constraint.",
       "evidence": [
-        "frontend/src/context/ProContext.tsx",
-        "frontend/src/components/WalletPro.tsx"
+        "frontend/src/components/ScreenRouter.tsx"
       ]
     }
   ],
   "confidence": 0.72,
   "changed_files": [
     "frontend-file-summaries.txt",
-    "frontend/src/components/BookingFlow.tsx",
-    "frontend/src/components/Builder.tsx",
-    "frontend/src/components/BusinessScreen.tsx",
-    "frontend/src/components/DashboardScreen.tsx",
-    "frontend/src/components/Explorer.tsx",
-    "frontend/src/components/ExplorerV2.tsx",
-    "frontend/src/components/MonBusiness.tsx",
-    "frontend/src/components/NexusOS.tsx",
-    "frontend/src/components/ProFiche.tsx",
-    "frontend/src/components/ProLayout.tsx",
-    "frontend/src/components/ProProfile.tsx",
-    "frontend/src/components/ProTabBar.tsx",
-    "frontend/src/components/ProviderDetail.tsx",
-    "frontend/src/components/RadarPro.tsx",
+    "frontend/src/components/ProApp.tsx",
+    "frontend/src/components/RoleSelectionV2.tsx",
     "frontend/src/components/ScreenRouter.tsx",
-    "frontend/src/components/SubscriptionSuccess.tsx",
-    "frontend/src/components/WalletPro.tsx",
-    "frontend/src/context/ProContext.tsx",
-    "frontend/src/data/mockData.ts",
-    "frontend/src/utils/demoData.ts",
     "project_state.json"
   ]
 }

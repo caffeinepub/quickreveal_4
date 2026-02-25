@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, ReactNode } from 'react';
 
 export interface ProData {
   prenom: string;
@@ -6,7 +6,7 @@ export interface ProData {
   categorie: string;
   iban: string;
   photos: (string | null)[];
-  services: string[];
+  services: { nom: string; prix: number; duree: number; badge: string | null }[];
   flashActif: boolean;
   slogan: string;
   bio: string;
@@ -26,14 +26,14 @@ const defaultProData: ProData = {
   ville: 'Lausanne',
   categorie: 'barber',
   iban: '',
-  photos: [],
+  photos: [null, null, null, null],
   services: [],
   flashActif: false,
   slogan: '',
   bio: '',
 };
 
-export const ProContext = createContext<ProContextType>({
+const ProContext = createContext<ProContextType>({
   proActif: false,
   setProActif: () => {},
   proData: defaultProData,
@@ -42,7 +42,7 @@ export const ProContext = createContext<ProContextType>({
   setWalletCooldownEnd: () => {},
 });
 
-export function ProProvider({ children }: { children: React.ReactNode }) {
+export function ProProvider({ children }: { children: ReactNode }) {
   const [proActif, setProActif] = useState(false);
   const [proData, setProData] = useState<ProData>(defaultProData);
   const [walletCooldownEnd, setWalletCooldownEnd] = useState<number | null>(null);
@@ -55,5 +55,7 @@ export function ProProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useProContext() {
-  return useContext(ProContext);
+  const ctx = useContext(ProContext);
+  if (!ctx) throw new Error('useProContext must be used within ProProvider');
+  return ctx;
 }

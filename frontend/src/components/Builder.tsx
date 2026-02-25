@@ -1,147 +1,142 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { DemoPro } from '../data/mockData';
+import { DemoPro, DemoService } from '../utils/demoData';
 
-interface LocalService {
-  id: string;
-  name: string;
-  price: number;
-  duration: number;
+interface ServiceForm {
+  nom: string;
+  prix: string;
+  duree: string;
+  description: string;
 }
 
-const CATEGORIES = ['Barber', 'Coiffure', 'Esthetique', 'Massage', 'Nail Art', 'Maquillage'];
-const SWISS_CITIES = [
-  'Lausanne', 'Geneve', 'Fribourg', 'Neuchatel', 'Sion', 'Bienne',
-  'Yverdon', 'Montreux', 'Vevey', 'Morges', 'Nyon', 'La Chaux-de-Fonds',
-];
-
 export default function Builder() {
-  const { navigateTo, setProProfile } = useAppContext();
+  const { navigateTo, setSelectedPro } = useAppContext();
   const [step, setStep] = useState(1);
-  const [brandName, setBrandName] = useState('');
-  const [category, setCategory] = useState('');
-  const [city, setCity] = useState('');
+  const [prenom, setPrenom] = useState('');
+  const [ville, setVille] = useState('');
+  const [categorie, setCategorie] = useState('barber');
   const [bio, setBio] = useState('');
-  const [services, setServices] = useState<LocalService[]>([
-    { id: '1', name: '', price: 0, duration: 30 },
-  ]);
+  const [slogan, setSlogan] = useState('');
+  const [services, setServices] = useState<ServiceForm[]>([{ nom: '', prix: '', duree: '30', description: '' }]);
+
+  const addService = () => {
+    setServices([...services, { nom: '', prix: '', duree: '30', description: '' }]);
+  };
+
+  const updateService = (index: number, field: keyof ServiceForm, value: string) => {
+    const updated = [...services];
+    updated[index] = { ...updated[index], [field]: value };
+    setServices(updated);
+  };
+
+  const removeService = (index: number) => {
+    setServices(services.filter((_, i) => i !== index));
+  };
 
   const handleFinish = () => {
-    // Map LocalService to DemoService format — use undefined instead of null for badge
-    const mappedServices = services.map(s => ({
-      nom: s.name,
-      prix: s.price,
-      duree: s.duration,
-      badge: undefined as string | undefined,
-    }));
+    const mappedServices: DemoService[] = services
+      .filter(s => s.nom.trim())
+      .map((s, i) => ({
+        id: `custom-${i}`,
+        nom: s.nom,
+        prix: parseInt(s.prix) || 0,
+        duree: parseInt(s.duree) || 30,
+        description: s.description,
+        badge: null,
+      }));
 
-    const proData: DemoPro = {
-      id: `builder-${Date.now()}`,
-      prenom: brandName,
+    const newPro: DemoPro = {
+      id: `custom-${Date.now()}`,
+      prenom,
       nom: '',
-      initials: brandName.slice(0, 2).toUpperCase(),
-      gradient: 'linear-gradient(135deg, #0A0614, #180B2E)',
-      coverGradient: 'linear-gradient(135deg, #0A0614, #180B2E)',
-      coverUrl: '',
-      categorie: category.toLowerCase() || 'barber',
-      ville: city,
-      note: 5.0,
-      avis: 0,
-      slogan: '',
-      bio,
+      initials: prenom.slice(0, 2).toUpperCase(),
+      categorie,
+      ville,
       flashActif: false,
-      isFlash: false,
-      hasRevolut: false,
-      revolutHandle: '',
-      responseTime: '—',
-      acceptanceRate: 100,
-      serviceCount: mappedServices.length,
-      startingPrice: services[0]?.price ?? 0,
-      flashResponseTime: '—',
+      note: 5.0,
+      nbAvis: 0,
+      prixDepuis: mappedServices[0]?.prix ?? 0,
+      gradient: 'linear-gradient(135deg, #0A0614, #180B2E)',
+      coverUrl: '',
+      bio,
+      slogan,
       services: mappedServices,
-      reviews: [],
-      galleryGradients: [],
     };
 
-    setProProfile(proData);
-    navigateTo('nexusOS');
+    setSelectedPro(newPro as any);
+    navigateTo('proFiche');
   };
 
   const inputStyle: React.CSSProperties = {
-    width: '100%', height: '52px',
-    background: 'var(--d3)', border: '1px solid var(--d4)',
-    borderRadius: '12px', padding: '0 16px',
-    fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '15px',
-    color: 'var(--t1)', outline: 'none', boxSizing: 'border-box',
-  };
-
-  const labelStyle: React.CSSProperties = {
-    display: 'block', fontFamily: 'Inter, sans-serif',
-    fontWeight: 600, fontSize: '12px', color: 'var(--t3)',
-    letterSpacing: '0.1em', marginBottom: '8px',
+    width: '100%',
+    padding: '14px 16px',
+    borderRadius: 12,
+    border: '1px solid rgba(255,255,255,0.08)',
+    background: 'var(--d2)',
+    color: 'var(--t1)',
+    fontSize: 14,
+    fontFamily: 'Inter, sans-serif',
+    outline: 'none',
+    boxSizing: 'border-box',
+    marginBottom: 12,
   };
 
   return (
-    <div style={{ background: 'var(--void)', minHeight: '100vh', padding: '24px 20px', paddingBottom: '40px' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '24px' }}>
-        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '22px', color: 'var(--t1)' }}>
-          Creer mon profil
-        </div>
-        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', color: 'var(--t3)', marginTop: '4px' }}>
-          Etape {step} sur 3
-        </div>
-        {/* Progress */}
-        <div style={{ height: '3px', background: 'var(--d4)', borderRadius: '999px', marginTop: '12px', overflow: 'hidden' }}>
-          <div style={{ height: '100%', background: 'var(--gold)', width: `${(step / 3) * 100}%`, transition: 'width 300ms ease', borderRadius: '999px' }} />
-        </div>
-      </div>
+    <div style={{ minHeight: '100vh', background: 'var(--void)', padding: '52px 20px 80px', fontFamily: 'Inter, sans-serif' }}>
+      <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--t1)', marginBottom: 8 }}>Creer mon profil</h1>
+      <p style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 32 }}>Etape {step} sur 2</p>
 
       {step === 1 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <label style={labelStyle}>NOM DE MARQUE</label>
-            <input type="text" value={brandName} onChange={e => setBrandName(e.target.value)} placeholder="Ex: Studio Julien" style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>CATEGORIE</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
-              {CATEGORIES.map(cat => (
-                <button
-                  key={cat}
-                  onClick={() => setCategory(cat)}
-                  style={{
-                    height: '48px',
-                    background: category === cat ? 'var(--gold-bg)' : 'var(--d3)',
-                    border: `1px solid ${category === cat ? 'var(--gold-edge)' : 'var(--d4)'}`,
-                    borderRadius: '12px',
-                    fontFamily: 'Inter, sans-serif', fontWeight: category === cat ? 600 : 400,
-                    fontSize: '13px', color: category === cat ? 'var(--gold)' : 'var(--t3)',
-                    cursor: 'pointer', transition: 'all 200ms',
-                  }}
-                >
-                  {cat}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <label style={labelStyle}>VILLE</label>
-            <select value={city} onChange={e => setCity(e.target.value)} style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}>
-              <option value="">Choisir une ville</option>
-              {SWISS_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-            </select>
-          </div>
+        <div>
+          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>
+            Prenom / Nom de marque
+          </label>
+          <input value={prenom} onChange={e => setPrenom(e.target.value)} style={inputStyle} placeholder="Alexandre" />
+
+          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>
+            Ville
+          </label>
+          <input value={ville} onChange={e => setVille(e.target.value)} style={inputStyle} placeholder="Lausanne" />
+
+          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>
+            Categorie
+          </label>
+          <select value={categorie} onChange={e => setCategorie(e.target.value)} style={{ ...inputStyle, appearance: 'none' as const }}>
+            <option value="barber">Barber</option>
+            <option value="coiffure">Coiffure</option>
+            <option value="esthetique">Esthetique</option>
+            <option value="massage">Massage</option>
+          </select>
+
+          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>
+            Slogan
+          </label>
+          <input value={slogan} onChange={e => setSlogan(e.target.value)} style={inputStyle} placeholder="L art de la coupe parfaite" />
+
+          <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, textTransform: 'uppercase' as const, letterSpacing: '0.05em' }}>
+            Bio
+          </label>
+          <textarea
+            value={bio}
+            onChange={e => setBio(e.target.value)}
+            style={{ ...inputStyle, height: 100, resize: 'none' as const }}
+            placeholder="Decrivez votre expertise..."
+          />
+
           <button
             onClick={() => setStep(2)}
-            disabled={!brandName || !category || !city}
+            disabled={!prenom.trim() || !ville.trim()}
             style={{
-              height: '56px', background: brandName && category && city ? '#F2D06B' : 'var(--d4)',
-              color: brandName && category && city ? '#050507' : 'var(--t4)',
-              border: 'none', borderRadius: '14px',
-              fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '14px',
-              cursor: brandName && category && city ? 'pointer' : 'not-allowed',
-              marginTop: '8px',
+              width: '100%',
+              padding: '16px',
+              borderRadius: 14,
+              border: 'none',
+              background: prenom.trim() && ville.trim() ? '#F2D06B' : 'var(--d3)',
+              color: prenom.trim() && ville.trim() ? '#050507' : 'var(--t4)',
+              fontSize: 15,
+              fontWeight: 700,
+              cursor: prenom.trim() && ville.trim() ? 'pointer' : 'not-allowed',
+              fontFamily: 'Inter, sans-serif',
             }}
           >
             Continuer
@@ -150,73 +145,39 @@ export default function Builder() {
       )}
 
       {step === 2 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div>
-            <label style={labelStyle}>BIO</label>
-            <textarea
-              value={bio}
-              onChange={e => setBio(e.target.value)}
-              placeholder="Decrivez votre activite..."
-              style={{ ...inputStyle, height: '120px', padding: '12px 16px', resize: 'none' }}
-            />
-          </div>
-          <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-            <button onClick={() => setStep(1)} style={{ flex: 1, height: '52px', background: 'var(--d3)', border: '1px solid var(--edge1)', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '14px', color: 'var(--t2)', cursor: 'pointer' }}>
-              Retour
-            </button>
-            <button onClick={() => setStep(3)} style={{ flex: 2, height: '52px', background: '#F2D06B', color: '#050507', border: 'none', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
-              Continuer
-            </button>
-          </div>
-        </div>
-      )}
+        <div>
+          <h2 style={{ fontSize: 18, fontWeight: 700, color: 'var(--t1)', marginBottom: 20 }}>Vos services</h2>
 
-      {step === 3 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '14px', color: 'var(--t2)', marginBottom: '4px' }}>
-            Vos services
-          </div>
           {services.map((service, i) => (
-            <div key={service.id} style={{ background: 'var(--d3)', border: '1px solid var(--edge1)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <input
-                type="text"
-                value={service.name}
-                onChange={e => setServices(prev => prev.map((s, idx) => idx === i ? { ...s, name: e.target.value } : s))}
-                placeholder="Nom du service"
-                style={{ ...inputStyle, height: '44px' }}
-              />
-              <div style={{ display: 'flex', gap: '10px' }}>
-                <input
-                  type="number"
-                  value={service.price || ''}
-                  onChange={e => setServices(prev => prev.map((s, idx) => idx === i ? { ...s, price: Number(e.target.value) } : s))}
-                  placeholder="Prix CHF"
-                  style={{ ...inputStyle, height: '44px', flex: 1 }}
-                />
-                <input
-                  type="number"
-                  value={service.duration || ''}
-                  onChange={e => setServices(prev => prev.map((s, idx) => idx === i ? { ...s, duration: Number(e.target.value) } : s))}
-                  placeholder="Duree min"
-                  style={{ ...inputStyle, height: '44px', flex: 1 }}
-                />
+            <div key={i} style={{ background: 'var(--d1)', borderRadius: 16, padding: 16, marginBottom: 12, border: '1px solid rgba(255,255,255,0.04)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <span style={{ fontSize: 13, fontWeight: 600, color: 'var(--t2)' }}>Service {i + 1}</span>
+                {services.length > 1 && (
+                  <button onClick={() => removeService(i)} style={{ background: 'none', border: 'none', color: 'var(--t3)', cursor: 'pointer', fontSize: 18 }}>×</button>
+                )}
               </div>
+              <input value={service.nom} onChange={e => updateService(i, 'nom', e.target.value)} style={inputStyle} placeholder="Nom du service" />
+              <div style={{ display: 'flex', gap: 10 }}>
+                <input value={service.prix} onChange={e => updateService(i, 'prix', e.target.value)} style={{ ...inputStyle, flex: 1 }} placeholder="Prix CHF" type="number" />
+                <input value={service.duree} onChange={e => updateService(i, 'duree', e.target.value)} style={{ ...inputStyle, flex: 1 }} placeholder="Duree min" type="number" />
+              </div>
+              <input value={service.description} onChange={e => updateService(i, 'description', e.target.value)} style={inputStyle} placeholder="Description" />
             </div>
           ))}
+
           <button
-            onClick={() => setServices(prev => [...prev, { id: String(Date.now()), name: '', price: 0, duration: 30 }])}
-            style={{ height: '44px', background: 'var(--d3)', border: '1px dashed var(--edge2)', borderRadius: '12px', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '13px', color: 'var(--t3)', cursor: 'pointer' }}
+            onClick={addService}
+            style={{ width: '100%', padding: '12px', borderRadius: 12, border: '1px dashed rgba(255,255,255,0.12)', background: 'transparent', color: 'var(--t3)', fontSize: 13, cursor: 'pointer', fontFamily: 'Inter, sans-serif', marginBottom: 20 }}
           >
             + Ajouter un service
           </button>
-          <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-            <button onClick={() => setStep(2)} style={{ flex: 1, height: '52px', background: 'var(--d3)', border: '1px solid var(--edge1)', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '14px', color: 'var(--t2)', cursor: 'pointer' }}>
-              Retour
-            </button>
-            <button onClick={handleFinish} style={{ flex: 2, height: '52px', background: '#F2D06B', color: '#050507', border: 'none', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
-              Terminer
-            </button>
-          </div>
+
+          <button
+            onClick={handleFinish}
+            style={{ width: '100%', padding: '16px', borderRadius: 14, border: 'none', background: '#F2D06B', color: '#050507', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
+          >
+            Creer mon profil
+          </button>
         </div>
       )}
     </div>

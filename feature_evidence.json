@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-global-procontext-and-proprovider-that-holds-proactif-boolean-setproactif-prodata-object-with-fields-prenom-alexandre-ville-lausanne-categorie-barber-iban-photos-services-flashactif-false-slogan-bio-and-setprodata-proprovider-must-wrap-all-pro-screens-so-state-persists-across-tab-navigation",
-      "featureTitle": "Create a global ProContext and ProProvider that holds proActif (boolean), setProActif, proData (object with fields: prenom='Alexandre', ville='Lausanne', categorie='barber', iban='', photos=[], services=[], flashActif=false, slogan='', bio=''), and setProData. ProProvider must wrap all pro screens so state persists across tab navigation.",
+      "featureId": "feature-create-a-new-file-frontend-src-components-proapp-tsx-as-a-fully-self-contained-react-component-no-react-router-no-external-navigation-libs-it-must-include-all-pro-space-screens-and-sub-components-inline-or-imported-locally-dashboard-radar-wallet-business-subscription-modal-and-subscription-success-animation-navigation-between-these-screens-must-be-driven-exclusively-by-usestate-the-component-must-export-proapp-as-a-default-export",
+      "featureTitle": "Create a new file `frontend/src/components/ProApp.tsx` as a fully self-contained React component (no React Router, no external navigation libs). It must include all pro-space screens and sub-components inline or imported locally: Dashboard, Radar, Wallet, Business, Subscription Modal, and Subscription Success animation. Navigation between these screens must be driven exclusively by `useState`. The component must export `ProApp` as a default export.",
       "files": [
-        "frontend/src/context/ProContext.tsx"
+        "frontend/src/components/ProApp.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -25,12 +25,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-refactor-prolayout-to-use-usestate-dashboard-for-activetab-and-render-the-4-pro-screens-radarscreen-walletscreen-dashboardscreen-businessscreen-via-conditional-rendering-not-react-router-prolayout-must-be-a-fixed-full-screen-container-with-flex-column-layout-with-the-content-area-flex-1-overflowy-auto-and-protabbar-at-the-bottom-protabbar-receives-active-and-onchange-props",
-      "featureTitle": "Refactor ProLayout to use useState('dashboard') for activeTab and render the 4 pro screens (RadarScreen, WalletScreen, DashboardScreen, BusinessScreen) via conditional rendering — NOT React Router. ProLayout must be a fixed full-screen container with flex column layout, with the content area (flex:1, overflowY:'auto') and ProTabBar at the bottom. ProTabBar receives active and onChange props.",
+      "featureId": "feature-in-frontend-src-components-proapp-tsx-define-a-color-constants-object-c-that-includes-the-value-t4-2e2e3e-use-c-t4-for-the-iconcamera-fill-color-and-for-all-other-very-subtle-discrete-ui-elements-placeholder-text-dividers-inactive-icon-strokes-secondary-backgrounds-etc",
+      "featureTitle": "In `frontend/src/components/ProApp.tsx`, define a color constants object `C` that includes the value `t4: '#2E2E3E'`. Use `C.t4` for the `IconCamera` fill color and for all other very subtle/discrete UI elements (placeholder text, dividers, inactive icon strokes, secondary backgrounds, etc.).",
       "files": [
-        "frontend/src/components/NexusOS.tsx",
-        "frontend/src/components/ProLayout.tsx",
-        "frontend/src/components/ProTabBar.tsx"
+        "frontend/src/components/ProApp.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -50,11 +48,10 @@
       "confidence": "high"
     },
     {
-      "featureId": "feature-refactor-businessscreen-monbusiness-to-use-usestate-identite-for-activesubtab-with-4-sub-tabs-identite-paiement-services-galerie-each-sub-tab-content-is-rendered-via-conditional-rendering-only-no-routing-sub-tab-state-must-not-reset-when-switching-between-sub-tabs-all-data-is-held-in-procontext",
-      "featureTitle": "Refactor BusinessScreen (MonBusiness) to use useState('identite') for activeSubTab with 4 sub-tabs: Identite / Paiement / Services / Galerie. Each sub-tab content is rendered via conditional rendering only (no routing). Sub-tab state must NOT reset when switching between sub-tabs — all data is held in ProContext.",
+      "featureId": "feature-in-frontend-src-components-roleselection-tsx-or-roleselectionv2-tsx-whichever-is-currently-active-in-screenrouter-replace-the-navigation-target-for-the-professionnel-role-selection-with-a-render-of-proapp-the-old-broken-pro-space-component-must-no-longer-be-rendered-when-the-user-selects-professionnel-import-proapp-from-proapp-and-render-it-in-place-of-the-previous-pro-route-component",
+      "featureTitle": "In `frontend/src/components/RoleSelection.tsx` (or `RoleSelectionV2.tsx`, whichever is currently active in ScreenRouter), replace the navigation target for the 'Professionnel' role selection with a render of `<ProApp />`. The old broken pro space component must no longer be rendered when the user selects 'Professionnel'. Import ProApp from `./ProApp` and render it in place of the previous pro route/component.",
       "files": [
-        "frontend/src/components/BusinessScreen.tsx",
-        "frontend/src/components/MonBusiness.tsx"
+        "frontend/src/components/RoleSelectionV2.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -70,275 +67,6 @@
       ],
       "testIds": [
         "REQ-3"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-replace-the-existing-photo-upload-implementation-in-the-galerie-sub-tab-with-the-ref-based-approach-use-an-array-of-4-useref-null-for-file-inputs-handleslotclick-triggers-the-corresponding-hidden-input-handlefilechange-validates-type-must-be-image-and-size-max-10mb-reads-as-base64-via-filereader-and-stores-in-prodata-photos-index-via-procontext-setprodata-each-slot-renders-a-hidden-input-type-file-accept-image-shows-the-uploaded-image-with-objectfit-cover-and-a-remove-button-iconx-stoppropagation-or-shows-an-empty-slot-with-dashed-border-iconcamera-and-add-label-remove-button-sets-photos-index-to-null",
-      "featureTitle": "Replace the existing photo upload implementation in the Galerie sub-tab with the ref-based approach: use an array of 4 useRef(null) for file inputs, handleSlotClick triggers the corresponding hidden input, handleFileChange validates type (must be image/*) and size (max 10MB), reads as base64 via FileReader and stores in proData.photos[index] via ProContext setProData. Each slot renders a hidden <input type='file' accept='image/*'>, shows the uploaded image with objectFit:'cover' and a remove button (IconX, stopPropagation), or shows an empty slot with dashed border, IconCamera, and 'Add' label. Remove button sets photos[index] to null.",
-      "files": [
-        "frontend/src/components/BusinessScreen.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-4"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-fix-the-subscription-flow-subscriptionsuccess-must-use-a-useeffect-with-a-4500ms-timer-that-calls-setproactif-true-via-procontext-and-then-calls-an-onsuccesscomplete-callback-prop-the-parent-that-renders-subscriptionsuccess-must-pass-onsuccesscomplete-as-setactivetab-dashboard-so-the-navigation-goes-to-the-dashboard-tab-in-prolayout-not-via-react-router-route-change",
-      "featureTitle": "Fix the subscription flow: SubscriptionSuccess must use a useEffect with a 4500ms timer that calls setProActif(true) via ProContext and then calls an onSuccessComplete callback prop. The parent that renders SubscriptionSuccess must pass onSuccessComplete as () => setActiveTab('dashboard') so the navigation goes to the Dashboard tab in ProLayout — NOT via React Router route change.",
-      "files": [
-        "frontend/src/components/BusinessScreen.tsx",
-        "frontend/src/components/DashboardScreen.tsx",
-        "frontend/src/components/ProLayout.tsx",
-        "frontend/src/components/SubscriptionSuccess.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-5"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-fix-the-activer-mon-profil-button-in-the-galerie-sub-tab-the-button-must-be-enabled-and-visible-when-photos-filter-boolean-length-3-regardless-of-iban-value-iban-is-not-required-in-demo-mode-do-not-block-activation-based-on-iban-being-empty",
-      "featureTitle": "Fix the 'Activer mon profil' button in the Galerie sub-tab: the button must be enabled and visible when photos.filter(Boolean).length >= 3, regardless of IBAN value. IBAN is not required in demo mode. Do not block activation based on IBAN being empty.",
-      "files": [
-        "frontend/src/components/BusinessScreen.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-6"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-replace-the-colored-gradient-backgrounds-on-explorer-pro-cards-with-real-unsplash-images-using-the-exact-urls-provided-add-a-coverurl-field-to-each-demo-pro-data-entry-with-the-following-values-studio-blade-https-images-unsplash-com-photo-1503951914875-452162b0f3f1-w-400-h-500-fit-crop-q-80-karim-cuts-https-images-unsplash-com-photo-1599351431202-1e0f0137899a-w-400-h-500-fit-crop-q-80-tom-barber-https-images-unsplash-com-photo-1621605815971-fbc98d665033-w-400-h-500-fit-crop-q-80-elise-coiffure-https-images-unsplash-com-photo-1562322140-8baeececf3df-w-400-h-500-fit-crop-q-80-sarah-style-https-images-unsplash-com-photo-1605497788044-5a32c7078486-w-400-h-500-fit-crop-q-80-nadia-beauty-https-images-unsplash-com-photo-1570172619644-dfd03ed5d881-w-400-h-500-fit-crop-q-80-clara-nails-https-images-unsplash-com-photo-1604654894610-df63bc536371-w-400-h-500-fit-crop-q-80-zen-by-marco-https-images-unsplash-com-photo-1544161515-4ab6ce6db874-w-400-h-500-fit-crop-q-80",
-      "featureTitle": "Replace the colored gradient backgrounds on Explorer pro cards with real Unsplash images using the exact URLs provided. Add a coverUrl field to each demo pro data entry with the following values: Studio Blade → https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&h=500&fit=crop&q=80, Karim Cuts → https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=400&h=500&fit=crop&q=80, Tom Barber → https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=400&h=500&fit=crop&q=80, Elise Coiffure → https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=500&fit=crop&q=80, Sarah Style → https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=400&h=500&fit=crop&q=80, Nadia Beauty → https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&h=500&fit=crop&q=80, Clara Nails → https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&h=500&fit=crop&q=80, Zen by Marco → https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&h=500&fit=crop&q=80.",
-      "files": [
-        "frontend/src/data/mockData.ts",
-        "frontend/src/utils/demoData.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-7"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-apply-a-mandatory-dark-overlay-on-all-pro-card-images-linear-gradient-180deg-rgba-5-5-7-0-1-0-rgba-5-5-7-0-92-100-positioned-absolute-with-inset-0-over-the-image-this-applies-to-flash-live-cards-168x228px-explorer-list-cards-and-the-pro-profile-cover-270px-height-text-content-badges-name-info-must-sit-above-the-overlay-using-z-index-stacking",
-      "featureTitle": "Apply a mandatory dark overlay on all pro card images: linear-gradient(180deg, rgba(5,5,7,0.1) 0%, rgba(5,5,7,0.92) 100%) positioned absolute with inset:0 over the image. This applies to Flash Live cards (168x228px), Explorer list cards, and the Pro profile cover (270px height). Text content (badges, name, info) must sit above the overlay using z-index stacking.",
-      "files": [
-        "frontend/src/components/Explorer.tsx",
-        "frontend/src/components/ExplorerV2.tsx",
-        "frontend/src/components/ProFiche.tsx",
-        "frontend/src/components/ProProfile.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-8"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-add-service-level-image-urls-to-all-demo-service-data-entries-by-category-barber-services-coupe-homme-https-images-unsplash-com-photo-1503951914875-452162b0f3f1-w-300-h-200-fit-crop-q-80-degrade-premium-https-images-unsplash-com-photo-1621605815971-fbc98d665033-w-300-h-200-fit-crop-q-80-coupe-barbe-https-images-unsplash-com-photo-1599351431202-1e0f0137899a-w-300-h-200-fit-crop-q-80-barbe-design-https-images-unsplash-com-photo-1519345182560-3f2917c472ef-w-300-h-200-fit-crop-q-80-rasage-traditionnel-https-images-unsplash-com-photo-1493256338651-d82f7acb2b38-w-300-h-200-fit-crop-q-80-coiffure-services-coupe-femme-https-images-unsplash-com-photo-1562322140-8baeececf3df-w-300-h-200-fit-crop-q-80-couleur-https-images-unsplash-com-photo-1522337360788-8b13dee7a37e-w-300-h-200-fit-crop-q-80-meches-https-images-unsplash-com-photo-1492106087820-71f1a00d2b11-w-300-h-200-fit-crop-q-80-brushing-https-images-unsplash-com-photo-1605497788044-5a32c7078486-w-300-h-200-fit-crop-q-80-esthetique-services-soin-visage-https-images-unsplash-com-photo-1570172619644-dfd03ed5d881-w-300-h-200-fit-crop-q-80-manucure-https-images-unsplash-com-photo-1604654894610-df63bc536371-w-300-h-200-fit-crop-q-80-pedicure-https-images-unsplash-com-photo-1519751138087-5bf79df62d5b-w-300-h-200-fit-crop-q-80-pose-gel-https-images-unsplash-com-photo-1604654894610-df63bc536371-w-300-h-200-fit-crop-q-80-massage-services-massage-relaxant-https-images-unsplash-com-photo-1544161515-4ab6ce6db874-w-300-h-200-fit-crop-q-80-massage-sportif-https-images-unsplash-com-photo-1600334129128-685c5582fd35-w-300-h-200-fit-crop-q-80-massage-duo-https-images-unsplash-com-photo-1515377905703-c4788e51af15-w-300-h-200-fit-crop-q-80-display-these-images-on-explorer-service-cards-and-in-pro-profile-service-lists",
-      "featureTitle": "Add service-level image URLs to all demo service data entries by category. Barber services: 'Coupe homme' → https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=200&fit=crop&q=80, 'Degrade premium' → https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=300&h=200&fit=crop&q=80, 'Coupe + Barbe' → https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=300&h=200&fit=crop&q=80, 'Barbe design' → https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=300&h=200&fit=crop&q=80, 'Rasage traditionnel' → https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?w=300&h=200&fit=crop&q=80. Coiffure services: 'Coupe femme' → https://images.unsplash.com/photo-1562322140-8baeececf3df?w=300&h=200&fit=crop&q=80, 'Couleur' → https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&h=200&fit=crop&q=80, 'Meches' → https://images.unsplash.com/photo-1492106087820-71f1a00d2b11?w=300&h=200&fit=crop&q=80, 'Brushing' → https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=300&h=200&fit=crop&q=80. Esthetique services: 'Soin visage' → https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=200&fit=crop&q=80, 'Manucure' → https://images.unsplash.com/photo-1604654894610-df63bc536371?w=300&h=200&fit=crop&q=80, 'Pedicure' → https://images.unsplash.com/photo-1519751138087-5bf79df62d5b?w=300&h=200&fit=crop&q=80, 'Pose gel' → https://images.unsplash.com/photo-1604654894610-df63bc536371?w=300&h=200&fit=crop&q=80. Massage services: 'Massage relaxant' → https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=300&h=200&fit=crop&q=80, 'Massage sportif' → https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=300&h=200&fit=crop&q=80, 'Massage duo' → https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=300&h=200&fit=crop&q=80. Display these images on Explorer service cards and in pro profile service lists.",
-      "files": [
-        "frontend/src/components/ProFiche.tsx",
-        "frontend/src/components/ProProfile.tsx",
-        "frontend/src/utils/demoData.ts"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-9"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-flash-live-card-layout-168x228px-borderradius-20-to-use-img-with-objectfit-cover-for-the-pro-coverurl-with-an-onerror-fallback-that-hides-the-image-and-restores-the-gradient-background-the-dark-overlay-div-must-be-absolutely-positioned-over-the-image-flash-badge-top-left-rating-top-right-and-pro-info-bottom-must-all-render-above-the-overlay",
-      "featureTitle": "Update the Flash Live card layout (168x228px, borderRadius:20) to use <img> with objectFit:'cover' for the pro coverUrl, with an onError fallback that hides the image and restores the gradient background. The dark overlay div must be absolutely positioned over the image. Flash badge (top-left), rating (top-right), and pro info (bottom) must all render above the overlay.",
-      "files": [
-        "frontend/src/components/ExplorerV2.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-10"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-explorer-list-card-avatars-44px-circular-to-display-the-pro-s-coverurl-as-a-circular-img-with-objectfit-cover-when-available-falling-back-to-gradient-background-with-initials-when-coverurl-is-absent-or-fails-to-load",
-      "featureTitle": "Update Explorer list card avatars (44px circular) to display the pro's coverUrl as a circular <img> with objectFit:'cover' when available, falling back to gradient background with initials when coverUrl is absent or fails to load.",
-      "files": [
-        "frontend/src/components/Explorer.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-11"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-update-the-pro-profile-cover-height-270px-to-render-the-pro-s-coverurl-as-a-full-width-img-with-objectfit-cover-and-objectposition-top-center-with-an-onerror-handler-that-hides-the-image-add-a-subtle-noise-grain-overlay-3-opacity-svg-pattern-and-a-dark-gradient-overlay-linear-gradient-180deg-transparent-0-rgba-5-5-7-0-98-100-absolutely-positioned-over-the-image",
-      "featureTitle": "Update the pro profile cover (height 270px) to render the pro's coverUrl as a full-width <img> with objectFit:'cover' and objectPosition:'top center', with an onError handler that hides the image. Add a subtle noise/grain overlay (3% opacity SVG pattern) and a dark gradient overlay (linear-gradient(180deg, transparent 0%, rgba(5,5,7,0.98) 100%)) absolutely positioned over the image.",
-      "files": [
-        "frontend/src/components/ProFiche.tsx",
-        "frontend/src/components/ProProfile.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-12"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-verify-that-the-wallet-30-second-cooldown-works-correctly-after-tapping-transfer-to-my-account-the-button-must-be-disabled-for-30-seconds-after-tap-show-a-countdown-and-the-balance-must-be-zeroed-ensure-this-functionality-is-not-broken-by-the-procontext-prolayout-refactor",
-      "featureTitle": "Verify that the Wallet 30-second cooldown works correctly after tapping 'Transfer to my account'. The button must be disabled for 30 seconds after tap, show a countdown, and the balance must be zeroed. Ensure this functionality is not broken by the ProContext/ProLayout refactor.",
-      "files": [
-        "frontend/src/components/WalletPro.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-14"
-      ],
-      "confidence": "high"
-    },
-    {
-      "featureId": "feature-remove-all-emoji-characters-from-any-pro-space-component-code-prolayout-businessscreen-protabbar-walletpro-radarpro-dashboardscreen-subscriptionmodal-subscriptionsuccess-use-only-svg-icon-components-from-icons-tsx-or-plain-text-labels",
-      "featureTitle": "Remove all emoji characters from any pro-space component code (ProLayout, BusinessScreen, ProTabBar, WalletPro, RadarPro, DashboardScreen, SubscriptionModal, SubscriptionSuccess). Use only SVG icon components (from Icons.tsx) or plain text labels.",
-      "files": [
-        "frontend/src/components/BusinessScreen.tsx",
-        "frontend/src/components/DashboardScreen.tsx",
-        "frontend/src/components/ProLayout.tsx",
-        "frontend/src/components/ProTabBar.tsx",
-        "frontend/src/components/RadarPro.tsx",
-        "frontend/src/components/SubscriptionSuccess.tsx",
-        "frontend/src/components/WalletPro.tsx"
-      ],
-      "components": [
-        "authorization@4.0.0",
-        "core-infrastructure@1.0.2",
-        "shadcn-ui@1.0.0",
-        "build-template-react@1.0.0",
-        "initial-app@1.0.0",
-        "github-export-icp-cli@1.0.0",
-        "blob-storage@4.0.0",
-        "stripe@3.0.0",
-        "http-outcalls@3.0.0",
-        "camera@1.0.0"
-      ],
-      "testIds": [
-        "REQ-15"
       ],
       "confidence": "high"
     }

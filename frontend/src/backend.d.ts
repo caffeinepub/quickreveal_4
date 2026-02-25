@@ -167,7 +167,8 @@ export interface backendInterface {
      */
     getProProfile(proId: Principal): Promise<ProProfile>;
     /**
-     * / Gets Stripe session status.
+     * / Gets Stripe session status. Only authenticated users may query session status
+     * / to prevent unauthenticated callers from probing sessions or triggering outcalls.
      */
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
     /**
@@ -189,7 +190,7 @@ export interface backendInterface {
      */
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
     /**
-     * / Transform query (used internally).
+     * / Transform query (used internally by ICP HTTP outcalls infrastructure).
      */
     transform(input: TransformationInput): Promise<TransformationOutput>;
     updateBookingStatus(bookingId: string, status: BookingStatus): Promise<void>;

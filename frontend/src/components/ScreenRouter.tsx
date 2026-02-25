@@ -1,6 +1,5 @@
 import React, { Suspense, lazy } from 'react';
 import { useAppContext } from '../context/AppContext';
-import SMSToast from './SMSToast';
 
 const Login = lazy(() => import('./Login'));
 const RoleSelectionV2 = lazy(() => import('./RoleSelectionV2'));
@@ -8,96 +7,80 @@ const OTPVerificationV2 = lazy(() => import('./OTPVerificationV2'));
 const ExplorerV2 = lazy(() => import('./ExplorerV2'));
 const ProFiche = lazy(() => import('./ProFiche'));
 const BookingFlow = lazy(() => import('./BookingFlow'));
-const SubscriptionModal = lazy(() => import('./SubscriptionModal'));
-const MonBusiness = lazy(() => import('./MonBusiness'));
 const LiveStatus = lazy(() => import('./LiveStatus'));
-const ClientDashboard = lazy(() => import('./ClientDashboard'));
 const NexusOS = lazy(() => import('./NexusOS'));
-const NotificationCenter = lazy(() => import('./NotificationCenter'));
-const Splash = lazy(() => import('./Splash'));
-const Welcome = lazy(() => import('./Welcome'));
 const RoleSelection = lazy(() => import('./RoleSelection'));
 const OTPVerification = lazy(() => import('./OTPVerification'));
-const Explorer = lazy(() => import('./Explorer'));
-const ProviderDetail = lazy(() => import('./ProviderDetail'));
-const BookingLocation = lazy(() => import('./BookingLocation'));
-const BookingDate = lazy(() => import('./BookingDate'));
-const BookingContact = lazy(() => import('./BookingContact'));
-const Subscription = lazy(() => import('./Subscription'));
-const Builder = lazy(() => import('./Builder'));
+const Welcome = lazy(() => import('./Welcome'));
 const ProLogin = lazy(() => import('./ProLogin'));
-const UpgradeModal = lazy(() => import('./UpgradeModal'));
-const SubscriptionScreen = lazy(() => import('./SubscriptionScreen'));
-const ProOnboardingModal = lazy(() => import('./ProOnboardingModal'));
+const Subscription = lazy(() => import('./Subscription'));
+const ClientDashboard = lazy(() => import('./ClientDashboard'));
+const NotificationCenter = lazy(() => import('./NotificationCenter'));
+const ProApp = lazy(() => import('./ProApp'));
 
-function LoadingFallback() {
-  return (
+const Spinner = () => (
+  <div style={{
+    position: 'fixed',
+    inset: 0,
+    background: 'var(--void)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+  }}>
     <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      height: '100vh',
-      background: 'var(--void)',
-    }}>
-      <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--gold)" strokeWidth="2" strokeLinecap="round" style={{ animation: 'spin 1s linear infinite' }}>
-        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-      </svg>
-    </div>
-  );
-}
+      width: 32,
+      height: 32,
+      border: '2px solid rgba(242,208,107,0.2)',
+      borderTop: '2px solid #F2D06B',
+      borderRadius: '50%',
+      animation: 'spin 0.8s linear infinite',
+    }} />
+  </div>
+);
 
 export default function ScreenRouter() {
-  const { currentScreen, smsToast, goBack, hideSMSToast, closeSubscriptionModal } = useAppContext();
+  const { currentScreen } = useAppContext();
 
   const renderScreen = () => {
     switch (currentScreen) {
       case 'login': return <Login />;
-      case 'roleSelectionV2': return <RoleSelectionV2 />;
       case 'roleSelection': return <RoleSelectionV2 />;
+      case 'roleSelectionV2': return <RoleSelectionV2 />;
+      case 'otpVerification': return <OTPVerification />;
       case 'clientOtp': return <OTPVerificationV2 />;
       case 'otp': return <OTPVerification />;
-      case 'otpVerification': return <OTPVerification />;
-      case 'proOnboarding': return <ProOnboardingModal onClose={goBack} />;
+      case 'welcome': return <Welcome />;
+      case 'proLogin': return <ProLogin />;
+      case 'proOnboarding': return <ProApp />;
       case 'explorerV2': return <ExplorerV2 />;
       case 'proFiche': return <ProFiche />;
       case 'bookingFlow': return <BookingFlow />;
-      case 'subscriptionModal': return <SubscriptionModal />;
-      // proSuccess and subscriptionSuccess are handled inside ProLayout/BusinessScreen
-      // Redirect to nexusOS which contains the full pro space
-      case 'proSuccess': return <NexusOS />;
-      case 'subscriptionSuccess': return <NexusOS />;
-      case 'monBusiness': return <MonBusiness />;
       case 'liveStatus': return <LiveStatus />;
-      case 'clientDashboard': return <ClientDashboard />;
       case 'nexusOS': return <NexusOS />;
-      case 'radarPro': return <NexusOS />;
-      case 'walletPro': return <NexusOS />;
-      case 'notificationCenter': return <NotificationCenter />;
-      case 'splash': return <Splash />;
-      case 'welcome': return <Welcome />;
-      case 'explorer': return <Explorer />;
-      case 'providerDetail': return <ProviderDetail />;
-      case 'bookingLocation': return <BookingLocation />;
-      case 'bookingDate': return <BookingDate />;
-      case 'bookingContact': return <BookingContact />;
+      case 'monBusiness': return <NexusOS />;
       case 'subscription': return <Subscription />;
-      case 'builder': return <Builder />;
-      case 'proLogin': return <ProLogin />;
-      case 'upgradeModal': return <UpgradeModal onClose={goBack} />;
-      case 'subscriptionScreen': return <SubscriptionScreen />;
+      case 'clientDashboard': return <ClientDashboard />;
+      case 'notificationCenter': return <NotificationCenter />;
+      case 'proSuccess': return <ProApp />;
+      case 'subscriptionSuccess': return <NexusOS />;
+      case 'radarPro': return <ProApp />;
+      case 'walletPro': return <ProApp />;
+      case 'splash': return <Login />;
+      case 'explorer': return <ExplorerV2 />;
+      case 'providerDetail': return <ProFiche />;
+      case 'bookingLocation': return <BookingFlow />;
+      case 'bookingDate': return <BookingFlow />;
+      case 'bookingContact': return <BookingFlow />;
+      case 'subscriptionScreen': return <NexusOS />;
+      case 'upgradeModal': return <NexusOS />;
+      case 'builder': return <Login />;
       default: return <Login />;
     }
   };
 
   return (
-    <Suspense fallback={<LoadingFallback />}>
+    <Suspense fallback={<Spinner />}>
       {renderScreen()}
-      <SMSToast
-        visible={smsToast.visible}
-        message={smsToast.message}
-        phone={smsToast.phone}
-        onDismiss={hideSMSToast}
-      />
     </Suspense>
   );
 }

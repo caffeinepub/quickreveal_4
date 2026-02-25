@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { IconUser, IconBusiness, IconArrowRight } from './icons/Icons';
+import ProApp from './ProApp';
 
 export default function RoleSelectionV2() {
   const { setCurrentScreen, setAppRole } = useAppContext();
   const [pressed, setPressed] = useState<string | null>(null);
+  const [showPro, setShowPro] = useState(false);
 
   const handleClient = () => {
     setAppRole('client');
@@ -13,8 +15,13 @@ export default function RoleSelectionV2() {
 
   const handlePro = () => {
     setAppRole('pro');
-    setCurrentScreen('proOnboarding');
+    setShowPro(true);
   };
+
+  // Render ProApp directly when pro is selected
+  if (showPro) {
+    return <ProApp />;
+  }
 
   return (
     <div

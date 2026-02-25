@@ -240,8 +240,12 @@ actor {
     };
   };
 
-  /// Gets Stripe session status.
-  public func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+  /// Gets Stripe session status. Only authenticated users may query session status
+  /// to prevent unauthenticated callers from probing sessions or triggering outcalls.
+  public shared ({ caller }) func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Must be authenticated to check session status");
+    };
     await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
   };
 
@@ -253,7 +257,7 @@ actor {
     await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
   };
 
-  /// Transform query (used internally).
+  /// Transform query (used internally by ICP HTTP outcalls infrastructure).
   public query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
     OutCall.transform(input);
   };
@@ -505,4 +509,3 @@ actor {
     };
   };
 };
-

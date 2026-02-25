@@ -1,707 +1,313 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
-import { MapPin, ChevronDown, Star, Zap } from 'lucide-react';
+import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import GlobalHeader from './GlobalHeader';
+import type { ProProfileData } from '../context/AppContext';
 import BottomNav from './BottomNav';
+import GlobalHeader from './GlobalHeader';
+import { DEMO_PROS } from '../utils/demoData';
 
-const DEMO_PROS = [
-  {
-    id: 'julien-rossi',
-    brandName: 'Julien Rossi',
-    slogan: 'Barber premium à domicile',
-    category: 'Barber',
-    city: 'Lausanne',
-    rating: 4.9,
-    reviewCount: 47,
-    responseTime: '3 min',
-    minPrice: 35,
-    isFlash: true,
-    hasRevolut: true,
-    coverPhoto: '/assets/generated/barber-lausanne-cover.dim_1200x400.png',
-    profilePhoto: '/assets/generated/provider-julien-rossi.dim_800x600.png',
-    bio: 'Spécialiste coupe homme et barbe depuis 10 ans.',
-    services: [
-      { id: 's1', name: 'Coupe homme', duration: 45, price: 45, badges: ['Populaire'] },
-      { id: 's2', name: 'Barbe complète', duration: 30, price: 35, badges: [] },
-      { id: 's3', name: 'Coupe + Barbe', duration: 75, price: 70, badges: ['Promo'] },
-    ],
-    acceptanceRate: 97,
-    totalPrestations: 124,
-  },
-  {
-    id: 'lucie-esthetics',
-    brandName: 'Lucie Esthetics',
-    slogan: 'Beauté & bien-être à domicile',
-    category: 'Esthétique',
-    city: 'Genève',
-    rating: 4.8,
-    reviewCount: 63,
-    responseTime: '5 min',
-    minPrice: 55,
-    isFlash: true,
-    hasRevolut: true,
-    coverPhoto: '/assets/generated/esthetique-lausanne-cover.dim_1200x400.png',
-    profilePhoto: '/assets/generated/provider-lucie-esthetics.dim_800x600.png',
-    bio: 'Esthéticienne diplômée, spécialiste soins visage et corps.',
-    services: [
-      { id: 's1', name: 'Soin visage', duration: 60, price: 75, badges: ['Populaire'] },
-      { id: 's2', name: 'Épilation jambes', duration: 45, price: 55, badges: [] },
-      { id: 's3', name: 'Manucure', duration: 30, price: 40, badges: ['Nouveau'] },
-    ],
-    acceptanceRate: 95,
-    totalPrestations: 89,
-  },
-  {
-    id: 'sophiane-hair',
-    brandName: 'Sophiane Hair',
-    slogan: 'Coiffure créative & tendance',
-    category: 'Coiffure',
-    city: 'Lausanne',
-    rating: 4.7,
-    reviewCount: 38,
-    responseTime: '8 min',
-    minPrice: 60,
-    isFlash: false,
-    hasRevolut: false,
-    coverPhoto: '/assets/generated/coiffure-geneva-cover.dim_1200x400.png',
-    profilePhoto: '/assets/generated/provider-sophiane-hair.dim_800x600.png',
-    bio: 'Coiffeuse passionnée, spécialiste colorations et coupes femme.',
-    services: [
-      { id: 's1', name: 'Coupe femme', duration: 60, price: 80, badges: ['Populaire'] },
-      { id: 's2', name: 'Coloration', duration: 120, price: 120, badges: [] },
-      { id: 's3', name: 'Brushing', duration: 45, price: 60, badges: [] },
-    ],
-    acceptanceRate: 92,
-    totalPrestations: 67,
-  },
-  {
-    id: 'zen-touch',
-    brandName: 'Zen Touch',
-    slogan: 'Massage & relaxation premium',
-    category: 'Massage',
-    city: 'Genève',
-    rating: 5.0,
-    reviewCount: 29,
-    responseTime: '10 min',
-    minPrice: 80,
-    isFlash: true,
-    hasRevolut: true,
-    coverPhoto: '/assets/generated/massage-geneva-cover.dim_1200x400.png',
-    profilePhoto: '/assets/generated/provider-zen-touch.dim_800x600.png',
-    bio: 'Masseur certifié, techniques suédoises et thaïlandaises.',
-    services: [
-      { id: 's1', name: 'Massage relaxant 60min', duration: 60, price: 90, badges: ['Populaire'] },
-      { id: 's2', name: 'Massage sportif', duration: 45, price: 80, badges: [] },
-      { id: 's3', name: 'Massage duo', duration: 90, price: 160, badges: ['Nouveau'] },
-    ],
-    acceptanceRate: 100,
-    totalPrestations: 45,
-  },
-  {
-    id: 'noura-beauty',
-    brandName: 'Noura Beauty',
-    slogan: 'Maquillage & soins orientaux',
-    category: 'Esthétique',
-    city: 'Fribourg',
-    rating: 4.6,
-    reviewCount: 21,
-    responseTime: '15 min',
-    minPrice: 45,
-    isFlash: false,
-    hasRevolut: false,
-    coverPhoto: '/assets/generated/coiffure-fribourg-cover.dim_1200x400.png',
-    profilePhoto: '/assets/generated/provider-noura-beauty.dim_800x600.png',
-    bio: 'Maquilleuse professionnelle, spécialiste mariages et événements.',
-    services: [
-      { id: 's1', name: 'Maquillage événement', duration: 60, price: 85, badges: ['Populaire'] },
-      { id: 's2', name: 'Soin hammam', duration: 90, price: 95, badges: ['Nouveau'] },
-      { id: 's3', name: 'Henné', duration: 45, price: 45, badges: [] },
-    ],
-    acceptanceRate: 88,
-    totalPrestations: 34,
-  },
-  {
-    id: 'barber-geneva',
-    brandName: 'Mageste Labs',
-    slogan: 'Barber shop haut de gamme',
-    category: 'Barber',
-    city: 'Genève',
-    rating: 4.8,
-    reviewCount: 55,
-    responseTime: '5 min',
-    minPrice: 40,
-    isFlash: true,
-    hasRevolut: true,
-    coverPhoto: '/assets/generated/barber-geneva-cover.dim_1200x400.png',
-    profilePhoto: '/assets/generated/provider-mageste-labs.dim_800x600.png',
-    bio: 'Barbier expert, spécialiste dégradés et soins barbe.',
-    services: [
-      { id: 's1', name: 'Dégradé américain', duration: 45, price: 50, badges: ['Populaire'] },
-      { id: 's2', name: 'Rasage traditionnel', duration: 30, price: 40, badges: [] },
-      { id: 's3', name: 'Coupe + Rasage', duration: 75, price: 80, badges: ['Promo'] },
-    ],
-    acceptanceRate: 96,
-    totalPrestations: 112,
-  },
-];
+const StarIcon = () => (
+  <svg width="12" height="12" viewBox="0 0 12 12" fill="#F2D06B" stroke="#F2D06B" strokeWidth="0.5">
+    <polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9.5 3,11 3.5,7.5 1,5 4.5,4.5" />
+  </svg>
+);
 
-const SWISS_CITIES = [
-  'Lausanne', 'Genève', 'Fribourg', 'Neuchâtel', 'Sion',
-  'Montreux', 'Vevey', 'Yverdon-les-Bains', 'Nyon', 'Morges',
-  'Renens', 'Biel/Bienne', 'La Chaux-de-Fonds', 'Delémont',
-];
+const SearchIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
+    <circle cx="7" cy="7" r="4.5" />
+    <line x1="10.5" y1="10.5" x2="14" y2="14" />
+  </svg>
+);
 
-const CATEGORIES = [
-  { id: 'all', label: 'Tous', emoji: '' },
-  { id: 'flash', label: 'Flash', emoji: '⚡' },
-  { id: 'Barber', label: 'Barber', emoji: '✂️' },
-  { id: 'Coiffure', label: 'Coiffure', emoji: '💇' },
-  { id: 'Esthétique', label: 'Esthétique', emoji: '💅' },
-  { id: 'Massage', label: 'Massage', emoji: '🤲' },
-];
+const LightningIcon = () => (
+  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#00D97A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="6,1 3,5.5 5.5,5.5 4,9 7,4.5 4.5,4.5" />
+  </svg>
+);
 
-type DemoPro = typeof DEMO_PROS[0];
+const CATEGORIES = ['Tous', 'Coiffure', 'Esthétique', 'Massage', 'Barbier', 'Ongles'];
 
-function SkeletonCard() {
-  return (
-    <div
-      style={{
-        borderRadius: '20px',
-        overflow: 'hidden',
-        marginBottom: '16px',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-      }}
-    >
-      <div className="skeleton-shimmer" style={{ width: '100%', height: '180px' }} />
-      <div style={{ backgroundColor: '#111111', padding: '16px' }}>
-        <div className="skeleton-shimmer" style={{ height: '20px', borderRadius: '4px', marginBottom: '8px', width: '60%' }} />
-        <div className="skeleton-shimmer" style={{ height: '14px', borderRadius: '4px', marginBottom: '12px', width: '40%' }} />
-        <div className="skeleton-shimmer" style={{ height: '14px', borderRadius: '4px', marginBottom: '16px', width: '80%' }} />
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div className="skeleton-shimmer" style={{ height: '20px', borderRadius: '4px', width: '30%' }} />
-          <div className="skeleton-shimmer" style={{ height: '40px', borderRadius: '50px', width: '35%' }} />
-        </div>
-      </div>
-    </div>
-  );
+function getInitials(name: string) {
+  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
 }
 
-function FlashCard({ pro, onPress }: { pro: DemoPro; onPress: () => void }) {
-  return (
-    <button
-      onClick={onPress}
-      className="btn-tap"
-      style={{
-        flexShrink: 0,
-        width: '160px',
-        height: '200px',
-        borderRadius: '16px',
-        overflow: 'hidden',
-        position: 'relative',
-        border: 'none',
-        cursor: 'pointer',
-        padding: 0,
-      }}
-    >
-      <img
-        src={pro.coverPhoto}
-        alt={pro.brandName}
-        style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block' }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          inset: 0,
-          background: 'linear-gradient(to bottom, transparent 40%, rgba(0,0,0,0.85) 100%)',
-        }}
-      />
-      <div
-        className="flash-badge"
-        style={{
-          position: 'absolute',
-          top: '10px',
-          left: '10px',
-          backgroundColor: '#22C55E',
-          color: '#FFFFFF',
-          fontSize: '10px',
-          fontWeight: 700,
-          fontFamily: "'Inter', sans-serif",
-          padding: '4px 10px',
-          borderRadius: '50px',
-          letterSpacing: '0.05em',
-        }}
-      >
-        FLASH
-      </div>
-      <div
-        style={{
-          position: 'absolute',
-          bottom: '12px',
-          left: '12px',
-          right: '12px',
-          textAlign: 'left',
-        }}
-      >
-        <div
-          style={{
-            color: '#FFFFFF',
-            fontWeight: 700,
-            fontSize: '14px',
-            fontFamily: "'Inter', sans-serif",
-            marginBottom: '2px',
-          }}
-        >
-          {pro.brandName}
-        </div>
-        <div style={{ color: '#CCCCCC', fontSize: '12px', fontFamily: "'Inter', sans-serif" }}>
-          {pro.city}
-        </div>
-      </div>
-    </button>
-  );
-}
-
-function ProCard({ pro, onPress, onBook }: { pro: DemoPro; onPress: () => void; onBook: () => void }) {
-  return (
-    <div
-      className="card-hover"
-      style={{
-        borderRadius: '20px',
-        overflow: 'hidden',
-        marginBottom: '16px',
-        boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
-        backgroundColor: '#111111',
-      }}
-    >
-      <div style={{ position: 'relative', width: '100%', height: '180px' }}>
-        <img
-          src={pro.coverPhoto}
-          alt={pro.brandName}
-          style={{ width: '100%', height: '180px', objectFit: 'cover', display: 'block' }}
-        />
-        {pro.isFlash && (
-          <div
-            className="flash-badge"
-            style={{
-              position: 'absolute',
-              top: '12px',
-              left: '12px',
-              backgroundColor: '#22C55E',
-              color: '#FFFFFF',
-              fontSize: '11px',
-              fontWeight: 700,
-              fontFamily: "'Inter', sans-serif",
-              padding: '5px 12px',
-              borderRadius: '50px',
-              letterSpacing: '0.05em',
-            }}
-          >
-            ⚡ FLASH
-          </div>
-        )}
-        {pro.hasRevolut && (
-          <div
-            style={{
-              position: 'absolute',
-              top: '12px',
-              right: '12px',
-              backgroundColor: 'rgba(0,0,0,0.6)',
-              color: '#FFFFFF',
-              fontSize: '11px',
-              fontWeight: 500,
-              fontFamily: "'Inter', sans-serif",
-              padding: '5px 10px',
-              borderRadius: '50px',
-              backdropFilter: 'blur(4px)',
-            }}
-          >
-            Revolut ✅
-          </div>
-        )}
-      </div>
-
-      <div
-        style={{ backgroundColor: '#111111', padding: '16px', cursor: 'pointer' }}
-        onClick={onPress}
-      >
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
-          <span style={{ color: '#FFFFFF', fontWeight: 700, fontSize: '18px', fontFamily: "'Inter', sans-serif" }}>
-            {pro.brandName}
-          </span>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <Star size={14} fill="#E8C89A" color="#E8C89A" />
-            <span style={{ color: '#E8C89A', fontWeight: 700, fontSize: '14px', fontFamily: "'Inter', sans-serif" }}>
-              {pro.rating}
-            </span>
-          </div>
-        </div>
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-          <span style={{ color: '#888888', fontSize: '14px', fontFamily: "'Inter', sans-serif" }}>
-            {pro.category}
-          </span>
-          <span style={{ color: '#666666', fontSize: '12px', fontFamily: "'Inter', sans-serif" }}>
-            ({pro.reviewCount} avis)
-          </span>
-        </div>
-
-        <div style={{ display: 'flex', gap: '16px', marginBottom: '14px' }}>
-          <span style={{ color: '#666666', fontSize: '12px', fontFamily: "'Inter', sans-serif" }}>
-            📍 {pro.city}
-          </span>
-          <span style={{ color: '#666666', fontSize: '12px', fontFamily: "'Inter', sans-serif" }}>
-            ⚡ Répond {pro.responseTime}
-          </span>
-        </div>
-
-        <div style={{ height: '1px', backgroundColor: '#1F1F1F', marginBottom: '14px' }} />
-
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <span style={{ color: '#E8C89A', fontWeight: 700, fontSize: '18px', fontFamily: "'Inter', sans-serif" }}>
-            À partir de {pro.minPrice} CHF
-          </span>
-          <button
-            onClick={(e) => { e.stopPropagation(); onBook(); }}
-            className="btn-tap"
-            style={{
-              backgroundColor: '#E8C89A',
-              color: '#0A0A0A',
-              fontFamily: "'Inter', sans-serif",
-              fontWeight: 700,
-              fontSize: '13px',
-              letterSpacing: '0.05em',
-              textTransform: 'uppercase',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '10px 18px',
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '4px',
-            }}
-          >
-            RÉSERVER <Zap size={13} />
-          </button>
-        </div>
-      </div>
-    </div>
-  );
+// Convert DemoPro to ProProfileData shape
+function toProProfileData(pro: typeof DEMO_PROS[0]): ProProfileData {
+  return {
+    ...pro,
+    flashResponseTime: typeof pro.flashResponseTime === 'number' ? pro.flashResponseTime : undefined,
+  };
 }
 
 export default function Explorer() {
-  const { navigate, bookings } = useAppContext();
-  const [selectedCategory, setSelectedCategory] = useState('all');
-  const [selectedCity, setSelectedCity] = useState('');
-  const [maxDistance, setMaxDistance] = useState(50);
-  const [showCityDropdown, setShowCityDropdown] = useState(false);
-  const [showDistanceSlider, setShowDistanceSlider] = useState(false);
-  const [isLoading] = useState(false);
-  const cityInputRef = useRef<HTMLDivElement>(null);
+  const { navigateToProProfile } = useAppContext();
+  const [search, setSearch] = useState('');
+  const [activeCategory, setActiveCategory] = useState('Tous');
 
-  useEffect(() => {
-    function handleClick(e: MouseEvent) {
-      if (cityInputRef.current && !cityInputRef.current.contains(e.target as Node)) {
-        setShowCityDropdown(false);
-      }
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, []);
+  const filtered = DEMO_PROS.filter(pro => {
+    const matchSearch = pro.name.toLowerCase().includes(search.toLowerCase()) ||
+      pro.category.toLowerCase().includes(search.toLowerCase()) ||
+      pro.city.toLowerCase().includes(search.toLowerCase());
+    const matchCat = activeCategory === 'Tous' || pro.category === activeCategory;
+    return matchSearch && matchCat;
+  });
 
-  const hasPendingBookings = useMemo(
-    () => bookings?.some((b) => b.status === 'pending') ?? false,
-    [bookings]
-  );
-
-  const filteredPros = useMemo(() => {
-    return DEMO_PROS.filter((pro) => {
-      if (selectedCategory === 'flash') return pro.isFlash;
-      if (selectedCategory !== 'all' && pro.category !== selectedCategory) return false;
-      if (selectedCity && pro.city !== selectedCity) return false;
-      return true;
-    });
-  }, [selectedCategory, selectedCity]);
-
-  const flashPros = useMemo(() => DEMO_PROS.filter((p) => p.isFlash), []);
-
-  const handleProPress = (pro: DemoPro) => {
-    navigate('providerDetail', { provider: pro });
-  };
-
-  const handleBook = (pro: DemoPro) => {
-    navigate('providerDetail', { provider: pro });
-  };
+  const flashPros = DEMO_PROS.filter(p => p.flashActive);
 
   return (
-    <div
-      className="screen-transition"
-      style={{ minHeight: '100dvh', backgroundColor: '#0A0A0A', paddingTop: '56px', paddingBottom: '80px' }}
-    >
-      <GlobalHeader hasNotifications={hasPendingBookings} />
+    <div style={{ minHeight: '100vh', background: '#050507', paddingBottom: '80px' }}>
+      <GlobalHeader />
 
-      <div style={{ padding: '20px 16px 0' }}>
-        {/* Search bar */}
-        <div ref={cityInputRef} style={{ position: 'relative', marginBottom: '16px' }}>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              backgroundColor: '#1A1A1A',
-              border: '1px solid #2A2A2A',
-              borderRadius: '14px',
-              padding: '0 14px',
-              height: '50px',
-              gap: '10px',
-            }}
-          >
-            <MapPin size={18} color="#E8C89A" />
+      <div style={{ paddingTop: '72px' }}>
+        {/* Search */}
+        <div style={{ padding: '16px 16px 0' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '10px',
+            background: '#0D0D13',
+            border: '1px solid #1E1E26',
+            borderRadius: '12px',
+            padding: '0 14px',
+            height: '44px',
+          }}>
+            <span style={{ color: '#54546C' }}><SearchIcon /></span>
             <input
-              type="text"
-              placeholder="Votre ville..."
-              value={selectedCity}
-              onChange={(e) => setSelectedCity(e.target.value)}
-              onFocus={() => setShowCityDropdown(true)}
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Rechercher un expert..."
               style={{
                 flex: 1,
                 background: 'none',
                 border: 'none',
                 outline: 'none',
-                color: '#CCCCCC',
-                fontFamily: "'Inter', sans-serif",
-                fontSize: '15px',
+                color: '#F4F4F8',
+                fontSize: '14px',
+                fontFamily: 'Inter, sans-serif',
               }}
             />
-            <button
-              onClick={() => setShowDistanceSlider(!showDistanceSlider)}
-              style={{
-                backgroundColor: '#E8C89A',
-                color: '#0A0A0A',
-                fontFamily: "'Inter', sans-serif",
-                fontWeight: 700,
-                fontSize: '12px',
-                border: 'none',
-                borderRadius: '50px',
-                padding: '5px 12px',
-                cursor: 'pointer',
-                whiteSpace: 'nowrap',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '4px',
-              }}
-            >
-              ≤ {maxDistance} km
-              <ChevronDown size={12} />
-            </button>
           </div>
-
-          {/* City dropdown */}
-          {showCityDropdown && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '54px',
-                left: 0,
-                right: 0,
-                backgroundColor: '#1A1A1A',
-                border: '1px solid #2A2A2A',
-                borderRadius: '14px',
-                zIndex: 50,
-                overflow: 'hidden',
-                boxShadow: '0 8px 32px rgba(0,0,0,0.5)',
-                maxHeight: '240px',
-                overflowY: 'auto',
-              }}
-            >
-              {SWISS_CITIES.filter((c) =>
-                !selectedCity || c.toLowerCase().includes(selectedCity.toLowerCase())
-              ).map((city) => (
-                <button
-                  key={city}
-                  onClick={() => { setSelectedCity(city); setShowCityDropdown(false); }}
-                  style={{
-                    width: '100%',
-                    textAlign: 'left',
-                    padding: '12px 16px',
-                    background: 'none',
-                    border: 'none',
-                    borderBottom: '1px solid #2A2A2A',
-                    color: '#CCCCCC',
-                    fontFamily: "'Inter', sans-serif",
-                    fontSize: '15px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                  }}
-                >
-                  <MapPin size={14} color="#E8C89A" />
-                  {city}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {/* Distance slider */}
-          {showDistanceSlider && (
-            <div
-              style={{
-                marginTop: '8px',
-                backgroundColor: '#1A1A1A',
-                border: '1px solid #2A2A2A',
-                borderRadius: '14px',
-                padding: '16px',
-              }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                <span style={{ color: '#888888', fontSize: '13px', fontFamily: "'Inter', sans-serif" }}>
-                  Distance maximale
-                </span>
-                <span style={{ color: '#E8C89A', fontWeight: 700, fontSize: '13px', fontFamily: "'Inter', sans-serif" }}>
-                  {maxDistance} km
-                </span>
-              </div>
-              <input
-                type="range"
-                min={5}
-                max={50}
-                step={5}
-                value={maxDistance}
-                onChange={(e) => setMaxDistance(Number(e.target.value))}
-                style={{ width: '100%', accentColor: '#E8C89A' }}
-              />
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px' }}>
-                <span style={{ color: '#555555', fontSize: '11px', fontFamily: "'Inter', sans-serif" }}>5 km</span>
-                <span style={{ color: '#555555', fontSize: '11px', fontFamily: "'Inter', sans-serif" }}>50 km</span>
-              </div>
-            </div>
-          )}
         </div>
 
-        {/* Category filters */}
-        <div
-          className="scroll-no-bar"
-          style={{ display: 'flex', gap: '8px', marginBottom: '24px', paddingBottom: '4px' }}
-        >
-          {CATEGORIES.map((cat) => {
-            const isActive = selectedCategory === cat.id;
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className="btn-tap"
-                style={{
-                  flexShrink: 0,
-                  backgroundColor: isActive ? '#E8C89A' : '#1A1A1A',
-                  color: isActive ? '#0A0A0A' : '#888888',
-                  fontFamily: "'Inter', sans-serif",
-                  fontWeight: isActive ? 700 : 400,
-                  fontSize: '14px',
-                  border: isActive ? 'none' : '1px solid #2A2A2A',
-                  borderRadius: '50px',
-                  padding: '10px 20px',
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {cat.emoji && <span style={{ marginRight: '4px' }}>{cat.emoji}</span>}
-                {cat.label}
-              </button>
-            );
-          })}
+        {/* Category pills */}
+        <div style={{
+          display: 'flex',
+          gap: '8px',
+          padding: '12px 16px',
+          overflowX: 'auto',
+          scrollbarWidth: 'none',
+        }}>
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              style={{
+                flexShrink: 0,
+                padding: '6px 14px',
+                borderRadius: '20px',
+                border: `1px solid ${activeCategory === cat ? '#F2D06B' : '#1E1E26'}`,
+                background: activeCategory === cat ? 'rgba(242,208,107,0.08)' : '#0D0D13',
+                color: activeCategory === cat ? '#F2D06B' : '#54546C',
+                fontSize: '13px',
+                fontWeight: activeCategory === cat ? 600 : 400,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              {cat}
+            </button>
+          ))}
         </div>
 
-        {/* Flash section */}
-        {(selectedCategory === 'all' || selectedCategory === 'flash') && flashPros.length > 0 && (
-          <div style={{ marginBottom: '28px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '14px' }}>
-              <span className="green-dot-pulse" />
-              <span
-                style={{
-                  color: '#22C55E',
-                  fontSize: '13px',
-                  fontWeight: 700,
-                  fontFamily: "'Inter', sans-serif",
-                  letterSpacing: '2px',
-                  textTransform: 'uppercase',
-                }}
-              >
-                DISPONIBLES MAINTENANT
+        {/* Flash Live section */}
+        {flashPros.length > 0 && (
+          <div style={{ padding: '0 16px 16px' }}>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              marginBottom: '12px',
+            }}>
+              <LightningIcon />
+              <span style={{
+                fontSize: '15px',
+                fontWeight: 700,
+                color: '#F4F4F8',
+                fontFamily: 'Inter, sans-serif',
+              }}>
+                Flash Live
               </span>
             </div>
-            <div
-              className="scroll-no-bar"
-              style={{ display: 'flex', gap: '12px', paddingBottom: '4px' }}
-            >
-              {flashPros.map((pro) => (
-                <FlashCard key={pro.id} pro={pro} onPress={() => handleProPress(pro)} />
+
+            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', scrollbarWidth: 'none' }}>
+              {flashPros.map(pro => (
+                <button
+                  key={pro.id + '-flash'}
+                  onClick={() => navigateToProProfile(toProProfileData(pro))}
+                  style={{
+                    flexShrink: 0,
+                    width: '120px',
+                    background: '#0D0D13',
+                    border: '1px solid rgba(0,217,122,0.2)',
+                    borderRadius: '12px',
+                    padding: '12px',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
+                >
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: pro.gradient || 'linear-gradient(135deg, #1C1C26, #2E2E3E)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    marginBottom: '8px',
+                    fontSize: '14px',
+                    fontWeight: 700,
+                    color: '#F4F4F8',
+                  }}>
+                    {getInitials(pro.name)}
+                  </div>
+                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#F4F4F8', marginBottom: '2px', fontFamily: 'Inter, sans-serif' }}>
+                    {pro.name.split(' ')[0]}
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#00D97A', fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>
+                    Répond en {pro.flashResponseTime || 5}min
+                  </div>
+                </button>
               ))}
             </div>
           </div>
         )}
 
-        {/* Main pro list */}
-        <div style={{ marginBottom: '8px' }}>
-          <h2
-            style={{
-              color: '#FFFFFF',
-              fontSize: '22px',
-              fontWeight: 600,
-              fontFamily: "'Inter', sans-serif",
-              marginBottom: '16px',
-            }}
-          >
-            {selectedCity ? `Pros à ${selectedCity}` : 'Tous les pros'}
-          </h2>
+        {/* Pro list */}
+        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{
+            fontSize: '11px',
+            fontWeight: 600,
+            color: '#54546C',
+            marginBottom: '4px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.08em',
+            fontFamily: 'Inter, sans-serif',
+          }}>
+            {filtered.length} expert{filtered.length !== 1 ? 's' : ''} disponible{filtered.length !== 1 ? 's' : ''}
+          </div>
 
-          {isLoading ? (
-            <>
-              <SkeletonCard />
-              <SkeletonCard />
-              <SkeletonCard />
-            </>
-          ) : filteredPros.length === 0 ? (
-            <div
+          {filtered.map(pro => (
+            <button
+              key={pro.id}
+              onClick={() => navigateToProProfile(toProProfileData(pro))}
               style={{
-                textAlign: 'center',
-                padding: '48px 24px',
-                color: '#555555',
-                fontFamily: "'Inter', sans-serif",
+                width: '100%',
+                height: '80px',
+                background: '#0D0D13',
+                border: '1px solid rgba(255,255,255,0.05)',
+                borderRadius: '14px',
+                padding: '0 16px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '14px',
+                cursor: 'pointer',
+                textAlign: 'left',
               }}
             >
-              <div style={{ fontSize: '40px', marginBottom: '16px' }}>🔍</div>
-              <p style={{ fontSize: '16px', color: '#888888' }}>Aucun pro trouvé</p>
-              <p style={{ fontSize: '14px', marginTop: '8px' }}>Essayez une autre ville ou catégorie</p>
-            </div>
-          ) : (
-            filteredPros.map((pro) => (
-              <ProCard
-                key={pro.id}
-                pro={pro}
-                onPress={() => handleProPress(pro)}
-                onBook={() => handleBook(pro)}
-              />
-            ))
-          )}
-        </div>
+              {/* Avatar */}
+              <div style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                flexShrink: 0,
+                background: pro.gradient || 'linear-gradient(135deg, #1C1C26, #2E2E3E)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '16px',
+                fontWeight: 700,
+                color: '#F4F4F8',
+                overflow: 'hidden',
+              }}>
+                {pro.photos && pro.photos.length > 0 ? (
+                  <img
+                    src={pro.photos[0]}
+                    alt={pro.name}
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
+                  />
+                ) : (
+                  getInitials(pro.name)
+                )}
+              </div>
 
-        {/* Footer */}
-        <footer style={{ padding: '24px 0 8px', textAlign: 'center' }}>
-          <p style={{ color: '#333333', fontSize: '11px', fontFamily: "'Inter', sans-serif" }}>
-            Built with ❤️ using{' '}
-            <a
-              href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ color: '#555555' }}
-            >
-              caffeine.ai
-            </a>{' '}
-            · © {new Date().getFullYear()} NEXUS
-          </p>
-        </footer>
+              {/* Info */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{
+                  fontSize: '16px',
+                  fontWeight: 700,
+                  color: '#F4F4F8',
+                  fontFamily: 'Inter, sans-serif',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {pro.name}
+                </div>
+                <div style={{
+                  fontSize: '13px',
+                  fontWeight: 400,
+                  color: '#54546C',
+                  fontFamily: 'Inter, sans-serif',
+                  marginTop: '2px',
+                }}>
+                  {pro.category} · {pro.city}
+                </div>
+                {pro.flashActive && (
+                  <div style={{
+                    fontSize: '12px',
+                    fontWeight: 500,
+                    color: '#00D97A',
+                    marginTop: '2px',
+                    fontFamily: 'Inter, sans-serif',
+                  }}>
+                    Répond en {pro.flashResponseTime || 5}min
+                  </div>
+                )}
+              </div>
+
+              {/* Rating + Price */}
+              <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '3px',
+                  justifyContent: 'flex-end',
+                  marginBottom: '4px',
+                }}>
+                  <StarIcon />
+                  <span style={{
+                    fontSize: '13px',
+                    fontWeight: 600,
+                    color: '#F4F4F8',
+                    fontFamily: 'Inter, sans-serif',
+                  }}>
+                    {pro.rating.toFixed(1)}
+                  </span>
+                </div>
+                <div style={{
+                  fontSize: '14px',
+                  fontWeight: 700,
+                  color: '#F2D06B',
+                  fontFamily: 'Inter, sans-serif',
+                }}>
+                  dès {pro.startingPrice} CHF
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
 
-      <BottomNav activeTab="explorer" hasPendingBookings={hasPendingBookings} />
+      <BottomNav activeTab="explorer" />
     </div>
   );
 }

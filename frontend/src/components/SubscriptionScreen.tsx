@@ -1,163 +1,111 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Check, Loader2, Gift } from 'lucide-react';
+import React from 'react';
 import { useAppContext } from '../context/AppContext';
-import { triggerGoldenConfetti } from '../utils/confetti';
 
-interface SubscriptionScreenProps {
-  onBack: () => void;
-}
+const CheckIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#00D97A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="2.5,8 6,11.5 13.5,4" />
+  </svg>
+);
 
 const BENEFITS = [
-  'Profil visible dans l\'Explorer',
+  'Profil visible par tous les clients',
   'Réservations illimitées',
-  'NEXUS PAY activé',
-  'Mode FLASH disponible',
-  'Notifications temps réel',
-  'Support prioritaire',
+  'Paiements sécurisés NEXUS PAY',
+  'Statistiques avancées',
+  'Support prioritaire 7j/7',
+  'Badge professionnel vérifié',
 ];
 
-export default function SubscriptionScreen({ onBack }: SubscriptionScreenProps) {
-  const { setCurrentScreen, setProProfile, addNotification } = useAppContext();
-  const [email, setEmail] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [countdown, setCountdown] = useState(3);
+export default function SubscriptionScreen() {
+  const { navigateTo, setSubscriptionActive, addNotification } = useAppContext();
 
-  useEffect(() => {
-    if (isProcessing && countdown > 0) {
-      const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-    if (isProcessing && countdown === 0) {
-      handleActivationSuccess();
-    }
-  }, [isProcessing, countdown]);
-
-  const handleActivate = () => {
-    if (!email) return;
-    setIsProcessing(true);
-    setCountdown(3);
-  };
-
-  const handleActivationSuccess = () => {
-    setIsProcessing(false);
-    setIsSuccess(true);
-    triggerGoldenConfetti();
-    setProProfile(prev => ({
-      ...prev,
-      subscriptionActive: true,
-      trialStartDate: Date.now(),
-      isPublished: true,
-    }));
+  const handleStart = () => {
+    setSubscriptionActive(true);
     addNotification({
-      type: 'confirmed',
-      message: '🎉 Votre profil est en ligne ! Des clients peuvent déjà vous voir.',
+      id: Date.now().toString(),
+      title: 'Abonnement activé',
+      message: 'Votre essai gratuit de 7 jours a commencé',
+      read: false,
+      createdAt: Date.now(),
     });
+    navigateTo('nexusOS');
   };
-
-  if (isSuccess) {
-    return (
-      <div className="nexus-container flex flex-col items-center justify-center min-h-screen px-6 text-center">
-        <div className="success-circle-anim flex flex-col items-center gap-6">
-          <div className="w-24 h-24 bg-nexus-success/20 rounded-full flex items-center justify-center">
-            <span className="text-5xl">🎉</span>
-          </div>
-          <div>
-            <h2 className="text-white font-black text-2xl mb-2">Vous êtes en ligne !</h2>
-            <p className="text-nexus-secondary text-sm leading-relaxed">
-              Des clients autour de vous peuvent déjà voir votre profil.
-            </p>
-          </div>
-          <div className="flex flex-col gap-3 w-full">
-            <button
-              onClick={() => setCurrentScreen('nexusOS')}
-              className="w-full py-4 bg-nexus-gold text-nexus-bg font-bold rounded-nexus hover:opacity-90 transition-all"
-            >
-              Accéder à mon espace pro
-            </button>
-            <button
-              onClick={() => setCurrentScreen('explorer')}
-              className="w-full py-3 bg-nexus-card border border-nexus-border rounded-nexus text-white font-medium hover:border-nexus-gold transition-all"
-            >
-              👁️ Voir mon profil client
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
 
   return (
-    <div className="nexus-container flex flex-col min-h-screen">
-      <div className="flex items-center gap-4 px-4 py-4 border-b border-nexus-border">
-        <button onClick={onBack} className="text-nexus-secondary hover:text-white">
-          <ArrowLeft size={22} />
-        </button>
-        <h1 className="text-white font-bold">Activer mon profil</h1>
+    <div style={{
+      minHeight: '100vh',
+      background: '#050507',
+      display: 'flex',
+      flexDirection: 'column',
+      padding: '48px 24px 40px',
+    }}>
+      <div style={{ flex: 1 }}>
+        <div style={{
+          fontSize: '32px',
+          fontWeight: 800,
+          color: '#F4F4F8',
+          fontFamily: 'Inter, sans-serif',
+          marginBottom: '8px',
+        }}>
+          7 jours gratuits
+        </div>
+        <div style={{
+          fontSize: '16px',
+          color: '#9898B4',
+          fontFamily: 'Inter, sans-serif',
+          marginBottom: '32px',
+        }}>
+          puis 19.90 CHF/mois
+        </div>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', marginBottom: '40px' }}>
+          {BENEFITS.map((b, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <CheckIcon />
+              <span style={{
+                fontSize: '15px',
+                color: '#F4F4F8',
+                fontFamily: 'Inter, sans-serif',
+              }}>
+                {b}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-6">
-        {/* Offer header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 bg-nexus-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Gift size={32} className="text-nexus-gold" />
-          </div>
-          <h2 className="text-white font-black text-3xl mb-1">🎁 7 JOURS GRATUITS</h2>
-          <p className="text-nexus-secondary">puis <span className="text-white font-bold">19,90 CHF/mois</span></p>
-          <p className="text-nexus-secondary text-sm">Résiliable à tout moment</p>
-        </div>
+      <button
+        onClick={handleStart}
+        style={{
+          width: '100%',
+          height: '56px',
+          background: '#F2D06B',
+          color: '#050507',
+          border: 'none',
+          borderRadius: '14px',
+          fontSize: '15px',
+          fontWeight: 700,
+          cursor: 'pointer',
+          fontFamily: 'Inter, sans-serif',
+        }}
+      >
+        Commencer l'essai gratuit
+      </button>
 
-        {/* Benefits */}
-        <div className="bg-nexus-card border border-nexus-border rounded-nexus p-5 mb-6">
-          <div className="flex flex-col gap-3">
-            {BENEFITS.map((benefit, i) => (
-              <div key={i} className="flex items-center gap-3">
-                <div className="w-5 h-5 bg-nexus-success/20 rounded-full flex items-center justify-center flex-shrink-0">
-                  <Check size={12} className="text-nexus-success" />
-                </div>
-                <span className="text-white text-sm">{benefit}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Email */}
-        <div className="mb-4">
-          <label className="text-nexus-secondary text-sm mb-2 block">Email de facturation</label>
-          <input
-            type="email"
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            placeholder="votre@email.com"
-            className="w-full bg-nexus-card border border-nexus-border rounded-nexus px-4 py-3 text-white placeholder-nexus-secondary focus:border-nexus-gold focus:outline-none"
-          />
-        </div>
-
-        {/* Payment button */}
-        <button
-          onClick={handleActivate}
-          disabled={!email || isProcessing}
-          className="w-full py-4 bg-red-600 text-white font-bold rounded-nexus hover:opacity-90 disabled:opacity-50 transition-all flex items-center justify-center gap-2 mb-4"
-        >
-          {isProcessing ? (
-            <>
-              <Loader2 size={20} className="animate-spin" />
-              Traitement... ({countdown}s)
-            </>
-          ) : (
-            '🔴 Payer via Revolut'
-          )}
-        </button>
-
-        {/* Activate button */}
-        <button
-          onClick={handleActivate}
-          disabled={!email || isProcessing}
-          className="w-full py-4 bg-nexus-gold text-nexus-bg font-bold text-lg rounded-nexus hover:opacity-90 disabled:opacity-50 transition-all shadow-gold"
-        >
-          ✅ ACTIVER MON ESSAI GRATUIT
-        </button>
-      </div>
+      <button
+        onClick={() => navigateTo('roleSelection')}
+        style={{
+          marginTop: '12px',
+          background: 'none',
+          border: 'none',
+          color: '#54546C',
+          fontSize: '14px',
+          cursor: 'pointer',
+          fontFamily: 'Inter, sans-serif',
+        }}
+      >
+        Pas maintenant
+      </button>
     </div>
   );
 }

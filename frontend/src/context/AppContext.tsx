@@ -1,174 +1,269 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
-export type ScreenType =
+export type AppRole = 'client' | 'pro' | null;
+
+export type Screen =
   | 'splash'
   | 'roleSelection'
   | 'otpVerification'
-  | 'proOnboarding'
-  | 'builder'
+  | 'otp'
   | 'subscription'
-  | 'explorer'
-  | 'providerDetail'
-  | 'bookingFlow'
+  | 'subscriptionScreen'
+  | 'proLogin'
   | 'clientDashboard'
   | 'nexusOS'
-  | 'landing';
+  | 'explorer'
+  | 'monBusiness'
+  | 'walletPro'
+  | 'radarPro'
+  | 'notificationCenter'
+  | 'proProfile'
+  | 'bookingFlow'
+  | 'liveStatus'
+  | 'landing'
+  | 'builder'
+  | 'welcome'
+  | 'pro-dashboard'
+  | 'radar-pro'
+  | 'wallet-pro'
+  | 'mon-business';
 
-export type AppRole = 'client' | 'professional' | null;
-
-export type LocalService = {
+export interface ProProfileData {
   id: string;
   name: string;
-  price: number;
-  duration: number;
-  badges: string[];
-  beforePhoto?: string;
-  afterPhoto?: string;
-};
-
-export type LocalProProfile = {
-  brandName: string;
-  slogan: string;
-  bio: string;
   category: string;
   city: string;
-  radius: number;
-  languages: string[];
-  phone: string;
-  revolut: string;
-  revolutVerified: boolean;
-  coverPhoto?: string;
-  profilePhoto?: string;
-  galleryPhotos: string[];
-  services: LocalService[];
-  atHomeService: boolean;
-  minBookingLeadTime: number;
-  flashMode: boolean;
-  flashActivatedAt?: number;
-  subscriptionActive: boolean;
-  trialStartDate?: number;
-  isPublished: boolean;
-};
-
-export type LocalBooking = {
-  id: string;
-  proId: string;
-  proName: string;
-  serviceName: string;
-  servicePrice: number;
-  date: string;
-  timeSlot: string;
-  address: string;
-  status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
-  createdAt: number;
-  clientName?: string;
-  clientRating?: number;
-};
-
-export type Notification = {
-  id: string;
-  type: 'flash' | 'confirmed' | 'payment' | 'review' | 'dispute' | 'reminder' | 'sms';
-  message: string;
-  timestamp: number;
-  read: boolean;
-};
-
-interface AppContextType {
-  currentScreen: ScreenType;
-  setCurrentScreen: (screen: ScreenType) => void;
-  /** Alias for setCurrentScreen — supports optional params stored in screenParams */
-  navigate: (screen: ScreenType, params?: Record<string, unknown>) => void;
-  screenParams: Record<string, unknown>;
-  goBack: () => void;
-  screenHistory: ScreenType[];
-  appRole: AppRole;
-  setAppRole: (role: AppRole) => void;
-  phoneVerified: boolean;
-  setPhoneVerified: (v: boolean) => void;
-  proProfile: LocalProProfile;
-  setProProfile: (p: LocalProProfile | ((prev: LocalProProfile) => LocalProProfile)) => void;
-  selectedProId: string | null;
-  setSelectedProId: (id: string | null) => void;
-  selectedServiceId: string | null;
-  setSelectedServiceId: (id: string | null) => void;
-  bookings: LocalBooking[];
-  setBookings: (b: LocalBooking[] | ((prev: LocalBooking[]) => LocalBooking[])) => void;
-  notifications: Notification[];
-  setNotifications: (n: Notification[] | ((prev: Notification[]) => Notification[])) => void;
-  addNotification: (n: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
-  unreadCount: number;
-  markAllRead: () => void;
-  walletBalance: number;
-  escrowBalance: number;
-  setWalletBalance: (v: number) => void;
-  setEscrowBalance: (v: number) => void;
+  rating: number;
+  reviewCount: number;
+  startingPrice: number;
+  isFlash: boolean;
+  flashActive: boolean;
+  flashResponseTime?: number;
+  responseTime?: number;
+  acceptanceRate?: number;
+  serviceCount?: number;
+  gradient?: string;
+  coverGradient?: string;
+  slogan?: string;
+  bio?: string;
+  emoji?: string;
+  services?: Service[];
+  reviews?: Review[];
+  galleryGradients?: string[];
+  hasRevolut?: boolean;
+  revolutHandle?: string;
+  photos?: string[];
 }
 
-const defaultProProfile: LocalProProfile = {
-  brandName: '',
-  slogan: '',
-  bio: '',
-  category: '',
-  city: '',
-  radius: 10,
-  languages: ['FR'],
-  phone: '',
-  revolut: '',
-  revolutVerified: false,
-  coverPhoto: undefined,
-  profilePhoto: undefined,
-  galleryPhotos: [],
-  services: [],
-  atHomeService: true,
-  minBookingLeadTime: 1,
-  flashMode: false,
-  subscriptionActive: false,
-  isPublished: false,
-};
+export interface Service {
+  id: string;
+  name: string;
+  duration: number | string;
+  price: number;
+  description?: string;
+  badge?: string;
+}
+
+export interface Review {
+  id: string;
+  author?: string;
+  name?: string;
+  rating: number;
+  comment?: string;
+  text?: string;
+  date?: string;
+}
+
+export interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  body?: string; // kept for backward compat
+  read: boolean;
+  createdAt: number;
+}
+
+// Alias for backward compatibility
+export type LocalBooking = Booking;
+
+export interface Booking {
+  id: string;
+  proId?: string;
+  proName: string;
+  serviceId?: string;
+  serviceName?: string;
+  service?: string;
+  price: number;
+  date: string;
+  timeSlot?: string;
+  time?: string;
+  address?: string;
+  status: 'pending' | 'confirmed' | 'cancelled';
+  createdAt?: number;
+}
+
+export interface WalletData {
+  balance: number;
+  escrow: number;
+  transactions: Transaction[];
+}
+
+export interface Transaction {
+  id: string;
+  label: string;
+  amount: number;
+  date: string;
+  type: 'credit' | 'debit';
+}
+
+// FlashRequest kept for backward compat with MessagingSheet
+export interface FlashRequest {
+  id: string;
+  clientName: string;
+  clientAvatar: string;
+  clientRating: number;
+  service: string;
+  price: number;
+  distance: string;
+  expiresAt: number;
+  status: 'pending' | 'confirmed' | 'declined';
+}
+
+interface AppContextType {
+  // Navigation
+  currentScreen: Screen;
+  navigateTo: (screen: Screen) => void;
+  navigate: (screen: Screen) => void;
+  goBack: () => void;
+  screenHistory: Screen[];
+
+  // User
+  appRole: AppRole;
+  setAppRole: (role: AppRole) => void;
+  userName: string;
+  setUserName: (name: string) => void;
+
+  // Pro
+  proProfile: ProProfileData | null;
+  setProProfile: (profile: ProProfileData | null) => void;
+  flashActive: boolean;
+  setFlashActive: (active: boolean) => void;
+  proActif: boolean;
+  setProActif: (active: boolean) => void;
+  essaiJours: number;
+  setEssaiJours: (days: number) => void;
+
+  // Wallet
+  wallet: WalletData;
+  setWallet: (wallet: WalletData) => void;
+
+  // Bookings
+  bookings: Booking[];
+  addBooking: (booking: Booking) => void;
+  updateBookingStatus: (id: string, status: Booking['status']) => void;
+  currentBooking: Booking | null;
+  setCurrentBooking: (booking: Booking | null) => void;
+
+  // Notifications
+  notifications: Notification[];
+  unreadCount: number;
+  addNotification: (notification: Notification) => void;
+  markAllRead: () => void;
+  markNotificationsRead: () => void;
+  removeNotification: (id: string) => void;
+
+  // Radar
+  radarBadgePulse: boolean;
+  setRadarBadgePulse: (pulse: boolean) => void;
+
+  // Subscription
+  subscriptionActive: boolean;
+  setSubscriptionActive: (active: boolean) => void;
+
+  // Selected pro for profile view
+  selectedPro: ProProfileData | null;
+  navigateToProProfile: (pro: ProProfileData) => void;
+  navigateToBookingFlow: (pro: ProProfileData, service?: any) => void;
+  navigateToLiveStatus: () => void;
+
+  // Upgrade
+  upgradeToProAccount: () => void;
+
+  // Landing
+  goToLanding: () => void;
+
+  // Notification center
+  notificationCenterOpen: boolean;
+  setNotificationCenterOpen: (open: boolean) => void;
+
+  // Flash requests (for RadarPro / MessagingSheet compat)
+  flashRequests: FlashRequest[];
+  addFlashRequest: (req: FlashRequest) => void;
+  updateFlashRequest: (id: string, status: 'confirmed' | 'declined') => void;
+}
 
 const AppContext = createContext<AppContextType | null>(null);
 
-export function AppContextProvider({ children }: { children: ReactNode }) {
-  const [currentScreen, setCurrentScreen] = useState<ScreenType>('splash');
-  const [screenParams, setScreenParams] = useState<Record<string, unknown>>({});
-  const [screenHistory, setScreenHistory] = useState<ScreenType[]>(['splash']);
-  const [appRole, setAppRole] = useState<AppRole>(null);
-  const [phoneVerified, setPhoneVerified] = useState(false);
-  const [proProfile, setProProfile] = useState<LocalProProfile>(defaultProProfile);
-  const [selectedProId, setSelectedProId] = useState<string | null>(null);
-  const [selectedServiceId, setSelectedServiceId] = useState<string | null>(null);
-  const [bookings, setBookings] = useState<LocalBooking[]>([]);
-  const [notifications, setNotifications] = useState<Notification[]>([
-    {
-      id: 'n1',
-      type: 'flash',
-      message: '⚡ Nouvelle demande Flash reçue de Sophie M.',
-      timestamp: Date.now() - 300000,
-      read: false,
-    },
-    {
-      id: 'n2',
-      type: 'confirmed',
-      message: '✅ Réservation confirmée — Coupe homme à 20h00',
-      timestamp: Date.now() - 600000,
-      read: false,
-    },
-    {
-      id: 'n3',
-      type: 'payment',
-      message: '💰 Paiement de 55 CHF reçu et sécurisé',
-      timestamp: Date.now() - 900000,
-      read: true,
-    },
-  ]);
-  const [walletBalance, setWalletBalance] = useState(240);
-  const [escrowBalance, setEscrowBalance] = useState(55);
+const INITIAL_WALLET: WalletData = {
+  balance: 240,
+  escrow: 55,
+  transactions: [
+    { id: '1', label: 'Réservation - Julien Rossi', amount: 85, date: '2026-02-20', type: 'credit' },
+    { id: '2', label: 'Réservation - Lucie Esthetics', amount: 120, date: '2026-02-18', type: 'credit' },
+    { id: '3', label: 'Virement Revolut', amount: -200, date: '2026-02-15', type: 'debit' },
+    { id: '4', label: 'Réservation - Zen Touch', amount: 95, date: '2026-02-12', type: 'credit' },
+  ],
+};
 
-  const navigate = useCallback((screen: ScreenType, params?: Record<string, unknown>) => {
-    setScreenHistory(prev => [...prev, screen]);
+const INITIAL_NOTIFICATIONS: Notification[] = [
+  {
+    id: '1',
+    title: 'Nouvelle réservation',
+    message: 'Marie D. a réservé une coupe pour demain à 14h',
+    read: false,
+    createdAt: Date.now() - 3600000,
+  },
+  {
+    id: '2',
+    title: 'Paiement reçu',
+    message: '85 CHF crédités sur votre wallet',
+    read: false,
+    createdAt: Date.now() - 7200000,
+  },
+  {
+    id: '3',
+    title: 'Avis client',
+    message: 'Sophie L. vous a laissé 5 étoiles',
+    read: true,
+    createdAt: Date.now() - 86400000,
+  },
+];
+
+export function AppContextProvider({ children }: { children: ReactNode }) {
+  const [currentScreen, setCurrentScreen] = useState<Screen>('splash');
+  const [screenHistory, setScreenHistory] = useState<Screen[]>(['splash']);
+  const [appRole, setAppRole] = useState<AppRole>(null);
+  const [userName, setUserName] = useState('');
+  const [proProfile, setProProfile] = useState<ProProfileData | null>(null);
+  const [flashActive, setFlashActive] = useState(false);
+  const [proActif, setProActif] = useState(false);
+  const [essaiJours, setEssaiJours] = useState(0);
+  const [wallet, setWallet] = useState<WalletData>(INITIAL_WALLET);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
+  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
+  const [radarBadgePulse, setRadarBadgePulse] = useState(true);
+  const [subscriptionActive, setSubscriptionActive] = useState(false);
+  const [selectedPro, setSelectedPro] = useState<ProProfileData | null>(null);
+  const [notificationCenterOpen, setNotificationCenterOpen] = useState(false);
+  const [flashRequests, setFlashRequests] = useState<FlashRequest[]>([]);
+
+  const navigateTo = useCallback((screen: Screen) => {
     setCurrentScreen(screen);
-    setScreenParams(params || {});
+    setScreenHistory(prev => [...prev, screen]);
   }, []);
+
+  const navigate = navigateTo;
 
   const goBack = useCallback(() => {
     setScreenHistory(prev => {
@@ -177,59 +272,111 @@ export function AppContextProvider({ children }: { children: ReactNode }) {
       setCurrentScreen(newHistory[newHistory.length - 1]);
       return newHistory;
     });
-    setScreenParams({});
   }, []);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const addBooking = useCallback((booking: Booking) => {
+    setBookings(prev => [...prev, booking]);
+  }, []);
 
-  const addNotification = useCallback((n: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
-    setNotifications(prev => [
-      {
-        ...n,
-        id: `notif-${Date.now()}`,
-        timestamp: Date.now(),
-        read: false,
-      },
-      ...prev,
-    ]);
+  const updateBookingStatus = useCallback((id: string, status: Booking['status']) => {
+    setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
+  }, []);
+
+  const addNotification = useCallback((notification: Notification) => {
+    setNotifications(prev => [notification, ...prev]);
   }, []);
 
   const markAllRead = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   }, []);
 
+  const markNotificationsRead = markAllRead;
+
+  const removeNotification = useCallback((id: string) => {
+    setNotifications(prev => prev.filter(n => n.id !== id));
+  }, []);
+
+  const navigateToProProfile = useCallback((pro: ProProfileData) => {
+    setSelectedPro(pro);
+    navigateTo('proProfile');
+  }, [navigateTo]);
+
+  const navigateToBookingFlow = useCallback((pro: ProProfileData, _service?: any) => {
+    setSelectedPro(pro);
+    navigateTo('bookingFlow');
+  }, [navigateTo]);
+
+  const navigateToLiveStatus = useCallback(() => {
+    navigateTo('liveStatus');
+  }, [navigateTo]);
+
+  const upgradeToProAccount = useCallback(() => {
+    setAppRole('pro');
+    navigateTo('nexusOS');
+  }, [navigateTo]);
+
+  const goToLanding = useCallback(() => {
+    navigateTo('landing');
+  }, [navigateTo]);
+
+  const addFlashRequest = useCallback((req: FlashRequest) => {
+    setFlashRequests(prev => [req, ...prev]);
+  }, []);
+
+  const updateFlashRequest = useCallback((id: string, status: 'confirmed' | 'declined') => {
+    setFlashRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
+  }, []);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
   return (
-    <AppContext.Provider
-      value={{
-        currentScreen,
-        setCurrentScreen,
-        navigate,
-        screenParams,
-        goBack,
-        screenHistory,
-        appRole,
-        setAppRole,
-        phoneVerified,
-        setPhoneVerified,
-        proProfile,
-        setProProfile,
-        selectedProId,
-        setSelectedProId,
-        selectedServiceId,
-        setSelectedServiceId,
-        bookings,
-        setBookings,
-        notifications,
-        setNotifications,
-        addNotification,
-        unreadCount,
-        markAllRead,
-        walletBalance,
-        escrowBalance,
-        setWalletBalance,
-        setEscrowBalance,
-      }}
-    >
+    <AppContext.Provider value={{
+      currentScreen,
+      navigateTo,
+      navigate,
+      goBack,
+      screenHistory,
+      appRole,
+      setAppRole,
+      userName,
+      setUserName,
+      proProfile,
+      setProProfile,
+      flashActive,
+      setFlashActive,
+      proActif,
+      setProActif,
+      essaiJours,
+      setEssaiJours,
+      wallet,
+      setWallet,
+      bookings,
+      addBooking,
+      updateBookingStatus,
+      currentBooking,
+      setCurrentBooking,
+      notifications,
+      unreadCount,
+      addNotification,
+      markAllRead,
+      markNotificationsRead,
+      removeNotification,
+      radarBadgePulse,
+      setRadarBadgePulse,
+      subscriptionActive,
+      setSubscriptionActive,
+      selectedPro,
+      navigateToProProfile,
+      navigateToBookingFlow,
+      navigateToLiveStatus,
+      upgradeToProAccount,
+      goToLanding,
+      notificationCenterOpen,
+      setNotificationCenterOpen,
+      flashRequests,
+      addFlashRequest,
+      updateFlashRequest,
+    }}>
       {children}
     </AppContext.Provider>
   );

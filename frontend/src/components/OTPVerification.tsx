@@ -1,158 +1,459 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowLeft, Phone, CheckCircle, Loader2 } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { useAuth } from '../context/AuthContext';
-import { useSaveCallerUserProfile } from '../hooks/useQueries';
-import { AppUserRole } from '../backend';
 
-interface OTPVerificationProps {
-  onBack: () => void;
-}
-
-export default function OTPVerification({ onBack }: OTPVerificationProps) {
-  const { setCurrentScreen, setAppRole, setPhoneVerified } = useAppContext();
-  const saveProfile = useSaveCallerUserProfile();
-  const [phone, setPhone] = useState('');
-  const [otp, setOtp] = useState('');
-  const [step, setStep] = useState<'phone' | 'otp'>('phone');
-  const [countdown, setCountdown] = useState(30);
+export default function OTPVerification() {
+  const { navigateTo, setAppRole, setUserName } = useAppContext();
+  const [digits, setDigits] = useState(['', '', '', '']);
   const [error, setError] = useState('');
-  const [isVerifying, setIsVerifying] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [success, setSuccess] = useState(false);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
-    if (step === 'otp' && countdown > 0) {
-      const timer = setTimeout(() => setCountdown(c => c - 1), 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [step, countdown]);
+    const timer = setTimeout(() => {
+      inputRefs.current[0]?.focus();
+    }, 400);
+    return () => clearTimeout(timer);
+  }, []);
 
-  const handleSendOTP = () => {
-    if (!phone || phone.length < 10) {
-      setError('Veuillez entrer un numéro valide');
-      return;
-    }
+  const handleDigitChange = (index: number, value: string) => {
+    if (!/^\d*$/.test(value)) return;
+    const newDigits = [...digits];
+    newDigits[index] = value.slice(-1);
+    setDigits(newDigits);
     setError('');
-    setStep('otp');
-    setCountdown(30);
-  };
 
-  const handleVerifyOTP = async () => {
-    if (otp !== '1234') {
-      setError('Code incorrect. Essayez 1234');
-      return;
+    if (value && index < 3) {
+      inputRefs.current[index + 1]?.focus();
     }
-    setError('');
-    setIsVerifying(true);
-    try {
-      await saveProfile.mutateAsync({ name: 'Client', appRole: AppUserRole.client });
-      setSuccess(true);
-      setPhoneVerified(true);
-      setAppRole('client');
-      setTimeout(() => {
-        setCurrentScreen('explorer');
-      }, 1500);
-    } catch {
-      setError('Erreur lors de la vérification');
-    } finally {
-      setIsVerifying(false);
+
+    if (newDigits.every(d => d !== '') && newDigits.join('').length === 4) {
+      verifyCode(newDigits.join(''));
     }
   };
 
-  if (success) {
-    return (
-      <div className="nexus-container flex flex-col items-center justify-center min-h-screen px-6">
-        <div className="success-circle-anim flex flex-col items-center gap-4">
-          <div className="w-20 h-20 bg-nexus-success/20 rounded-full flex items-center justify-center">
-            <CheckCircle size={40} className="text-nexus-success" />
-          </div>
-          <h2 className="text-white font-bold text-xl">✅ Téléphone vérifié</h2>
-          <p className="text-nexus-secondary text-sm">Redirection vers l'Explorer...</p>
-        </div>
-      </div>
-    );
-  }
+  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
+    if (e.key === 'Backspace' && !digits[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    }
+  };
+
+  const verifyCode = (code: string) => {
+    setVerifying(true);
+    setTimeout(() => {
+      if (code === '1234') {
+        setSuccess(true);
+        setTimeout(() => {
+          setAppRole('client');
+          setUserName('Alexandre');
+          navigateTo('explorer');
+        }, 800);
+      } else {
+        setError('Code incorrect. Utilisez 1234 pour la démo.');
+        setDigits(['', '', '', '']);
+        inputRefs.current[0]?.focus();
+        setVerifying(false);
+      }
+    }, 900);
+  };
+
+  const handleResend = () => {
+    setDigits(['', '', '', '']);
+    setError('');
+    inputRefs.current[0]?.focus();
+  };
 
   return (
-    <div className="nexus-container flex flex-col min-h-screen px-6 py-8">
-      <div className="flex items-center gap-4 mb-10">
-        <button onClick={onBack} className="text-nexus-secondary hover:text-white">
-          <ArrowLeft size={22} />
-        </button>
-        <h1 className="text-white font-bold text-xl">Vérification téléphone</h1>
+    <div
+      style={{
+        minHeight: '100vh',
+        background: 'var(--void)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Ambient orb */}
+      <div
+        style={{
+          position: 'absolute',
+          width: 350,
+          height: 350,
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(0,224,122,0.05) 0%, transparent 70%)',
+          filter: 'blur(80px)',
+          top: -80,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          pointerEvents: 'none',
+          animation: 'orbeFloat 16s ease infinite',
+        }}
+      />
+
+      {/* Header with logo */}
+      <div
+        style={{
+          paddingTop: 'calc(56px + env(safe-area-inset-top, 0px))',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          width: '100%',
+          zIndex: 1,
+          animation: 'dropIn 0.3s ease forwards',
+        }}
+      >
+        <div style={{ lineHeight: 1, userSelect: 'none' }}>
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 900,
+              fontSize: 24,
+              color: 'var(--t1)',
+              letterSpacing: '-1.5px',
+            }}
+          >
+            NEXUS
+          </span>
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 900,
+              fontSize: 28,
+              color: 'var(--blue)',
+              letterSpacing: 0,
+            }}
+          >
+            .
+          </span>
+        </div>
       </div>
 
-      <div className="flex flex-col gap-6">
-        <div className="w-16 h-16 bg-nexus-card rounded-full flex items-center justify-center mx-auto">
-          <Phone size={28} className="text-nexus-gold" />
+      {/* Main content */}
+      <div
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          padding: '0 24px',
+          width: '100%',
+          maxWidth: 430,
+          zIndex: 1,
+          flex: 1,
+          justifyContent: 'center',
+          marginTop: -40,
+        }}
+      >
+        {/* SMS sent pill */}
+        <div
+          style={{
+            background: 'rgba(0,224,122,0.06)',
+            border: '1px solid rgba(0,224,122,0.18)',
+            borderRadius: 'var(--r-full)',
+            padding: '10px 20px',
+            marginBottom: 40,
+            display: 'flex',
+            alignItems: 'center',
+            gap: 8,
+            animation: 'dropIn 0.4s ease 0.1s both',
+          }}
+        >
+          <div
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: '50%',
+              background: 'var(--flash)',
+              animation: 'breatheFlash 1.5s ease infinite',
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 500,
+              fontSize: 13,
+              color: 'var(--flash)',
+            }}
+          >
+            SMS envoyé au +41 79 *** ** 42
+          </span>
         </div>
 
-        {step === 'phone' ? (
-          <>
-            <div>
-              <p className="text-nexus-secondary text-sm mb-4 text-center">
-                Entrez votre numéro pour recevoir un code de vérification
-              </p>
-              <input
-                type="tel"
-                value={phone}
-                onChange={e => setPhone(e.target.value)}
-                placeholder="+41 79 XXX XX XX"
-                className="w-full bg-nexus-card border border-nexus-border rounded-nexus px-4 py-3 text-white placeholder-nexus-secondary focus:border-nexus-gold focus:outline-none"
-              />
-            </div>
-            {error && <p className="text-nexus-urgent text-sm text-center">{error}</p>}
-            <button
-              onClick={handleSendOTP}
-              className="w-full py-4 bg-nexus-gold text-nexus-bg font-bold rounded-nexus hover:opacity-90 active:scale-95 transition-all"
+        {/* Title */}
+        <h1
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 800,
+            fontSize: 28,
+            color: 'var(--t1)',
+            letterSpacing: '-0.04em',
+            textAlign: 'center',
+            marginBottom: 8,
+            animation: 'riseIn 0.5s cubic-bezier(0.22,1,0.36,1) 0.15s both',
+          }}
+        >
+          Vérification
+        </h1>
+        <p
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 400,
+            fontSize: 15,
+            color: 'var(--t3)',
+            textAlign: 'center',
+            marginBottom: 36,
+            animation: 'riseIn 0.5s cubic-bezier(0.22,1,0.36,1) 0.25s both',
+          }}
+        >
+          Entrez le code reçu par SMS
+        </p>
+
+        {/* OTP inputs */}
+        <div
+          style={{
+            display: 'flex',
+            gap: 12,
+            marginBottom: 24,
+            animation: 'riseIn 0.5s cubic-bezier(0.22,1,0.36,1) 0.3s both',
+          }}
+        >
+          {digits.map((digit, i) => (
+            <input
+              key={i}
+              ref={el => { inputRefs.current[i] = el; }}
+              type="text"
+              inputMode="numeric"
+              maxLength={1}
+              value={digit}
+              onChange={e => handleDigitChange(i, e.target.value)}
+              onKeyDown={e => handleKeyDown(i, e)}
+              disabled={verifying || success}
+              style={{
+                width: 68,
+                height: 76,
+                background: success
+                  ? 'rgba(0,224,122,0.06)'
+                  : digit
+                  ? 'var(--d3)'
+                  : 'var(--d2)',
+                border: `2px solid ${
+                  success
+                    ? 'rgba(0,224,122,0.4)'
+                    : error
+                    ? 'rgba(255,61,90,0.5)'
+                    : digit
+                    ? 'var(--edge-gold)'
+                    : 'var(--edge-2)'
+                }`,
+                borderRadius: 'var(--r-md)',
+                textAlign: 'center',
+                fontSize: 28,
+                fontWeight: 700,
+                color: success ? 'var(--flash)' : 'var(--t1)',
+                fontFamily: 'Inter, sans-serif',
+                outline: 'none',
+                transition: 'all 200ms ease',
+                boxShadow: digit && !error && !success
+                  ? '0 0 0 3px rgba(242,208,107,0.06)'
+                  : 'none',
+                cursor: verifying || success ? 'not-allowed' : 'text',
+              }}
+            />
+          ))}
+        </div>
+
+        {/* Error message */}
+        {error && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              marginBottom: 16,
+              animation: 'dropIn 0.3s ease forwards',
+            }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--alert)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <circle cx="12" cy="12" r="10" />
+              <line x1="12" y1="8" x2="12" y2="12" />
+              <line x1="12" y1="16" x2="12.01" y2="16" />
+            </svg>
+            <p
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 13,
+                fontWeight: 500,
+                color: 'var(--alert)',
+                textAlign: 'center',
+              }}
             >
-              Envoyer le code
-            </button>
-          </>
-        ) : (
-          <>
-            <div>
-              <p className="text-nexus-secondary text-sm mb-2 text-center">
-                Code envoyé au <span className="text-white">{phone}</span>
-              </p>
-              <p className="text-nexus-secondary text-xs mb-4 text-center">
-                (Simulation : entrez <span className="text-nexus-gold font-bold">1234</span>)
-              </p>
-              <input
-                type="text"
-                value={otp}
-                onChange={e => setOtp(e.target.value.slice(0, 4))}
-                placeholder="0000"
-                maxLength={4}
-                className="w-full bg-nexus-card border border-nexus-border rounded-nexus px-4 py-4 text-white text-center text-3xl tracking-widest placeholder-nexus-secondary focus:border-nexus-gold focus:outline-none"
-              />
-            </div>
-
-            {countdown > 0 ? (
-              <p className="text-nexus-secondary text-sm text-center">
-                Renvoyer dans <span className="text-nexus-gold">{countdown}s</span>
-              </p>
-            ) : (
-              <button
-                onClick={() => { setCountdown(30); setStep('phone'); }}
-                className="text-nexus-gold text-sm text-center hover:underline"
-              >
-                Renvoyer le code
-              </button>
-            )}
-
-            {error && <p className="text-nexus-urgent text-sm text-center">{error}</p>}
-
-            <button
-              onClick={handleVerifyOTP}
-              disabled={otp.length !== 4 || isVerifying}
-              className="w-full py-4 bg-nexus-gold text-nexus-bg font-bold rounded-nexus hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
-            >
-              {isVerifying ? <Loader2 size={20} className="animate-spin" /> : null}
-              Vérifier
-            </button>
-          </>
+              {error}
+            </p>
+          </div>
         )}
+
+        {/* Verifying state */}
+        {verifying && !success && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              color: 'var(--gold-w)',
+              marginBottom: 16,
+            }}
+          >
+            <div
+              style={{
+                width: 16,
+                height: 16,
+                border: '2px solid rgba(242,208,107,0.2)',
+                borderTop: '2px solid var(--gold)',
+                borderRadius: '50%',
+                animation: 'spin 1s linear infinite',
+              }}
+            />
+            <span
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 14,
+                fontWeight: 500,
+                color: 'var(--t2)',
+              }}
+            >
+              Vérification en cours...
+            </span>
+          </div>
+        )}
+
+        {/* Success state */}
+        {success && (
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+              marginBottom: 16,
+              animation: 'successPop 0.5s cubic-bezier(0.34,1.56,0.64,1) forwards',
+            }}
+          >
+            <div
+              style={{
+                width: 28,
+                height: 28,
+                borderRadius: '50%',
+                background: 'var(--flash)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                boxShadow: 'var(--shadow-flash)',
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#050507" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
+            </div>
+            <span
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontSize: 14,
+                fontWeight: 600,
+                color: 'var(--flash)',
+              }}
+            >
+              Identité vérifiée
+            </span>
+          </div>
+        )}
+
+        {/* Demo hint */}
+        {!verifying && !success && (
+          <p
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 12,
+              fontWeight: 400,
+              color: 'var(--t4)',
+              textAlign: 'center',
+              marginTop: 8,
+            }}
+          >
+            Code de démo :{' '}
+            <span
+              style={{
+                color: 'var(--gold)',
+                fontWeight: 700,
+              }}
+            >
+              1234
+            </span>
+          </p>
+        )}
+
+        {/* Resend link */}
+        {!verifying && !success && (
+          <button
+            onClick={handleResend}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 13,
+              fontWeight: 600,
+              color: 'var(--gold)',
+              cursor: 'pointer',
+              marginTop: 20,
+              padding: '8px 16px',
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            Renvoyer le code
+          </button>
+        )}
+
+        {/* Back button */}
+        {!verifying && !success && (
+          <button
+            onClick={() => navigateTo('roleSelection')}
+            style={{
+              background: 'none',
+              border: 'none',
+              fontFamily: 'Inter, sans-serif',
+              fontSize: 14,
+              fontWeight: 400,
+              color: 'var(--t3)',
+              cursor: 'pointer',
+              marginTop: 8,
+              padding: '8px 16px',
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              WebkitTapHighlightColor: 'transparent',
+            }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M19 12H5M12 19l-7-7 7-7" />
+            </svg>
+            Retour
+          </button>
+        )}
+      </div>
+
+      {/* Footer */}
+      <div
+        style={{
+          paddingBottom: 'calc(24px + env(safe-area-inset-bottom, 0px))',
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 400,
+          fontSize: 11,
+          color: 'var(--t4)',
+          letterSpacing: '0.05em',
+          zIndex: 1,
+        }}
+      >
+        NEXUS · Suisse romande · CHF
       </div>
     </div>
   );

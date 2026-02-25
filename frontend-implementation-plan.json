@@ -1,257 +1,223 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "NEXUS Complete Design Overhaul — Premium Dark UI with Gold Accents",
+  "title": "NEXUS Patch v6.0 — Full UI Corrections (C1–C8)",
   "requirements": [
     {
       "id": "REQ-1",
-      "summary": "Redesign login/splash screen with typographic NEXUS logo, tagline, golden separator, premium CTA button, security line, and locale footer",
+      "summary": "Replace all emoji characters with inline SVG icons (stroke 1.5px, currentColor) across the entire UI including tab bars, buttons, section titles, and confetti",
       "acceptanceCriteria": [
-        "No image asset or duplicate NEXUS text appears on the login screen",
-        "Background is solid #0A0A0A full-screen",
-        "NEXUS logo renders as white Inter Black 52px with blue period #4F6EF7 60px, letter-spacing -2px",
-        "Tagline, golden separator, CTA button, security line, and locale footer are all present and correctly styled",
-        "Button triggers the existing login/auth flow",
-        "Tap on button triggers scale(0.97) + brightness animation"
+        "Zero emoji characters appear anywhere in the rendered UI",
+        "All SVG icons use stroke 1.5px and inherit currentColor",
+        "Both tab bars (pro and client) display SVG-only icons",
+        "Radar Accept/Decline buttons show SVG check and × alongside text",
+        "Confetti renders only in #F2D06B"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Splash.tsx",
+          "path": "frontend/src/components/BottomNav.tsx",
           "operation": "modify",
-          "description": "Replace the entire splash screen layout with the new design: full-screen #0A0A0A background, centered typographic NEXUS logo (white 'NEXUS' in Inter Black 52px -2px tracking + electric blue '#4F6EF7' period at 60px), tagline 'Services à domicile premium' in #888888 italic 16px with 16px margin, 1px golden horizontal separator 60px wide centered with 32px margin, pill button 'SE CONNECTER' with #E8C89A background, #0A0A0A Bold text 16px tracking 2px uppercase, border-radius 50px, 85% max-width, 56px height, shadow 0 8px 32px rgba(232,200,154,0.3), scale(0.97) + brightness(1.1) on active state. Below button: '🔒 Face ID · Empreinte · WebAuthn' in #555555 12px centered. At bottom: 'CHF · Suisse romande · +41' in #333333 11px. Remove any image references (frontend/public/assets/generated/nexus-logo.dim_400x120.png, frontend/public/assets/generated/splash-hero.dim_1920x1080.png) and eliminate duplicate NEXUS text. Wire the button to the existing authentication flow from useAuth or useInternetIdentity."
+          "description": "Replace emoji icons in pro tab bar (Radar, Wallet, Dashboard, Mon Business) and client tab bar (Explorer, Réservations, Alertes, Profil) with inline SVG icons. Pro: Radar = circle + 2 concentric arcs, Wallet = rectangle with centered $, Dashboard = 3 horizontal lines, Mon Business = simple pencil. Client: Explorer = thin magnifier, Réservations = simple calendar, Alertes = thin bell, Profil = circle + clean silhouette. All SVGs use stroke='1.5px' and fill='currentColor'."
+        },
+        {
+          "path": "frontend/src/components/ProDashboard.tsx",
+          "operation": "modify",
+          "description": "Replace 'Flash Live' section title emoji with a 14px lightning SVG icon positioned before the plain text. Ensure the SVG uses stroke='1.5px' and currentColor."
+        },
+        {
+          "path": "frontend/src/components/RadarPro.tsx",
+          "operation": "modify",
+          "description": "Replace emojis in 'Accepter' and 'Décliner' buttons with inline SVG icons. 'Accepter' receives a 14px check SVG, 'Décliner' receives a 14px × SVG. Both use stroke='1.5px' and currentColor."
+        },
+        {
+          "path": "frontend/src/components/ProSubscriptionModal.tsx",
+          "operation": "modify",
+          "description": "Replace emoji bullets in the subscription advantage list with thin-dash SVG bullets. Each bullet is an inline SVG line with stroke='1.5px' and currentColor. Remove any emoji characters from list items."
+        },
+        {
+          "path": "frontend/src/components/MonBusiness.tsx",
+          "operation": "modify",
+          "description": "Replace section title 'Mon Business' emoji with plain text only. Update button label from 'Me Rendre Visible' to 'Activer mon profil'. Remove any emoji decorations."
+        },
+        {
+          "path": "frontend/src/utils/confetti.ts",
+          "operation": "modify",
+          "description": "Update confetti particle rendering to use only color #F2D06B. Remove any multi-color logic and ensure all particles are rendered in the gold color (#F2D06B)."
+        },
+        {
+          "path": "frontend/src/components/NexusOS.tsx",
+          "operation": "modify",
+          "description": "Remove any emoji characters from the NexusOS pro dashboard screen. Replace with inline SVG icons where visual indicators are needed, using stroke='1.5px' and currentColor."
+        },
+        {
+          "path": "frontend/src/components/ClientDashboard.tsx",
+          "operation": "modify",
+          "description": "Remove any emoji characters from the client dashboard screen. Replace with inline SVG icons where visual indicators are needed, using stroke='1.5px' and currentColor."
         }
       ]
     },
     {
       "id": "REQ-2",
-      "summary": "Implement fixed global header with NEXUS logo, notification bell with animated badge, and circular avatar showing user initials",
+      "summary": "Implement a 2×2 photo upload grid in the MonBusiness gallery with hidden file inputs, dataURL state, × remove buttons, live counter, and gold progress bar",
       "acceptanceCriteria": [
-        "Header is fixed/sticky at the top on all authenticated screens",
-        "Background is #0A0A0A with 1px #1F1F1F bottom border",
-        "NEXUS logo (white + blue period) appears on the left at 24px",
-        "Notification bell with animated red pulse badge appears on the right",
-        "Circular 32px initials avatar appears on the right",
-        "'Mes résa' button is absent from the header"
+        "Grid renders as 2×2 layout with 4 slots",
+        "Tapping an empty slot opens the native file picker",
+        "Selected image displays as full cover within its slot",
+        "× button removes the photo and resets that slot",
+        "Counter 'X/4 photos' updates in real time",
+        "Progress bar width equals (filledCount/4)*100% in gold",
+        "Text 'Minimum atteint ✓' appears when 3 or more slots are filled"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/GlobalHeader.tsx",
-          "operation": "create",
-          "description": "Create a new GlobalHeader component with fixed positioning at the top. Background #0A0A0A with border-bottom 1px #1F1F1F. Left side: render NEXUS typographic logo (white 'NEXUS' in Inter Bold 24px + blue period '#4F6EF7' at 24px). Right side: notification bell icon 🔔 with a red pulsing badge (use red-pulse animation from tailwind.config.js) showing unread notification count from AppContext, and a circular 32px avatar displaying the user's initials (extract from UserProfile name) with a dark background. Do not include a 'Mes résa' button. Use the useAuth hook to get user identity and useGetCallerUserProfile to fetch the user name for initials."
-        },
-        {
-          "path": "frontend/src/components/Explorer.tsx",
+          "path": "frontend/src/components/MonBusiness.tsx",
           "operation": "modify",
-          "description": "Import and render GlobalHeader at the top of the Explorer screen layout. Ensure the header is fixed/sticky and the rest of the content scrolls beneath it."
-        },
-        {
-          "path": "frontend/src/components/NexusOS.tsx",
-          "operation": "modify",
-          "description": "Import and render GlobalHeader at the top of the NexusOS dashboard layout. Ensure the header is fixed/sticky and the rest of the content scrolls beneath it."
-        },
-        {
-          "path": "frontend/src/components/ClientDashboard.tsx",
-          "operation": "modify",
-          "description": "Import and render GlobalHeader at the top of the ClientDashboard layout. Ensure the header is fixed/sticky and the rest of the content scrolls beneath it."
-        },
-        {
-          "path": "frontend/src/components/ProviderDetail.tsx",
-          "operation": "modify",
-          "description": "Import and render GlobalHeader at the top of the ProviderDetail layout. Ensure the header is fixed/sticky and the rest of the content scrolls beneath it."
+          "description": "Implement a 2×2 photo upload grid in the gallery section. Each of 4 slots contains a hidden <input type='file' accept='image/*'>. Tapping an empty slot triggers .click() on the input. onChange handler uses FileReader.readAsDataURL and stores the dataURL in state per slot index (0-3). Filled slots display <img src={dataURL} style='object-fit:cover; width:100%; height:100%'> with an absolute × button (top: 8px, right: 8px) that clears that slot. Show a live counter 'X/4 photos' and a gold (#F2D06B) progress bar at (count/4)*100% width. When count >= 3, display text 'Minimum atteint ✓'."
         }
       ]
     },
     {
       "id": "REQ-3",
-      "summary": "Redesign Explorer search bar with golden pin icon, dropdown city selector, and distance pill with slider",
+      "summary": "Implement complete Pro subscription activation flow with fullscreen modal, email input, progress bar, success overlay with animated check and confetti, and navigation to Pro Dashboard with trial badge",
       "acceptanceCriteria": [
-        "Search bar has #1A1A1A background and 1px #2A2A2A border",
-        "Golden pin icon is displayed on the left of the input",
-        "Placeholder text 'Votre ville...' appears in #555",
-        "Tapping the input opens a dropdown with Swiss Romande city options",
-        "Golden '≤ 50 km' pill is displayed on the right and opens a distance slider on tap"
+        "Fullscreen modal opens with correct typography and colors on 'Activer mon profil' tap",
+        "Email input has correct styling with gold focus border",
+        "Button has #F2D06B background and #050507 text — never gold on gold",
+        "Top progress bar animates 0→100% over 2s on submit",
+        "Success overlay appears with animated green check circle and gold confetti",
+        "Navigation to Pro Dashboard occurs after 2500ms",
+        "proActif and essaiJours state are set correctly",
+        "Pro Dashboard shows 'ESSAI GRATUIT · J1/7' badge in green pill style",
+        "Flash toggle is ON by default when proActif is true"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Explorer.tsx",
+          "path": "frontend/src/components/ProSubscriptionModal.tsx",
           "operation": "modify",
-          "description": "Replace the existing search bar with a redesigned version: background #1A1A1A, border 1px #2A2A2A, border-radius appropriate for the design. On the left, render a golden pin icon (📍 emoji or SVG styled in #E8C89A). Input placeholder 'Votre ville...' in #555. On tap/focus, show a dropdown listing Swiss Romande cities from frontend/src/utils/cityData.ts. On the right, render a golden '≤ 50 km' pill (background #E8C89A, text #0A0A0A, border-radius 50px) that opens a distance slider modal or inline component when tapped. Wire the city selection and distance to the existing filterProsByLocation logic or state."
+          "description": "Implement the complete activation flow. Fullscreen modal with: title '7 jours gratuits' (Inter 800 32px white), subtitle 'puis 19.90 CHF/mois' (Inter 400 16px #9898B4), 6-item advantage list using SVG thin-dash bullets (no emoji), email input (bg #0D0D13, border #1E1E26, focus border #F2D06B), and button 'Commencer l'essai gratuit' (bg #F2D06B, color #050507, Inter 700 14px, height 56px). On button tap: (1) animate gold progress bar at top from 0→100% over 2s; (2) show fullscreen overlay (#050507) with 80px green circle (#00D97E), animated SVG check (stroke-dashoffset 400ms), text 'Profil activé' (Inter 800 28px #F4F4F8), subtext 'Visible par les clients dès maintenant' (Inter 400 15px #9898B4), and 40 gold confetti particles (#F2D06B); (3) after 2500ms, navigate to Pro Dashboard and set state { proActif: true, essaiJours: 7 }."
+        },
+        {
+          "path": "frontend/src/components/ProDashboard.tsx",
+          "operation": "modify",
+          "description": "Display pill badge 'ESSAI GRATUIT · J1/7' when proActif is true. Badge styling: background rgba(0,217,122,0.1), border 1px solid #00D97A, text color #00D97A. Set Flash toggle to ON by default when proActif is true. Add 'Voir mon profil public' button that navigates to Explorer with the pro profile visible at position 1."
+        },
+        {
+          "path": "frontend/src/context/AppContext.tsx",
+          "operation": "modify",
+          "description": "Add state properties proActif (boolean) and essaiJours (number) to AppContext. Provide actions to set these values from ProSubscriptionModal. Ensure state persists across navigation and is accessible to ProDashboard and other components that need subscription status."
         }
       ]
     },
     {
       "id": "REQ-4",
-      "summary": "Redesign Explorer category filters as horizontally scrollable pills with active/inactive styling",
+      "summary": "Simplify color palette: remove violet/bordeaux/gold gradients, apply neutral dark backgrounds to Explorer cards and Wallet, update bar chart colors, and redesign tab bar with gold active indicator",
       "acceptanceCriteria": [
-        "Category pills scroll horizontally with no visible scrollbar",
-        "Active pill has #E8C89A background and #0A0A0A Bold text",
-        "Inactive pills have #1A1A1A background, #888 text, 1px #2A2A2A border",
-        "Pills have border-radius 50px and padding 10px 20px",
-        "Pills appear in the order: Tous, Flash, Barber, Coiffure, Esthétique, Massage"
+        "No violet or bordeaux colors appear on Explorer cards",
+        "Wallet card uses the specified neutral dark gradient",
+        "Bar chart inactive bars are #1C1C26 and today's bar is #F2D06B with no gradients",
+        "Tab bar background is rgba(5,5,7,0.96) with backdrop-blur",
+        "Active tab shows a 2px gold top indicator and gold SVG icon, no colored background"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/Explorer.tsx",
           "operation": "modify",
-          "description": "Replace the category filter UI with horizontally scrollable pills (overflow-x: auto with no visible scrollbar via CSS). Render pills in order: [Tous] [⚡Flash] [✂️Barber] [💇Coiffure] [💅Esthétique] [🤲Massage]. Active pill: background #E8C89A, text #0A0A0A Bold. Inactive pill: background #1A1A1A, text #888, border 1px #2A2A2A. All pills: border-radius 50px, padding 10px 20px. Wire the pill tap to update the category filter state."
+          "description": "Update Explorer professional cards to use background #0D0D13 with border 1px solid rgba(255,255,255,0.06). Remove all violet and bordeaux tints from card backgrounds. Ensure cards render with a clean, neutral dark appearance."
+        },
+        {
+          "path": "frontend/src/components/WalletPro.tsx",
+          "operation": "modify",
+          "description": "Update Wallet card background to linear-gradient(135deg, #0A0A0A, #0F0E0A) with border 1px solid rgba(242,208,107,0.15). Remove orange-brown saturated gradient. Balance display: '240 CHF' in Inter 900 48px #F2D06B, 'SOLDE DISPONIBLE' in Inter 600 10px #54546C. Bar chart: inactive bars #1C1C26, today's active bar #F2D06B, remove all gold/brown gradients on bars."
+        },
+        {
+          "path": "frontend/src/components/BottomNav.tsx",
+          "operation": "modify",
+          "description": "Update tab bar (both client and pro) with background rgba(5,5,7,0.96) and backdrop-blur(24px), border-top 1px solid rgba(255,255,255,0.04). Active tab: SVG icon #F2D06B with a 2px #F2D06B top indicator 20px wide, no colored background on active tab. Inactive tab: SVG icon #2E2E3E."
         }
       ]
     },
     {
       "id": "REQ-5",
-      "summary": "Add 'DISPONIBLES MAINTENANT' Flash section with horizontally scrollable flash pro cards above the main pro list",
+      "summary": "Redesign Explorer professional cards as full-width vertical list with 80px height, flex layout, 44px avatar circle, flash response time text, and star rating SVG",
       "acceptanceCriteria": [
-        "Section title shows a pulsing green dot and 'DISPONIBLES MAINTENANT' in #22C55E 13px tracking 2px",
-        "Flash cards scroll horizontally",
-        "Each card is 160×200px with 16px radius and a cover photo",
-        "Black gradient overlay appears at the card bottom",
-        "FLASH badge in #22C55E top-left, pro name white Bold and city #CCC 12px at the bottom"
+        "Explorer displays professionals as a full-width list, not a grid",
+        "Each card is exactly 80px tall with the specified flex layout",
+        "Avatar circle is 44px with photo cover or initials fallback",
+        "Flash response time shows as text in #00D97A with no emoji",
+        "Star rating uses an SVG icon, not an emoji",
+        "Price displays in #F2D06B"
       ],
       "file_operations": [
         {
           "path": "frontend/src/components/Explorer.tsx",
           "operation": "modify",
-          "description": "Add a new Flash section above the main pro card list. Section title: a green pulsing dot (CSS animation pulse, background #22C55E) + 'DISPONIBLES MAINTENANT' in #22C55E 13px tracking 2px uppercase. Render horizontally scrollable flash pro cards (overflow-x: auto, no visible scrollbar). Each card: 160px wide, 200px tall, border-radius 16px, full-card cover photo (mainPhoto or galleryPhotos[0] from ProProfile), black gradient overlay at the bottom (linear-gradient from transparent to rgba(0,0,0,0.8)), green 'FLASH' badge in top-left corner (background #22C55E, text white, border-radius 50px, padding 10px 12px), pro brandName in white Bold at the bottom, and city in #CCC 12px. Filter displayed pros by those with flash availability or a flash flag (check ProProfile fields or use demo data logic). Wire card tap to navigate to ProviderDetail."
+          "description": "Redesign professional cards as a full-width vertical list. Each card: height 80px, background #0D0D13, border 1px solid rgba(255,255,255,0.05), border-radius 14px, padding 0 16px, display flex, align-items center, gap 14px. Left: 44px circle avatar — if photo: img object-fit cover border-radius 50%; if no photo: subtle gradient + Inter 700 16px initials. Center (flex-1): name in Inter 700 16px #F4F4F8; 'Catégorie · Ville' in Inter 400 13px #54546C; if flash active: 'Répond en Xmin' in Inter 500 12px #00D97A (text only, no emoji). Right (text-align right): SVG star 12px + '4.9' in Inter 600 13px; 'dès 35 CHF' in Inter 700 14px #F2D06B."
         }
       ]
     },
     {
       "id": "REQ-6",
-      "summary": "Redesign main pro cards with full-width cover photo, badges, info zone, price, and golden RÉSERVER button",
+      "summary": "Update WalletPro with escrow explanation text, disabled transfer button state 'Virement initié' for 30s, and toast notification with green left border",
       "acceptanceCriteria": [
-        "Cover photo occupies full card width at 180px height with object-fit cover",
-        "FLASH badge (green) appears top-left; Revolut badge appears top-right with semi-transparent background",
-        "Info zone has #111111 background with pro name, rating, category, location, response time, price, and RÉSERVER button",
-        "Price is displayed in #E8C89A Bold",
-        "Card has 20px border-radius and 0 4px 24px rgba(0,0,0,0.4) shadow",
-        "Cards have 16px vertical margin between them"
+        "Escrow explanation text 'Libéré dans 48h après prestation' appears below the escrow amount",
+        "Transfer button becomes disabled and shows 'Virement initié' immediately after tap",
+        "Button re-enables after 30 seconds",
+        "Toast notification appears for 5s with the transfer message and #00D97A left border"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Explorer.tsx",
+          "path": "frontend/src/components/WalletPro.tsx",
           "operation": "modify",
-          "description": "Redesign the main pro card list items. Each card: full-width cover photo at 180px height with object-fit cover (use mainPhoto or first galleryPhoto from ProProfile), green FLASH badge in top-left if applicable (background #22C55E, text white, padding 6px 12px, border-radius 50px), semi-transparent 'Revolut ✅' badge in top-right (background rgba(0,0,0,0.6), text white, padding 6px 12px, border-radius 50px). Info zone: background #111111, padding 16px. Display pro brandName in Bold 18px white with ⭐ rating (from demo data or ProProfile) right-aligned, category in #888 14px with review count, location 📍 city and ⚡ response time in #666 12px, horizontal separator line, price 'À partir de X CHF' in #E8C89A Bold 18px (compute minimum service price from ProProfile services array), and a golden 'RÉSERVER ⚡' button (background #E8C89A, text #0A0A0A Bold 14px uppercase, padding 12px 24px, border-radius 50px). Card: border-radius 20px, box-shadow 0 4px 24px rgba(0,0,0,0.4), margin-bottom 16px. Wire card tap to navigate to ProviderDetail; wire button tap to start booking flow."
+          "description": "Below the '55 CHF séquestre' line, add text 'Libéré dans 48h après prestation' in Inter 400 12px #54546C. After user initiates a transfer, disable the transfer button and set its label to 'Virement initié' for 30 seconds. Show a toast notification for 5s reading 'Virement de 240 CHF vers votre Revolut' with a 3px left border in #00D97A. Re-enable button after 30s."
         }
       ]
     },
     {
       "id": "REQ-7",
-      "summary": "Add fixed bottom navigation bar with four tabs: Explorer, Réservations, Messages, Profil",
+      "summary": "Redesign RoleSelection screen with 2 full-width 96px cards, zero emojis, SVG arrow right, and tap-active border/background highlighting",
       "acceptanceCriteria": [
-        "Bottom nav bar is fixed at the bottom of the screen on all main app screens",
-        "Background is #0F0F0F with 1px #1F1F1F top border",
-        "Height is 64px with env(safe-area-inset-bottom) padding for iOS",
-        "Four tabs displayed: Explorer, Réservations, Messages, Profil",
-        "Active tab icon and label render in #E8C89A; inactive tabs in #555555",
-        "Red badge appears on Réservations tab when there are pending bookings",
-        "Tapping each tab navigates to the corresponding screen"
+        "Role selection shows exactly 2 full-width cards at 96px height",
+        "No emoji or iOS-style icons appear on either card",
+        "SVG arrow is visible on the right of each card",
+        "Tapping Client card highlights it with blue border and subtle blue tint",
+        "Tapping Professional card highlights it with gold border and subtle gold tint"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/BottomNav.tsx",
-          "operation": "create",
-          "description": "Create a new BottomNav component with fixed positioning at the bottom. Background #0F0F0F, border-top 1px #1F1F1F, height 64px plus env(safe-area-inset-bottom) padding for iOS. Render four tabs: [🔍 Explorer] [📅 Réservations] [💬 Messages] [👤 Profil]. Active tab: icon + text in #E8C89A. Inactive tab: icon + text in #555555. Show a red badge on Réservations tab when there are new/pending bookings (check AppContext bookings state for pending status). Wire each tab tap to navigate to the corresponding screen via AppContext navigation (explorer, clientDashboard or nexusOS for Réservations depending on user role, messages placeholder, and profile screen). Use the current screen state from AppContext to determine the active tab."
-        },
-        {
-          "path": "frontend/src/components/Explorer.tsx",
+          "path": "frontend/src/components/RoleSelection.tsx",
           "operation": "modify",
-          "description": "Import and render BottomNav at the bottom of the Explorer layout. Ensure it is fixed and does not overlap with content by adding padding-bottom equal to nav height."
-        },
-        {
-          "path": "frontend/src/components/ClientDashboard.tsx",
-          "operation": "modify",
-          "description": "Import and render BottomNav at the bottom of the ClientDashboard layout. Ensure it is fixed and does not overlap with content by adding padding-bottom equal to nav height."
-        },
-        {
-          "path": "frontend/src/components/NexusOS.tsx",
-          "operation": "modify",
-          "description": "Import and render BottomNav at the bottom of the NexusOS layout. Ensure it is fixed and does not overlap with content by adding padding-bottom equal to nav height."
+          "description": "Redesign with 2 full-width cards, each 96px tall, zero emojis, zero iOS-style icons. Client card: title 'Client' Inter 700 20px #F4F4F8, subtitle 'Réservez un expert à domicile' Inter 400 14px #54546C, SVG arrow right 16px #2E2E3E absolute right, background #0D0D13, border #1E1E26, border-radius 16px; on tap: border #5B7FFF, background rgba(91,127,255,0.04). Professional card: title 'Professionnel' Inter 700 20px #F4F4F8, subtitle 'Gérez votre activité beauté' Inter 400 14px #54546C, SVG arrow right 16px #2E2E3E, background #0D0D13, border #1E1E26, border-radius 16px; on tap: border #F2D06B, background rgba(242,208,107,0.04)."
         }
       ]
     },
     {
       "id": "REQ-8",
-      "summary": "Apply global Inter typography system with specific sizes, weights, colors, and tracking for all text elements",
+      "summary": "Enforce dark text (#050507) on all gold (#F2D06B) background buttons, ensuring no gold-on-gold contrast issues anywhere in the app",
       "acceptanceCriteria": [
-        "Inter is the sole font family used throughout the app",
-        "H1/H2/body/caption/label/price/button text sizes and weights match the specification",
-        "Price elements render in #E8C89A Bold 18px",
-        "Button text is #0A0A0A Bold 14px uppercase with tracking 1px"
+        "Subscription CTA button renders with #F2D06B background and #050507 text",
+        "No instance of gold/yellow text on gold/yellow background exists anywhere in the app",
+        "Button text is legible with sufficient contrast ratio"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/index.css",
+          "path": "frontend/src/components/ProSubscriptionModal.tsx",
           "operation": "modify",
-          "description": "Replace all font-family declarations with Inter. Import Inter from Google Fonts if not already present (check frontend/index.html). Define global typography utility classes or CSS variables: H1 (28px Bold #FFFFFF tracking -1px), H2 (22px SemiBold #FFFFFF), Body (15px Regular #CCCCCC), Caption (12px Regular #888888), Labels (11px SemiBold #888888 tracking 2px uppercase), Prices (18px Bold #E8C89A), Buttons (14px Bold #0A0A0A tracking 1px uppercase). Update the base body font to Inter 15px Regular #CCCCCC."
+          "description": "Ensure subscription CTA button 'Commencer l'essai gratuit' always renders with background #F2D06B and text color #050507. Never apply gold/yellow text on gold/yellow background."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/components/MonBusiness.tsx",
           "operation": "modify",
-          "description": "Update the fontFamily theme extension to set Inter as the default sans font family. Ensure all existing font references (Darker Grotesque, Playfair Display) are removed or overridden by Inter. Verify that custom fontSize and letterSpacing values are available for H1, H2, body, caption, labels, prices, and buttons."
-        }
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "summary": "Implement micro-animations for buttons, cards, badges, skeletons, and screen transitions",
-      "acceptanceCriteria": [
-        "All interactive buttons scale to 0.96 on tap/active with 150ms transition",
-        "Cards show shadow elevation on hover/tap",
-        "FLASH badges continuously pulse (opacity 1→0.6→1) on a 1.5s loop",
-        "Red notification badges have a pulsing red animation",
-        "Skeleton loaders show a golden shimmer sweep on #1A1A1A",
-        "Navigating between screens fades in/out over 200ms"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/index.css",
-          "operation": "modify",
-          "description": "Add global CSS classes and animations: (1) .btn-tap with active:scale-[0.96] transition-transform duration-150 ease-out; (2) .card-hover with hover:shadow-elevated transition-shadow; (3) @keyframes flash-pulse for FLASH badges (opacity 1→0.6→1, 1.5s infinite); (4) @keyframes red-pulse for red notification badges (if not already present); (5) @keyframes shimmer for skeleton loaders with golden shimmer sweep on #1A1A1A background; (6) .screen-transition with opacity fade-in/out 200ms. Apply these classes to relevant elements across components."
+          "description": "Audit all buttons with #F2D06B background in MonBusiness and enforce dark text #050507. Ensure no gold-on-gold contrast issues."
         },
         {
-          "path": "frontend/tailwind.config.js",
+          "path": "frontend/src/components/SubscriptionScreen.tsx",
           "operation": "modify",
-          "description": "Ensure the animation keyframes for flash-pulse, red-pulse, and shimmer are defined in the theme.extend.keyframes section. Add animation utilities: flash-pulse (1.5s infinite), red-pulse (2s infinite), shimmer (2s infinite). Verify that transitionDuration includes 150ms and 200ms values."
+          "description": "Audit subscription screen buttons with #F2D06B background and enforce text color #050507. Ensure legible contrast for all CTAs."
         },
         {
-          "path": "frontend/src/components/Explorer.tsx",
+          "path": "frontend/src/components/Subscription.tsx",
           "operation": "modify",
-          "description": "Apply .btn-tap class to all buttons and .card-hover class to pro cards. Apply flash-pulse animation to FLASH badges. Ensure skeleton loaders use the shimmer animation on #1A1A1A backgrounds."
-        },
-        {
-          "path": "frontend/src/components/Splash.tsx",
-          "operation": "modify",
-          "description": "Apply .btn-tap class to the 'SE CONNECTER' button with scale(0.96) and brightness(1.1) on active state."
-        },
-        {
-          "path": "frontend/src/components/GlobalHeader.tsx",
-          "operation": "modify",
-          "description": "Apply red-pulse animation to the notification badge."
-        },
-        {
-          "path": "frontend/src/components/ScreenRouter.tsx",
-          "operation": "modify",
-          "description": "Wrap screen components with a fade-in/fade-out transition (200ms) when switching between screens. Use CSS transitions or React transition libraries as appropriate."
-        }
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "summary": "Build or fully redesign pro detail screen with cover photo, profile photo, badges, score bar, service cards, and sticky bottom CTA",
-      "acceptanceCriteria": [
-        "Cover photo is full-width at 220px",
-        "Profile photo is 80px circular with 3px golden border, overlapping cover by 40px",
-        "Pro name, slogan, and inline badges are displayed correctly",
-        "Score bar shows response time, acceptance rate, and prestations count in a dark card",
-        "Services render as horizontally scrollable cards with name, duration, price in gold, and optional badges",
-        "Sticky bottom button shows '⚡ RÉSERVER MAINTENANT — X CHF' in #E8C89A background with #0A0A0A text",
-        "Tapping the CTA initiates the booking flow for the selected service"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ProviderDetail.tsx",
-          "operation": "modify",
-          "description": "Redesign the entire ProviderDetail layout. Top: full-width cover photo at 220px height (use mainPhoto or first galleryPhoto from ProProfile). Overlapping the cover by -40px: circular 80px profile photo with 3px golden border (#E8C89A). Below: pro brandName in 24px Bold white with 48px margin-top, slogan in 14px italic #888. Inline badges: [⚡ Flash] [💳 Revolut ✅] [⭐ rating] [N avis] (styled as pills with appropriate colors). Score bar: background #1A1A1A, border-radius 12px, padding 16px, three columns showing ⚡ response time, ✅ acceptance rate, and 🎯 total prestations (extract from ProProfile or demo data). Horizontally scrollable service cards: background #1A1A1A, border-radius 12px, padding 16px, showing service name Bold white, duration + price in #E8C89A Bold, optional before/after photos from service.beforeAfterPhotos, and badges [Populaire] [Nouveau] [Promo] from service.badges. Sticky bottom CTA: '⚡ RÉSERVER MAINTENANT — X CHF' (compute total price for selected service), background #E8C89A, text #0A0A0A Bold 14px uppercase, full width, height 56px, border-radius 0, border-top 1px rgba(232,200,154,0.3). Wire CTA tap to initiate the booking flow (navigate to BookingFlow with selected service)."
+          "description": "Audit subscription buttons with #F2D06B background and enforce text color #050507. Ensure no gold text appears on gold background."
         }
       ]
     }

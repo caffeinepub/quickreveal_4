@@ -1,104 +1,157 @@
 import React, { useState } from 'react';
-import { User, Scissors, ArrowLeft } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import { useAuth } from '../context/AuthContext';
-import { useSaveCallerUserProfile } from '../hooks/useQueries';
-import { AppUserRole } from '../backend';
-import OTPVerification from './OTPVerification';
-import ProOnboardingModal from './ProOnboardingModal';
+
+const ArrowRightIcon = ({ color = '#2E2E3E' }: { color?: string }) => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+    <line x1="3" y1="8" x2="13" y2="8" />
+    <polyline points="9,4 13,8 9,12" />
+  </svg>
+);
 
 export default function RoleSelection() {
-  const { setCurrentScreen, setAppRole, phoneVerified } = useAppContext();
-  const { logout } = useAuth();
-  const saveProfile = useSaveCallerUserProfile();
-  const [showOTP, setShowOTP] = useState(false);
-  const [showProModal, setShowProModal] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const { navigateTo, setAppRole } = useAppContext();
+  const [selected, setSelected] = useState<'client' | 'pro' | null>(null);
 
-  const handleClientSelect = async () => {
-    if (phoneVerified) {
-      setAppRole('client');
-      await saveProfile.mutateAsync({ name: 'Client', appRole: AppUserRole.client });
-      setCurrentScreen('explorer');
-    } else {
-      setShowOTP(true);
-    }
+  const handleSelect = (role: 'client' | 'pro') => {
+    setSelected(role);
+    setTimeout(() => {
+      setAppRole(role);
+      if (role === 'client') {
+        navigateTo('otp');
+      } else {
+        navigateTo('subscription');
+      }
+    }, 180);
   };
 
-  const handleProSelect = () => {
-    setShowProModal(true);
-  };
-
-  if (showOTP) {
-    return <OTPVerification onBack={() => setShowOTP(false)} />;
-  }
+  const clientActive = selected === 'client';
+  const proActive = selected === 'pro';
 
   return (
-    <>
-      <div className="nexus-container flex flex-col min-h-screen px-6 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-12">
-          <button onClick={logout} className="text-nexus-secondary hover:text-white transition-colors">
-            <ArrowLeft size={22} />
-          </button>
-          <div className="text-white font-black text-xl tracking-widest">
-            NEXUS<span className="inline-block w-1.5 h-1.5 bg-blue-500 rounded-full ml-0.5 mb-1 align-bottom" />
-          </div>
-          <div className="w-6" />
+    <div style={{
+      minHeight: '100vh',
+      background: '#050507',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '0 24px',
+    }}>
+      {/* Logo */}
+      <div style={{ marginBottom: '48px', textAlign: 'center' }}>
+        <div style={{
+          fontSize: '36px',
+          fontWeight: 900,
+          color: '#F4F4F8',
+          letterSpacing: '-0.03em',
+          fontFamily: 'Inter, sans-serif',
+        }}>
+          NEXUS
+          <span style={{ color: '#F2D06B' }}>.</span>
         </div>
-
-        {/* Title */}
-        <div className="mb-10">
-          <h1 className="text-3xl font-bold text-white mb-2">Vous êtes ?</h1>
-          <p className="text-nexus-secondary">Choisissez votre profil pour continuer</p>
-        </div>
-
-        {/* Role cards */}
-        <div className="flex flex-col gap-4">
-          <button
-            onClick={handleClientSelect}
-            disabled={isLoading || saveProfile.isPending}
-            className="w-full p-6 bg-nexus-card border border-nexus-border rounded-nexus text-left hover:border-nexus-gold transition-all active:scale-98 group"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-nexus-bg rounded-full flex items-center justify-center group-hover:bg-nexus-gold/10 transition-colors">
-                <User size={28} className="text-nexus-gold" />
-              </div>
-              <div>
-                <h2 className="text-white font-bold text-lg">Je cherche un service</h2>
-                <p className="text-nexus-secondary text-sm mt-0.5">Réservez un pro près de chez vous</p>
-              </div>
-            </div>
-          </button>
-
-          <button
-            onClick={handleProSelect}
-            className="w-full p-6 bg-nexus-card border border-nexus-border rounded-nexus text-left hover:border-nexus-gold transition-all active:scale-98 group"
-          >
-            <div className="flex items-center gap-4">
-              <div className="w-14 h-14 bg-nexus-bg rounded-full flex items-center justify-center group-hover:bg-nexus-gold/10 transition-colors">
-                <Scissors size={28} className="text-nexus-gold" />
-              </div>
-              <div>
-                <h2 className="text-white font-bold text-lg">Je propose un service</h2>
-                <p className="text-nexus-secondary text-sm mt-0.5">Développez votre activité avec NEXUS</p>
-              </div>
-            </div>
-          </button>
-        </div>
-
-        {/* Footer */}
-        <div className="mt-auto pt-8 text-center">
-          <p className="text-nexus-secondary text-xs">
-            En continuant, vous acceptez les{' '}
-            <span className="text-nexus-gold">Conditions d'utilisation</span>
-          </p>
-        </div>
+        <p style={{
+          fontSize: '14px',
+          color: '#54546C',
+          marginTop: '8px',
+          fontWeight: 400,
+        }}>
+          Choisissez votre profil
+        </p>
       </div>
 
-      {showProModal && (
-        <ProOnboardingModal onClose={() => setShowProModal(false)} />
-      )}
-    </>
+      {/* Cards */}
+      <div style={{ width: '100%', maxWidth: '380px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+        {/* Client Card */}
+        <button
+          onClick={() => handleSelect('client')}
+          style={{
+            width: '100%',
+            height: '96px',
+            background: clientActive ? 'rgba(91,127,255,0.04)' : '#0D0D13',
+            border: `1px solid ${clientActive ? '#5B7FFF' : '#1E1E26'}`,
+            borderRadius: '16px',
+            padding: '0 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            transition: 'border-color 0.15s, background 0.15s',
+            textAlign: 'left',
+          }}
+        >
+          <div>
+            <div style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#F4F4F8',
+              fontFamily: 'Inter, sans-serif',
+              lineHeight: 1.2,
+            }}>
+              Client
+            </div>
+            <div style={{
+              fontSize: '14px',
+              fontWeight: 400,
+              color: '#54546C',
+              marginTop: '4px',
+              fontFamily: 'Inter, sans-serif',
+            }}>
+              Réservez un expert à domicile
+            </div>
+          </div>
+          <ArrowRightIcon color={clientActive ? '#5B7FFF' : '#2E2E3E'} />
+        </button>
+
+        {/* Pro Card */}
+        <button
+          onClick={() => handleSelect('pro')}
+          style={{
+            width: '100%',
+            height: '96px',
+            background: proActive ? 'rgba(242,208,107,0.04)' : '#0D0D13',
+            border: `1px solid ${proActive ? '#F2D06B' : '#1E1E26'}`,
+            borderRadius: '16px',
+            padding: '0 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            cursor: 'pointer',
+            transition: 'border-color 0.15s, background 0.15s',
+            textAlign: 'left',
+          }}
+        >
+          <div>
+            <div style={{
+              fontSize: '20px',
+              fontWeight: 700,
+              color: '#F4F4F8',
+              fontFamily: 'Inter, sans-serif',
+              lineHeight: 1.2,
+            }}>
+              Professionnel
+            </div>
+            <div style={{
+              fontSize: '14px',
+              fontWeight: 400,
+              color: '#54546C',
+              marginTop: '4px',
+              fontFamily: 'Inter, sans-serif',
+            }}>
+              Gérez votre activité beauté
+            </div>
+          </div>
+          <ArrowRightIcon color={proActive ? '#F2D06B' : '#2E2E3E'} />
+        </button>
+      </div>
+
+      <p style={{
+        marginTop: '32px',
+        fontSize: '12px',
+        color: '#2E2E3E',
+        textAlign: 'center',
+      }}>
+        Vous pouvez changer de rôle à tout moment
+      </p>
+    </div>
   );
 }

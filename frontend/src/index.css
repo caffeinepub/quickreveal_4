@@ -1,354 +1,231 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-@layer base {
-  :root {
-    --background: oklch(0.08 0 0);
-    --foreground: oklch(0.92 0 0);
-    --card: oklch(0.11 0 0);
-    --card-foreground: oklch(0.92 0 0);
-    --popover: oklch(0.11 0 0);
-    --popover-foreground: oklch(0.92 0 0);
-    --primary: oklch(0.82 0.08 75);
-    --primary-foreground: oklch(0.08 0 0);
-    --secondary: oklch(0.15 0 0);
-    --secondary-foreground: oklch(0.92 0 0);
-    --muted: oklch(0.18 0 0);
-    --muted-foreground: oklch(0.55 0 0);
-    --accent: oklch(0.82 0.08 75);
-    --accent-foreground: oklch(0.08 0 0);
-    --destructive: oklch(0.55 0.22 25);
-    --destructive-foreground: oklch(0.98 0 0);
-    --border: oklch(0.18 0 0);
-    --input: oklch(0.15 0 0);
-    --ring: oklch(0.82 0.08 75);
-    --radius: 0.5rem;
+/* ─── NEXUS v5.0 Design System ─────────────────────────────────────────── */
 
-    /* NEXUS custom tokens */
-    --nexus-black: #0A0A0A;
-    --nexus-dark: #111111;
-    --nexus-dark-2: #1A1A1A;
-    --nexus-dark-3: #1F1F1F;
-    --nexus-dark-4: #2A2A2A;
-    --nexus-gold: #E8C89A;
-    --nexus-blue: #4F6EF7;
-    --nexus-green: #22C55E;
-    --nexus-text: #CCCCCC;
-    --nexus-muted: #888888;
-    --nexus-subtle: #555555;
-    --nexus-faint: #333333;
-  }
+:root {
+  /* Void / backgrounds */
+  --void:       #07070d;
+  --d1:         #0d0d16;
+  --d2:         #12121e;
+  --d3:         #1a1a2a;
+  --d4:         #252538;
 
-  * {
-    @apply border-border;
-    box-sizing: border-box;
-  }
+  /* Text */
+  --t1:         #f0f0f8;
+  --t2:         #9090b0;
+  --t3:         #505070;
 
-  html {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+  /* Gold system */
+  --gold:       #d4af37;
+  --gold-light: #f0d060;
+  --gold-dark:  #b8860b;
+  --edge-gold:  rgba(212, 175, 55, 0.35);
 
-  body {
-    background-color: var(--nexus-black);
-    color: var(--nexus-text);
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    font-size: 15px;
-    font-weight: 400;
-    line-height: 1.6;
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-  }
+  /* Status */
+  --green:      #22c55e;
+  --red:        #ef4444;
+  --blue:       #3b82f6;
 
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #FFFFFF;
-    letter-spacing: -0.01em;
-    line-height: 1.2;
-  }
-
-  h2 {
-    font-size: 22px;
-    font-weight: 600;
-    color: #FFFFFF;
-    line-height: 1.3;
-  }
-
-  h3 {
-    font-size: 18px;
-    font-weight: 600;
-    color: #FFFFFF;
-  }
+  /* Radius */
+  --radius: 0.5rem;
 }
 
-@layer components {
-  /* Typography utilities */
-  .text-nexus-h1 {
-    font-size: 28px;
-    font-weight: 700;
-    color: #FFFFFF;
-    letter-spacing: -0.01em;
-  }
+/* ─── Base ──────────────────────────────────────────────────────────────── */
 
-  .text-nexus-h2 {
-    font-size: 22px;
-    font-weight: 600;
-    color: #FFFFFF;
-  }
-
-  .text-nexus-body {
-    font-size: 15px;
-    font-weight: 400;
-    color: #CCCCCC;
-  }
-
-  .text-nexus-caption {
-    font-size: 12px;
-    font-weight: 400;
-    color: #888888;
-  }
-
-  .text-nexus-label {
-    font-size: 11px;
-    font-weight: 600;
-    color: #888888;
-    letter-spacing: 0.2em;
-    text-transform: uppercase;
-  }
-
-  .text-nexus-price {
-    font-size: 18px;
-    font-weight: 700;
-    color: #E8C89A;
-  }
-
-  .text-nexus-btn {
-    font-size: 14px;
-    font-weight: 700;
-    color: #0A0A0A;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
-
-  /* Button tap animation */
-  .btn-tap {
-    transition: transform 150ms ease-out, filter 150ms ease-out;
-    cursor: pointer;
-  }
-
-  .btn-tap:active {
-    transform: scale(0.96);
-  }
-
-  .btn-tap-gold {
-    transition: transform 150ms ease-out, filter 150ms ease-out, box-shadow 150ms ease-out;
-    cursor: pointer;
-  }
-
-  .btn-tap-gold:active {
-    transform: scale(0.97);
-    filter: brightness(1.1);
-  }
-
-  /* Card hover */
-  .card-hover {
-    transition: box-shadow 200ms ease-out, transform 200ms ease-out;
-  }
-
-  .card-hover:hover {
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-    transform: translateY(-2px);
-  }
-
-  /* Screen transition */
-  .screen-transition {
-    animation: screenFadeIn 200ms ease-out forwards;
-  }
-
-  /* Skeleton shimmer */
-  .skeleton-shimmer {
-    background: linear-gradient(
-      90deg,
-      #1A1A1A 0%,
-      #2A2420 40%,
-      #E8C89A22 50%,
-      #2A2420 60%,
-      #1A1A1A 100%
-    );
-    background-size: 200% 100%;
-    animation: shimmer 2s infinite;
-  }
-
-  /* Scrollable without scrollbar */
-  .scroll-no-bar {
-    overflow-x: auto;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-
-  .scroll-no-bar::-webkit-scrollbar {
-    display: none;
-  }
-
-  /* NEXUS logo style */
-  .nexus-logo-text {
-    font-family: 'Inter', sans-serif;
-    font-weight: 900;
-    color: #FFFFFF;
-    letter-spacing: -0.02em;
-  }
-
-  .nexus-logo-dot {
-    color: #4F6EF7;
-  }
-
-  /* Gold separator */
-  .gold-separator {
-    width: 60px;
-    height: 1px;
-    background-color: #E8C89A;
-    margin: 0 auto;
-  }
-
-  /* Flash badge pulse */
-  .flash-badge {
-    animation: flashPulse 1.5s ease-in-out infinite;
-  }
-
-  /* Green dot pulse */
-  .green-dot-pulse {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background-color: #22C55E;
-    animation: greenPulse 1.5s ease-in-out infinite;
-    display: inline-block;
-    flex-shrink: 0;
-  }
-
-  /* Red badge pulse */
-  .red-badge-pulse {
-    animation: redPulse 2s ease-in-out infinite;
-  }
-
-  /* Safe area bottom padding */
-  .safe-bottom {
-    padding-bottom: env(safe-area-inset-bottom, 0px);
-  }
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-@layer utilities {
-  .text-gold {
-    color: #E8C89A;
-  }
-
-  .text-nexus-blue {
-    color: #4F6EF7;
-  }
-
-  .text-nexus-green {
-    color: #22C55E;
-  }
-
-  .bg-nexus-black {
-    background-color: #0A0A0A;
-  }
-
-  .bg-nexus-dark {
-    background-color: #111111;
-  }
-
-  .bg-nexus-dark-2 {
-    background-color: #1A1A1A;
-  }
-
-  .border-nexus {
-    border-color: #1F1F1F;
-  }
-
-  .border-nexus-2 {
-    border-color: #2A2A2A;
-  }
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
 }
 
-/* Keyframe animations */
-@keyframes screenFadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+body {
+  background: var(--void);
+  color: var(--t1);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+/* ─── App container ─────────────────────────────────────────────────────── */
+
+.app-container {
+  width: 100%;
+  max-width: 430px;
+  height: 100%;
+  margin: 0 auto;
+  position: relative;
+  overflow: hidden;
+  background: var(--void);
 }
 
-@keyframes flashPulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
-}
+/* ─── Scrollbar hide ────────────────────────────────────────────────────── */
 
-@keyframes greenPulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.7;
-    transform: scale(1.2);
-  }
-}
+::-webkit-scrollbar { display: none; }
+* { scrollbar-width: none; }
 
-@keyframes redPulse {
-  0%, 100% {
-    opacity: 1;
-    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
-  }
-  50% {
-    opacity: 0.9;
-    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0);
-  }
-}
+/* ─── Keyframes ─────────────────────────────────────────────────────────── */
 
 @keyframes spin {
-  to {
-    transform: rotate(360deg);
+  to { transform: rotate(360deg); }
+}
+
+@keyframes breatheGold {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(212, 175, 55, 0.3);
+    border-color: rgba(212, 175, 55, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(212, 175, 55, 0.7);
+    border-color: rgba(212, 175, 55, 0.9);
   }
 }
 
-/* Scrollbar global hide for mobile feel */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: #2A2A2A transparent;
+@keyframes breatheFlash {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
 }
 
-*::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+@keyframes gradientDrift {
+  0%   { background-position: 0% 50%; }
+  50%  { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
 }
 
-*::-webkit-scrollbar-track {
-  background: transparent;
+@keyframes floatGentle {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-8px); }
 }
 
-*::-webkit-scrollbar-thumb {
-  background-color: #2A2A2A;
-  border-radius: 2px;
+@keyframes goldRain {
+  0%   { transform: translateY(0) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+
+@keyframes countBeat {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.08); }
+  100% { transform: scale(1); }
+}
+
+@keyframes successPop {
+  0%   { transform: scale(0); opacity: 0; }
+  60%  { transform: scale(1.15); opacity: 1; }
+  80%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes dropIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeBlur {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+  }
+}
+
+@keyframes orbeFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33%       { transform: translate(20px, -30px) scale(1.05); }
+  66%       { transform: translate(-15px, 20px) scale(0.95); }
+}
+
+@keyframes drawCheck {
+  from { stroke-dashoffset: 40; }
+  to   { stroke-dashoffset: 0; }
+}
+
+@keyframes shimmerFlow {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+/* ─── Screen transition ─────────────────────────────────────────────────── */
+
+.screen-enter {
+  animation: fadeBlur 0.35s ease both;
+}
+
+/* ─── Glass utilities ───────────────────────────────────────────────────── */
+
+.glass-dark {
+  background: rgba(7, 7, 13, 0.7);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.glass-gold {
+  background: rgba(212, 175, 55, 0.08);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--edge-gold);
+}
+
+/* ─── shadcn/ui compatibility tokens ───────────────────────────────────── */
+
+:root {
+  --background:    oklch(0.07 0.01 270);
+  --foreground:    oklch(0.94 0.01 270);
+  --card:          oklch(0.10 0.01 270);
+  --card-foreground: oklch(0.94 0.01 270);
+  --popover:       oklch(0.10 0.01 270);
+  --popover-foreground: oklch(0.94 0.01 270);
+  --primary:       oklch(0.78 0.12 85);
+  --primary-foreground: oklch(0.10 0.01 270);
+  --secondary:     oklch(0.16 0.01 270);
+  --secondary-foreground: oklch(0.94 0.01 270);
+  --muted:         oklch(0.16 0.01 270);
+  --muted-foreground: oklch(0.55 0.01 270);
+  --accent:        oklch(0.78 0.12 85);
+  --accent-foreground: oklch(0.10 0.01 270);
+  --destructive:   oklch(0.55 0.22 25);
+  --destructive-foreground: oklch(0.94 0.01 270);
+  --border:        oklch(0.20 0.01 270);
+  --input:         oklch(0.20 0.01 270);
+  --ring:          oklch(0.78 0.12 85);
+  --chart-1:       oklch(0.78 0.12 85);
+  --chart-2:       oklch(0.65 0.15 200);
+  --chart-3:       oklch(0.70 0.18 150);
+  --chart-4:       oklch(0.60 0.20 300);
+  --chart-5:       oklch(0.55 0.22 25);
+  --sidebar-background: oklch(0.10 0.01 270);
+  --sidebar-foreground: oklch(0.94 0.01 270);
+  --sidebar-primary: oklch(0.78 0.12 85);
+  --sidebar-primary-foreground: oklch(0.10 0.01 270);
+  --sidebar-accent: oklch(0.16 0.01 270);
+  --sidebar-accent-foreground: oklch(0.94 0.01 270);
+  --sidebar-border: oklch(0.20 0.01 270);
+  --sidebar-ring:  oklch(0.78 0.12 85);
 }

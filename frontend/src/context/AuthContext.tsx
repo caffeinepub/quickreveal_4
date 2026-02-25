@@ -1,22 +1,22 @@
-import React, { createContext, useContext, ReactNode } from 'react';
+import React, { createContext, useContext } from 'react';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
 
 interface AuthContextType {
   isAuthenticated: boolean;
   principal: string | null;
+  identity: ReturnType<typeof useInternetIdentity>['identity'];
   login: () => Promise<void>;
   logout: () => Promise<void>;
   isLoading: boolean;
-  identity: ReturnType<typeof useInternetIdentity>['identity'];
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthContextProvider({ children }: { children: ReactNode }) {
+export function AuthContextProvider({ children }: { children: React.ReactNode }) {
   const { login, clear, loginStatus, identity, isInitializing } = useInternetIdentity();
 
   const isAuthenticated = !!identity;
-  const principal = identity?.getPrincipal().toString() ?? null;
+  const principal = identity?.getPrincipal().toString() || null;
   const isLoading = isInitializing || loginStatus === 'logging-in';
 
   const handleLogin = async () => {
@@ -27,8 +27,6 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
       if (err?.message === 'User is already authenticated') {
         await clear();
         setTimeout(() => login(), 300);
-      } else {
-        throw error;
       }
     }
   };
@@ -38,30 +36,24 @@ export function AuthContextProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider
-      value={{
-        isAuthenticated,
-        principal,
-        login: handleLogin,
-        logout: handleLogout,
-        isLoading,
-        identity,
-      }}
-    >
+    <AuthContext.Provider value={{
+      isAuthenticated,
+      principal,
+      identity,
+      login: handleLogin,
+      logout: handleLogout,
+      isLoading,
+    }}>
       {children}
     </AuthContext.Provider>
   );
 }
 
-/** @deprecated Use useAuth instead */
 export function useAuthContext() {
   const ctx = useContext(AuthContext);
   if (!ctx) throw new Error('useAuthContext must be used within AuthContextProvider');
   return ctx;
 }
 
-export function useAuth() {
-  const ctx = useContext(AuthContext);
-  if (!ctx) throw new Error('useAuth must be used within AuthContextProvider');
-  return ctx;
-}
+/** Legacy alias */
+export const useAuth = useAuthContext;

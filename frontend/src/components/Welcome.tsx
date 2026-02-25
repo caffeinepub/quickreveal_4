@@ -1,70 +1,104 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { useAuthContext } from '../context/AuthContext';
-import { useSaveCallerUserProfile } from '../hooks/useQueries';
-import { AppUserRole } from '../backend';
-import { toast } from 'sonner';
 
-const Welcome: React.FC = () => {
-  const { navigate } = useAppContext();
-  const { identity } = useAuthContext();
-  const saveProfile = useSaveCallerUserProfile();
-  const [displayName, setDisplayName] = useState('');
+export default function Welcome() {
+  const { navigateTo, setUserName, setAppRole } = useAppContext();
+  const [name, setName] = useState('');
 
-  const handleCreateAccount = async (skipName: boolean = false) => {
-    const name = skipName
-      ? (identity?.getPrincipal().toString().slice(0, 8) ?? 'Utilisateur')
-      : displayName.trim() || (identity?.getPrincipal().toString().slice(0, 8) ?? 'Utilisateur');
+  const handleStart = () => {
+    if (name.trim()) setUserName(name.trim());
+    setAppRole('client');
+    navigateTo('explorer');
+  };
 
-    try {
-      await saveProfile.mutateAsync({ name, appRole: AppUserRole.client });
-      toast.success('Bienvenue ! Votre compte est créé');
-      setTimeout(() => navigate('explorer'), 300);
-    } catch {
-      navigate('explorer');
-    }
+  const handleSkip = () => {
+    setAppRole('client');
+    navigateTo('explorer');
   };
 
   return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh', padding: '20px' }}>
-      <div style={{ maxWidth: '400px', margin: '0 auto', paddingTop: '80px' }}>
-        <div style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '32px', fontWeight: 900, marginBottom: '8px', textAlign: 'center', color: '#E8C89A' }}>
-          NEXUS
+    <div
+      style={{
+        height: '100%',
+        background: 'var(--void)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px 24px',
+      }}
+    >
+      <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div
+          style={{
+            fontSize: 13,
+            color: 'var(--gold)',
+            fontWeight: 700,
+            letterSpacing: '0.15em',
+            marginBottom: 12,
+          }}
+        >
+          BIENVENUE
         </div>
-        <p style={{ color: 'rgba(255, 255, 255, 0.7)', marginBottom: '48px', fontSize: '18px', textAlign: 'center', fontWeight: 300 }}>
-          Bienvenue sur NEXUS
+        <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--t1)', marginBottom: 8 }}>
+          Comment vous appelez-vous ?
+        </h1>
+        <p style={{ fontSize: 14, color: 'var(--t2)' }}>
+          Personnalisez votre expérience NEXUS
         </p>
-
-        <div style={{ marginBottom: '32px' }}>
-          <label style={{ display: 'block', fontSize: '12px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255, 255, 255, 0.55)', marginBottom: '8px' }}>
-            Comment souhaitez-vous être appelé ? (optionnel)
-          </label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Votre nom"
-            style={{ width: '100%', background: '#1A1A1A', border: '1px solid #333', borderRadius: '10px', padding: '12px 16px', color: '#fff', fontSize: '14px', outline: 'none' }}
-          />
-        </div>
-
-        <button
-          onClick={() => handleCreateAccount(false)}
-          disabled={saveProfile.isPending}
-          style={{ width: '100%', background: '#E8C89A', border: 'none', borderRadius: '12px', padding: '14px 16px', color: '#0a0a0a', fontSize: '13px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em', cursor: 'pointer', marginBottom: '12px' }}
-        >
-          COMMENCER
-        </button>
-
-        <button
-          onClick={() => handleCreateAccount(true)}
-          style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255, 255, 255, 0.2)', borderRadius: '10px', padding: '14px 16px', color: 'rgba(255, 255, 255, 0.7)', fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', cursor: 'pointer' }}
-        >
-          PASSER
-        </button>
       </div>
+
+      <input
+        value={name}
+        onChange={e => setName(e.target.value)}
+        placeholder="Votre prénom..."
+        style={{
+          width: '100%',
+          padding: '16px 20px',
+          borderRadius: 16,
+          background: 'var(--d2)',
+          border: '1px solid var(--d4)',
+          color: 'var(--t1)',
+          fontSize: 16,
+          outline: 'none',
+          marginBottom: 16,
+          boxSizing: 'border-box',
+          textAlign: 'center',
+        }}
+        onKeyDown={e => e.key === 'Enter' && handleStart()}
+      />
+
+      <button
+        onClick={handleStart}
+        style={{
+          width: '100%',
+          padding: '18px',
+          borderRadius: 18,
+          background: 'linear-gradient(135deg, var(--gold) 0%, #b8860b 100%)',
+          border: 'none',
+          color: '#000',
+          fontSize: 16,
+          fontWeight: 900,
+          cursor: 'pointer',
+          boxShadow: '0 4px 24px rgba(212,175,55,0.4)',
+          marginBottom: 12,
+        }}
+      >
+        COMMENCER
+      </button>
+
+      <button
+        onClick={handleSkip}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: 'var(--t3)',
+          fontSize: 14,
+          cursor: 'pointer',
+        }}
+      >
+        PASSER
+      </button>
     </div>
   );
-};
-
-export default Welcome;
+}

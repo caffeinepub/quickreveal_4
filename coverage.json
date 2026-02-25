@@ -1,81 +1,83 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T23:34:18.226Z",
+  "generatedAt": "2026-02-25T12:37:57.150Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 10,
-    "implemented": 10,
+    "total": 8,
+    "implemented": 8,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Redesign the login/splash screen with a full-screen #0A0A0A background. Display a single typographic NEXUS logo using Inter Black: 'NEXUS' in white #FFFFFF at 52px with letter-spacing -2px, followed by a period '.' in electric blue #4F6EF7 at 60px. Below the logo, show the tagline 'Services à domicile premium' in #888888 italic 16px with 16px margin. Add a 1px golden horizontal separator 60px wide centered with 32px margin. Render a pill button 'SE CONNECTER' with background #E8C89A, text #0A0A0A Bold 16px tracking 2px uppercase, border-radius 50px, 85% max-width, 56px height, shadow 0 8px 32px rgba(232,200,154,0.3), and scale(0.97)+brightness(1.1) on tap. Below the button, display one line: '🔒 Face ID · Empreinte · WebAuthn' in #555555 12px centered. At the very bottom of the screen: 'CHF · Suisse romande · +41' in #333333 11px. Remove any image/logo asset and eliminate duplicate NEXUS text occurrences.",
+        "summary": "Replace every emoji in the UI with inline SVG icons (stroke 1.5px, currentColor, 16px default). Pro tab bar: Radar = circle + 2 concentric arcs, Wallet = rectangle with centered $, Dashboard = 3 horizontal lines, Mon Business = simple pencil. Client tab bar: Explorer = thin magnifier, Réservations = simple calendar, Alertes = thin bell, Profil = circle + clean silhouette. Section titles: 'Flash Live' = plain text + 14px lightning SVG before. Radar buttons: 'Accepter' + 14px check SVG, 'Décliner' + 14px × SVG. Subscription modal list: SVG thin dash bullet, no emoji. 'Mon Business' section title = plain text only. 'Me Rendre Visible' button label → 'Activer mon profil'. Confetti particles: color #F2D06B only.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Splash.tsx"
+          "frontend/src/components/BottomNav.tsx",
+          "frontend/src/components/ProDashboard.tsx",
+          "frontend/src/components/RadarPro.tsx",
+          "frontend/src/components/ProSubscriptionModal.tsx",
+          "frontend/src/components/MonBusiness.tsx",
+          "frontend/src/utils/confetti.ts",
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/components/ClientDashboard.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/Splash.tsx"
-        ]
-      },
-      {
-        "id": "REQ-10",
-        "summary": "Build or fully redesign the pro detail screen (client view). Layout: full-width cover photo at 220px height; circular 80px profile photo with 3px golden border overlapping the cover by -40px; pro name in 24px Bold white with 48px margin-top; slogan in 14px italic #888; inline badges [⚡ Flash] [💳 Revolut ✅] [⭐ rating] [N avis]; a score bar (background #1A1A1A, radius 12px, padding 16px) showing ⚡response time, ✅ acceptance rate, and 🎯 total prestations in three columns; horizontally scrollable service cards (background #1A1A1A, radius 12px) showing service name Bold white, duration + price in gold, optional before/after photos, and badges [Populaire] [Nouveau] [Promo]; a sticky bottom CTA button '⚡ RÉSERVER MAINTENANT — X CHF' with background #E8C89A, text #0A0A0A Bold, full width, 56px height, radius 0, border-top 1px rgba(232,200,154,0.3).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ProviderDetail.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ProviderDetail.tsx"
+          "frontend/src/components/BottomNav.tsx",
+          "frontend/src/components/ProDashboard.tsx",
+          "frontend/src/components/RadarPro.tsx",
+          "frontend/src/components/ProSubscriptionModal.tsx",
+          "frontend/src/components/MonBusiness.tsx",
+          "frontend/src/components/NexusOS.tsx",
+          "frontend/src/components/ClientDashboard.tsx"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "Implement a fixed global header displayed on all authenticated screens. Background #0A0A0A with border-bottom 1px #1F1F1F. Left side: NEXUS logo in the same style as the login screen but at 24px (white Bold + blue period #4F6EF7). Right side: a notification bell 🔔 with a red pulsing badge showing unread count, and a circular 32px avatar showing the user's initials with a dark background. Remove the 'Mes résa' button from the header.",
+        "summary": "Implement a 2×2 photo upload grid in the MonBusiness gallery section. Each empty slot contains a hidden <input type='file' accept='image/*'>; tapping the slot triggers .click() on the input. onChange uses FileReader.readAsDataURL and stores the dataURL in state per slot index. Filled slots show <img src={dataURL} style='object-fit:cover; width:100%; height:100%'> with an absolute × button (top: 8px, right: 8px) that clears that slot. Display a live counter 'X/4 photos' and a gold progress bar at (count/4)*100% width. When count >= 3, show the text 'Minimum atteint ✓'.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/GlobalHeader.tsx",
-          "frontend/src/components/Explorer.tsx",
-          "frontend/src/components/NexusOS.tsx",
-          "frontend/src/components/ClientDashboard.tsx",
-          "frontend/src/components/ProviderDetail.tsx"
+          "frontend/src/components/MonBusiness.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/GlobalHeader.tsx",
-          "frontend/src/components/Explorer.tsx",
-          "frontend/src/components/NexusOS.tsx",
-          "frontend/src/components/ClientDashboard.tsx",
-          "frontend/src/components/ProviderDetail.tsx"
+          "frontend/src/components/MonBusiness.tsx"
         ]
       },
       {
         "id": "REQ-3",
-        "summary": "Redesign the Explorer screen search bar: background #1A1A1A, border 1px #2A2A2A, a golden pin icon on the left, placeholder 'Votre ville...' in #555, dropdown of Swiss Romande cities on tap, and a '≤ 50 km' golden pill on the right that opens a distance slider on tap.",
+        "summary": "Implement the complete subscription activation flow in ProSubscriptionModal. 'Activer mon profil' tap opens a fullscreen modal with: title '7 jours gratuits' (Inter 800 32px white), subtitle 'puis 19.90 CHF/mois' (Inter 400 16px #9898B4), a 6-item advantage list using SVG thin-dash bullets (no emoji), email input (bg #0D0D13, border #1E1E26, focus border #F2D06B), and a 'Commencer l'essai gratuit' button (bg #F2D06B, color #050507, Inter 700 14px, height 56px). On button tap: (1) a gold progress bar at the top of the screen animates from 0→100% over 2s; (2) a fullscreen overlay (#050507) appears showing an 80px circle (#00D97E) with an animated SVG check (stroke-dashoffset 400ms), text 'Profil activé' (Inter 800 28px #F4F4F8), subtext 'Visible par les clients dès maintenant' (Inter 400 15px #9898B4), and 40 gold confetti particles (#F2D06B only); (3) after 2500ms, navigate to Pro Dashboard and set state { proActif: true, essaiJours: 7 }. Pro Dashboard after activation shows a pill badge 'ESSAI GRATUIT · J1/7' (#00D97A at 10% opacity bg + border + text color). Flash toggle defaults to ON when proActif is true. 'Voir mon profil public' button navigates to Explorer with the pro profile visible at position 1.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Explorer.tsx"
+          "frontend/src/components/ProSubscriptionModal.tsx",
+          "frontend/src/components/ProDashboard.tsx",
+          "frontend/src/context/AppContext.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/Explorer.tsx"
+          "frontend/src/components/ProSubscriptionModal.tsx",
+          "frontend/src/components/ProDashboard.tsx",
+          "frontend/src/context/AppContext.tsx"
         ]
       },
       {
         "id": "REQ-4",
-        "summary": "Redesign the Explorer category filters as horizontally scrollable pills with no visible scrollbar. Active pill: background #E8C89A, text #0A0A0A Bold. Inactive pill: background #1A1A1A, text #888, border 1px #2A2A2A. All pills: border-radius 50px, padding 10px 20px. Order: [Tous] [⚡Flash] [✂️Barber] [💇Coiffure] [💅Esthétique] [🤲Massage].",
+        "summary": "Simplify the color palette across the app. Explorer cards: background #0D0D13 (remove all violet/bordeaux tints), border 1px solid rgba(255,255,255,0.06). Wallet card: background linear-gradient(135deg, #0A0A0A, #0F0E0A), border 1px solid rgba(242,208,107,0.15), remove orange-brown saturated gradient. Balance display: '240 CHF' in Inter 900 48px #F2D06B, 'SOLDE DISPONIBLE' in Inter 600 10px #54546C. Bar chart: inactive bars #1C1C26, today's active bar #F2D06B, remove all gold/brown gradients on bars. Tab bar (both client and pro): background rgba(5,5,7,0.96) backdrop-blur(24px), border-top 1px solid rgba(255,255,255,0.04), active tab icon SVG #F2D06B with a 2px #F2D06B top indicator 20px wide, inactive tab icon SVG #2E2E3E, no colored background on active tab.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Explorer.tsx"
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/components/WalletPro.tsx",
+          "frontend/src/components/BottomNav.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/Explorer.tsx"
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/components/WalletPro.tsx",
+          "frontend/src/components/BottomNav.tsx"
         ]
       },
       {
         "id": "REQ-5",
-        "summary": "Add a 'DISPONIBLES MAINTENANT' Flash section in the Explorer above the main pro list. Title: a green pulsing dot + 'DISPONIBLES MAINTENANT' text in #22C55E, 13px, tracking 2px. Display horizontally scrollable flash pro cards: 160px wide, 200px tall, 16px radius, full-card cover photo, black gradient overlay at the bottom, a green 'FLASH' badge (background #22C55E, white text, radius 50px, padding 10px 12px) in the top-left, pro name in white Bold at the bottom, and city in #CCC 12px.",
+        "summary": "Redesign Explorer professional cards as a full-width vertical list. Each card: height 80px, background #0D0D13, border 1px solid rgba(255,255,255,0.05), border-radius 14px, padding 0 16px, display flex, align-items center, gap 14px. Left: 44px circle — if photo: img object-fit cover border-radius 50%; if no photo: subtle gradient + Inter 700 16px initials. Center (flex-1): name in Inter 700 16px #F4F4F8; 'Catégorie · Ville' in Inter 400 13px #54546C; if flash active: 'Répond en Xmin' in Inter 500 12px #00D97A (text only, no emoji). Right (text-right): SVG star 12px + '4.9' in Inter 600 13px; 'dès 35 CHF' in Inter 700 14px #F2D06B.",
         "status": "implemented",
         "plannedFiles": [
           "frontend/src/components/Explorer.tsx"
@@ -86,64 +88,41 @@
       },
       {
         "id": "REQ-6",
-        "summary": "Redesign the main pro cards in the Explorer list. Each card: full-width cover photo 180px height object-fit cover, green FLASH badge top-left, semi-transparent 'Revolut ✅' badge top-right (background rgba(0,0,0,0.6)), info zone background #111111, pro name Bold 18px white with ⭐ rating right-aligned, category in #888 14px with review count, location 📍city and ⚡response time in #666 12px, separator line, price 'À partir de X CHF' in #E8C89A Bold, and a golden 'RÉSERVER ⚡' button. Card border-radius 20px, shadow 0 4px 24px rgba(0,0,0,0.4), margin between cards 16px.",
+        "summary": "Update the WalletPro component: below the '55 CHF séquestre' line, add the text 'Libéré dans 48h après prestation' in Inter 400 12px #54546C. After the user initiates a transfer, disable the transfer button and display its label as 'Virement initié' for 30 seconds. Show a toast notification for 5s reading 'Virement de 240 CHF vers votre Revolut' with a 3px left border in #00D97A.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/Explorer.tsx"
+          "frontend/src/components/WalletPro.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/Explorer.tsx"
+          "frontend/src/components/WalletPro.tsx"
         ]
       },
       {
         "id": "REQ-7",
-        "summary": "Add a fixed bottom navigation bar for mobile. Background #0F0F0F, border-top 1px #1F1F1F, height 64px plus iOS safe area padding. Four tabs: [🔍 Explorer] [📅 Réservations] [💬 Messages] [👤 Profil]. Active tab: icon + text in #E8C89A. Inactive tab: icon + text in #555555. Show a red badge on Réservations when there are new/pending bookings. Wire each tab to its corresponding screen.",
+        "summary": "Redesign the RoleSelection screen. Replace current cards with 2 full-width cards, each 96px tall, zero emojis, zero iOS-style icons. Client card: title 'Client' Inter 700 20px #F4F4F8, subtitle 'Réservez un expert à domicile' Inter 400 14px #54546C, SVG arrow right 16px #2E2E3E positioned absolute right, background #0D0D13, border #1E1E26, border-radius 16px; on tap: border changes to #5B7FFF, background rgba(91,127,255,0.04). Professional card: title 'Professionnel' Inter 700 20px #F4F4F8, subtitle 'Gérez votre activité beauté' Inter 400 14px #54546C, SVG arrow right 16px #2E2E3E, background #0D0D13, border #1E1E26, border-radius 16px; on tap: border changes to #F2D06B, background rgba(242,208,107,0.04).",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/BottomNav.tsx",
-          "frontend/src/components/Explorer.tsx",
-          "frontend/src/components/ClientDashboard.tsx",
-          "frontend/src/components/NexusOS.tsx"
+          "frontend/src/components/RoleSelection.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/BottomNav.tsx",
-          "frontend/src/components/Explorer.tsx",
-          "frontend/src/components/ClientDashboard.tsx",
-          "frontend/src/components/NexusOS.tsx"
+          "frontend/src/components/RoleSelection.tsx"
         ]
       },
       {
         "id": "REQ-8",
-        "summary": "Apply a global Inter typography system across the entire app. Import Inter from Google Fonts. Apply: H1 28px Bold #FFFFFF tracking -1px; H2 22px SemiBold #FFFFFF; Body 15px Regular #CCCCCC; Caption 12px Regular #888888; Labels 11px SemiBold #888888 tracking 2px uppercase; Prices 18px Bold #E8C89A; Buttons 14px Bold #0A0A0A tracking 1px uppercase. Replace all existing font-family declarations with Inter.",
+        "summary": "Ensure the subscription CTA button 'Commencer l'essai gratuit' (and any similar primary CTA) always renders with background #F2D06B and text color #050507. Never apply gold/yellow text on a gold/yellow background anywhere in the app. Audit all buttons with #F2D06B background and enforce dark text #050507.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js"
+          "frontend/src/components/ProSubscriptionModal.tsx",
+          "frontend/src/components/MonBusiness.tsx",
+          "frontend/src/components/SubscriptionScreen.tsx",
+          "frontend/src/components/Subscription.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js"
-        ]
-      },
-      {
-        "id": "REQ-9",
-        "summary": "Implement micro-animations across the app: (1) All buttons and tappable cards have active/tap state scale(0.96) with 150ms ease transition. (2) Cards show a subtle elevated box-shadow on hover/tap. (3) FLASH badges have an infinite CSS pulse animation (opacity 1→0.6→1, 1.5s). (4) Red notification badges have a red pulse animation. (5) Skeleton loading states use a golden shimmer animation on #1A1A1A backgrounds. (6) Screen/page transitions use a 200ms fade.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/components/Explorer.tsx",
-          "frontend/src/components/Splash.tsx",
-          "frontend/src/components/GlobalHeader.tsx",
-          "frontend/src/components/ScreenRouter.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/index.css",
-          "frontend/tailwind.config.js",
-          "frontend/src/components/Explorer.tsx",
-          "frontend/src/components/Splash.tsx",
-          "frontend/src/components/GlobalHeader.tsx",
-          "frontend/src/components/ScreenRouter.tsx"
+          "frontend/src/components/ProSubscriptionModal.tsx",
+          "frontend/src/components/MonBusiness.tsx",
+          "frontend/src/components/SubscriptionScreen.tsx",
+          "frontend/src/components/Subscription.tsx"
         ]
       }
     ]
@@ -151,20 +130,27 @@
   "changedFiles": [
     "build-request.json",
     "feature_evidence.json",
-    "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/components/BookingFlow.tsx",
     "frontend/src/components/BottomNav.tsx",
+    "frontend/src/components/Builder.tsx",
     "frontend/src/components/ClientDashboard.tsx",
     "frontend/src/components/Explorer.tsx",
     "frontend/src/components/GlobalHeader.tsx",
+    "frontend/src/components/MessagingSheet.tsx",
+    "frontend/src/components/MonBusiness.tsx",
     "frontend/src/components/NexusOS.tsx",
-    "frontend/src/components/ProviderDetail.tsx",
+    "frontend/src/components/NotificationCenter.tsx",
+    "frontend/src/components/ProDashboard.tsx",
+    "frontend/src/components/ProSubscriptionModal.tsx",
+    "frontend/src/components/RadarPro.tsx",
+    "frontend/src/components/RoleSelection.tsx",
     "frontend/src/components/ScreenRouter.tsx",
-    "frontend/src/components/Splash.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/tailwind.config.js",
+    "frontend/src/components/Subscription.tsx",
+    "frontend/src/components/SubscriptionScreen.tsx",
+    "frontend/src/components/WalletPro.tsx",
+    "frontend/src/context/AppContext.tsx",
+    "frontend/src/utils/demoData.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

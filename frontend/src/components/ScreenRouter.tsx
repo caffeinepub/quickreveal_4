@@ -1,59 +1,77 @@
-import React, { useState, useEffect } from 'react';
+import React, { Suspense, lazy } from 'react';
 import { useAppContext } from '../context/AppContext';
-import Splash from './Splash';
-import Explorer from './Explorer';
-import ProviderDetail from './ProviderDetail';
-import BookingFlow from './BookingFlow';
-import ClientDashboard from './ClientDashboard';
-import NexusOS from './NexusOS';
-import Builder from './Builder';
-import LandingPage from './LandingPage';
-import RoleSelection from './RoleSelection';
+
+const Splash = lazy(() => import('./Splash'));
+const RoleSelection = lazy(() => import('./RoleSelection'));
+const OTPVerification = lazy(() => import('./OTPVerification'));
+const Explorer = lazy(() => import('./Explorer'));
+const ClientDashboard = lazy(() => import('./ClientDashboard'));
+const NexusOS = lazy(() => import('./NexusOS'));
+const Builder = lazy(() => import('./Builder'));
+const Subscription = lazy(() => import('./Subscription'));
+const SubscriptionScreen = lazy(() => import('./SubscriptionScreen'));
+const ProLogin = lazy(() => import('./ProLogin'));
+const Welcome = lazy(() => import('./Welcome'));
+const LandingPage = lazy(() => import('./LandingPage'));
+const ProProfile = lazy(() => import('./ProProfile'));
+const BookingFlow = lazy(() => import('./BookingFlow'));
+const LiveStatus = lazy(() => import('./LiveStatus'));
+const RadarPro = lazy(() => import('./RadarPro'));
+const WalletPro = lazy(() => import('./WalletPro'));
+const MonBusiness = lazy(() => import('./MonBusiness'));
+
+function LoadingFallback() {
+  return (
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: '100%',
+        background: 'var(--void)',
+      }}
+    >
+      <div
+        style={{
+          width: 40,
+          height: 40,
+          border: '3px solid rgba(242,208,107,0.3)',
+          borderTopColor: '#F2D06B',
+          borderRadius: '50%',
+          animation: 'spin 0.8s linear infinite',
+        }}
+      />
+    </div>
+  );
+}
 
 export default function ScreenRouter() {
   const { currentScreen } = useAppContext();
-  const [displayScreen, setDisplayScreen] = useState(currentScreen);
-  const [opacity, setOpacity] = useState(1);
-
-  useEffect(() => {
-    if (currentScreen !== displayScreen) {
-      setOpacity(0);
-      const timer = setTimeout(() => {
-        setDisplayScreen(currentScreen);
-        setOpacity(1);
-      }, 100);
-      return () => clearTimeout(timer);
-    }
-  }, [currentScreen, displayScreen]);
-
-  const renderScreen = () => {
-    switch (displayScreen) {
-      case 'splash':
-        return <Splash />;
-      case 'landing':
-        return <LandingPage />;
-      case 'roleSelection':
-        return <RoleSelection />;
-      case 'explorer':
-        return <Explorer />;
-      case 'providerDetail':
-        return <ProviderDetail />;
-      case 'bookingFlow':
-        return <BookingFlow />;
-      case 'clientDashboard':
-        return <ClientDashboard />;
-      case 'nexusOS':
-        return <NexusOS />;
-      case 'builder':
-        return <Builder />;
-      default:
-        return <Splash />;
-    }
-  };
 
   return (
-    <div style={{ opacity, transition: 'opacity 200ms ease-out' }}>
-      {renderScreen()}
+    <div className="screen-enter" key={currentScreen} style={{ height: '100%' }}>
+      <Suspense fallback={<LoadingFallback />}>
+        {currentScreen === 'splash' && <Splash />}
+        {currentScreen === 'roleSelection' && <RoleSelection />}
+        {(currentScreen === 'otpVerification' || currentScreen === 'otp') && <OTPVerification />}
+        {currentScreen === 'explorer' && <Explorer />}
+        {currentScreen === 'clientDashboard' && <ClientDashboard />}
+        {currentScreen === 'nexusOS' && <NexusOS />}
+        {(currentScreen === 'pro-dashboard') && <NexusOS />}
+        {currentScreen === 'builder' && <Builder />}
+        {currentScreen === 'subscription' && <Subscription />}
+        {currentScreen === 'subscriptionScreen' && <SubscriptionScreen />}
+        {currentScreen === 'proLogin' && <ProLogin />}
+        {currentScreen === 'welcome' && <Welcome />}
+        {currentScreen === 'landing' && <LandingPage />}
+        {currentScreen === 'proProfile' && <ProProfile />}
+        {currentScreen === 'bookingFlow' && <BookingFlow />}
+        {currentScreen === 'liveStatus' && <LiveStatus />}
+        {(currentScreen === 'radarPro' || currentScreen === 'radar-pro') && <RadarPro />}
+        {(currentScreen === 'walletPro' || currentScreen === 'wallet-pro') && <WalletPro />}
+        {(currentScreen === 'monBusiness' || currentScreen === 'mon-business') && <MonBusiness />}
+        {currentScreen === 'notificationCenter' && <NexusOS />}
+      </Suspense>
     </div>
   );
 }

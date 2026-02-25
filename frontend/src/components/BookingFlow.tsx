@@ -1,943 +1,683 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { ArrowLeft, Check, MapPin, ChevronDown, Lock } from 'lucide-react';
 import { useAppContext } from '../context/AppContext';
-import { useAuthContext } from '../context/AuthContext';
-import { ChevronLeft, Check, CreditCard, Loader2 } from 'lucide-react';
+import { SWISS_CITIES } from '../utils/demoData';
 
-interface LocalService {
-  id: string;
-  name: string;
-  priceStudio: number | null;
-  priceDomicile: number | null;
-  duration: string;
-}
-
-interface LocalProvider {
-  id: string;
-  name: string;
-  category: string;
-  coverPhotoUrl: string;
-  studioAddress?: string;
-  modes: string[];
-}
-
-interface DayInfo {
-  date: Date;
-  label: string;
-  num: number;
-  dateStr: string;
-}
-
-type BookingStep = 'service' | 'datetime' | 'address' | 'recap' | 'payment' | 'confirmation';
+const STEPS = ['Service', 'Créneau', 'Adresse', 'Récap', 'Paiement'];
 
 const TIME_SLOTS = [
-  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30',
-  '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
-  '17:00', '17:30', '18:00', '18:30',
+  { id: 'flash1', label: 'Dans 1h', sublabel: 'Disponible maintenant', value: 'dans-1h' },
+  { id: 'flash2', label: 'Dans 2h', sublabel: 'Créneau rapide', value: 'dans-2h' },
+  { id: 'tonight', label: 'Ce soir', sublabel: '18h00 - 21h00', value: 'ce-soir' },
+  { id: 'tomorrow', label: 'Demain', sublabel: 'Matin ou après-midi', value: 'demain' },
 ];
 
-function generateNextDays(count: number): DayInfo[] {
-  const days: DayInfo[] = [];
-  const today = new Date();
-  const dayNames = ['Dim', 'Lun', 'Mar', 'Mer', 'Jeu', 'Ven', 'Sam'];
-  for (let i = 0; i < count; i++) {
-    const d = new Date(today);
-    d.setDate(today.getDate() + i);
-    days.push({
-      date: d,
-      label: i === 0 ? 'Auj.' : i === 1 ? 'Dem.' : dayNames[d.getDay()],
-      num: d.getDate(),
-      dateStr: d.toISOString().split('T')[0],
-    });
-  }
-  return days;
+function QRCode() {
+  const size = 7;
+  const pattern = Array.from({ length: size }, (_, r) =>
+    Array.from({ length: size }, (_, c) => {
+      if ((r < 2 && c < 2) || (r < 2 && c >= size - 2) || (r >= size - 2 && c < 2)) return true;
+      return Math.random() > 0.5;
+    })
+  );
+  return (
+    <div style={{ position: 'relative', display: 'inline-block' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${size}, 8px)`,
+          gap: 2,
+          padding: 12,
+          background: 'rgba(255,255,255,0.05)',
+          borderRadius: 12,
+          border: '1px solid rgba(242,208,107,0.3)',
+        }}
+      >
+        {pattern.flat().map((filled, i) => (
+          <div
+            key={i}
+            style={{
+              width: 8,
+              height: 8,
+              borderRadius: 2,
+              background: filled ? '#F2D06B' : 'transparent',
+            }}
+          />
+        ))}
+      </div>
+      <div
+        style={{
+          position: 'absolute',
+          inset: 0,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          pointerEvents: 'none',
+        }}
+      >
+        <div
+          style={{
+            background: '#0D0D13',
+            padding: '3px 6px',
+            borderRadius: 6,
+            fontSize: 10,
+            fontWeight: 900,
+            color: '#F2D06B',
+            letterSpacing: '0.1em',
+          }}
+        >
+          NEXUS.
+        </div>
+      </div>
+    </div>
+  );
 }
 
-function ConfettiAnimation() {
-  const pieces = Array.from({ length: 30 }, (_, i) => i);
+function SuccessAnimation({ onComplete }: { onComplete: () => void }) {
+  const [barWidth, setBarWidth] = useState(0);
+  const [showCircle, setShowCircle] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const confettiRef = useRef<Array<{ x: number; delay: number; duration: number }>>([]);
+
+  if (confettiRef.current.length === 0) {
+    confettiRef.current = Array.from({ length: 40 }, () => ({
+      x: Math.random() * 100,
+      delay: Math.random() * 0.5,
+      duration: 1.5 + Math.random() * 1,
+    }));
+  }
+
+  useEffect(() => {
+    const t1 = setTimeout(() => setBarWidth(100), 50);
+    const t2 = setTimeout(() => {
+      setShowCircle(true);
+      setShowConfetti(true);
+    }, 2600);
+    const t3 = setTimeout(() => onComplete(), 4600);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [onComplete]);
+
   return (
-    <div style={{ pointerEvents: 'none', position: 'fixed', inset: 0, zIndex: 9999 }}>
-      {pieces.map((i) => (
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: '#050507',
+        zIndex: 300,
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Confetti — gold only */}
+      {showConfetti &&
+        confettiRef.current.map((c, i) => (
+          <div
+            key={i}
+            style={{
+              position: 'absolute',
+              top: -20,
+              left: `${c.x}%`,
+              width: 8,
+              height: 8,
+              borderRadius: i % 3 === 0 ? '50%' : 2,
+              background: '#F2D06B',
+              animation: `goldRain ${c.duration}s ease-in ${c.delay}s both`,
+            }}
+          />
+        ))}
+
+      {/* Progress bar */}
+      <div
+        style={{
+          width: '80%',
+          height: 4,
+          background: '#1C1C26',
+          borderRadius: 2,
+          overflow: 'hidden',
+          marginBottom: 40,
+        }}
+      >
         <div
-          key={i}
           style={{
-            position: 'absolute',
-            left: `${Math.random() * 100}%`,
-            top: '-20px',
-            width: `${Math.random() * 8 + 4}px`,
-            height: `${Math.random() * 8 + 4}px`,
-            background: Math.random() > 0.5 ? '#E8C89A' : '#c9a870',
-            borderRadius: Math.random() > 0.5 ? '50%' : '2px',
-            opacity: 0,
+            height: '100%',
+            width: `${barWidth}%`,
+            background: '#F2D06B',
+            borderRadius: 2,
+            transition: 'width 2.5s cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         />
-      ))}
+      </div>
+
+      {/* Success circle */}
+      {showCircle && (
+        <div
+          style={{
+            width: 100,
+            height: 100,
+            borderRadius: '50%',
+            background: '#00D97E',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            animation: 'successPop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) both',
+            boxShadow: '0 0 40px rgba(0,217,126,0.4)',
+          }}
+        >
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <path
+              d="M12 24L20 32L36 16"
+              stroke="white"
+              strokeWidth="4"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              style={{
+                strokeDasharray: 40,
+                strokeDashoffset: 0,
+                animation: 'drawCheck 0.5s ease 0.2s both',
+              }}
+            />
+          </svg>
+        </div>
+      )}
+
+      {showCircle && (
+        <div
+          style={{
+            marginTop: 24,
+            fontSize: 18,
+            fontWeight: 800,
+            color: '#F4F4F8',
+            fontFamily: 'Inter, sans-serif',
+            animation: 'riseIn 0.5s ease 0.4s both',
+          }}
+        >
+          Paiement confirmé !
+        </div>
+      )}
+      {showCircle && (
+        <div
+          style={{
+            marginTop: 8,
+            fontSize: 14,
+            color: '#9898B4',
+            fontFamily: 'Inter, sans-serif',
+            animation: 'riseIn 0.5s ease 0.6s both',
+          }}
+        >
+          Redirection vers le suivi...
+        </div>
+      )}
     </div>
   );
 }
 
 export default function BookingFlow() {
-  const { navigate, screenParams, addNotification, setBookings } = useAppContext();
-  const { isAuthenticated } = useAuthContext();
-
-  const provider = screenParams?.provider as LocalProvider | undefined;
-  const initialService = screenParams?.service as LocalService | undefined;
-
-  const [step, setStep] = useState<BookingStep>(initialService ? 'datetime' : 'service');
-  const [selectedService, setSelectedService] = useState<LocalService | null>(initialService ?? null);
-  const [selectedDate, setSelectedDate] = useState<string | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const { selectedPro, navigateTo, navigateToLiveStatus, addBooking, addNotification } = useAppContext();
+  const [step, setStep] = useState(1);
+  const [selectedService, setSelectedService] = useState<any>(null);
+  const [selectedSlot, setSelectedSlot] = useState<any>(null);
   const [address, setAddress] = useState('');
-  const [cardNumber, setCardNumber] = useState('');
-  const [cardExpiry, setCardExpiry] = useState('');
-  const [cardCvc, setCardCvc] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-  const [showConfetti, setShowConfetti] = useState(false);
+  const [city, setCity] = useState('Genève');
+  const [note, setNote] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [amountBeat, setAmountBeat] = useState(false);
 
-  const days = generateNextDays(8);
+  const pro = selectedPro;
 
-  if (!provider) {
-    return (
-      <div
-        style={{
-          background: '#0A0A0A',
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <p style={{ color: '#666', marginBottom: '16px' }}>Aucun professionnel sélectionné</p>
-          <button
-            onClick={() => navigate('explorer')}
-            style={{
-              background: '#E8C89A',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '12px 24px',
-              color: '#0a0a0a',
-              fontWeight: 700,
-              cursor: 'pointer',
-            }}
-          >
-            Retour à l'Explorer
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const services = pro?.services || [
+    { id: 's1', name: 'Coupe + Brushing', duration: '45min', price: 35, badge: 'Populaire' },
+    { id: 's2', name: 'Coloration', duration: '90min', price: 85, badge: 'Nouveau' },
+    { id: 's3', name: 'Soin Kératine', duration: '120min', price: 120, badge: 'Promo' },
+    { id: 's4', name: 'Balayage', duration: '150min', price: 150 },
+  ];
 
-  if (!isAuthenticated && step !== 'service') {
-    return (
-      <div
-        style={{
-          background: '#0A0A0A',
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '24px',
-        }}
-      >
-        <div style={{ maxWidth: '360px', width: '100%', textAlign: 'center' }}>
-          <h3 style={{ fontSize: '20px', fontWeight: 700, marginBottom: '12px', color: '#fff' }}>
-            Connectez-vous pour continuer
-          </h3>
-          <p style={{ fontSize: '14px', marginBottom: '24px', color: '#666' }}>
-            Vous devez être connecté pour effectuer une réservation
-          </p>
-          <button
-            onClick={() => navigate('splash')}
-            style={{
-              width: '100%',
-              background: '#E8C89A',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '14px',
-              color: '#0a0a0a',
-              fontWeight: 700,
-              cursor: 'pointer',
-              marginBottom: '10px',
-            }}
-          >
-            Se connecter
-          </button>
-          <button
-            onClick={() => navigate('explorer')}
-            style={{
-              width: '100%',
-              background: 'transparent',
-              border: '1px solid #333',
-              borderRadius: '50px',
-              padding: '12px',
-              color: '#666',
-              fontWeight: 600,
-              cursor: 'pointer',
-            }}
-          >
-            Annuler
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const totalPrice = selectedService?.price || pro?.startingPrice || 35;
 
-  // Simulate booking locally — demo providers use string IDs, not on-chain Principals
-  const handlePayAndConfirm = async () => {
-    setSubmitting(true);
-    try {
-      await new Promise<void>((resolve) => setTimeout(resolve, 1000));
-
-      // Add a local booking to context
-      const newBooking = {
-        id: `booking-${Date.now()}`,
-        proId: provider.id,
-        proName: provider.name,
-        serviceName: selectedService?.name ?? 'Service',
-        servicePrice: selectedService?.priceDomicile ?? selectedService?.priceStudio ?? 0,
-        date: selectedDate ?? '',
-        timeSlot: selectedTime ?? '',
-        address: address || provider.studioAddress || '',
-        status: 'pending' as const,
-        createdAt: Date.now(),
-      };
-
-      setBookings((prev) => [newBooking, ...prev]);
-
-      addNotification({
-        type: 'confirmed',
-        message: `✅ Demande envoyée à ${provider.name}`,
-      });
-
-      setStep('confirmation');
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 4000);
-    } catch {
-      setStep('confirmation');
-      setShowConfetti(true);
-      setTimeout(() => setShowConfetti(false), 4000);
-    } finally {
-      setSubmitting(false);
+  useEffect(() => {
+    if (step === 5) {
+      const interval = setInterval(() => {
+        setAmountBeat(true);
+        setTimeout(() => setAmountBeat(false), 300);
+      }, 2000);
+      return () => clearInterval(interval);
     }
+  }, [step]);
+
+  const handlePayment = () => {
+    const booking = {
+      id: `booking-${Date.now()}`,
+      proId: pro?.id || 'demo',
+      proName: pro?.name || 'Pro',
+      serviceId: selectedService?.id || 's1',
+      serviceName: selectedService?.name || 'Service',
+      service: selectedService?.name || 'Service',
+      price: totalPrice,
+      date: selectedSlot?.value || 'dans-1h',
+      timeSlot: selectedSlot?.label || 'Dans 1h',
+      time: selectedSlot?.label || 'Dans 1h',
+      address: `${address}, ${city}`,
+      status: 'confirmed' as const,
+      createdAt: Date.now(),
+    };
+    addBooking(booking);
+    addNotification({
+      id: `notif-${Date.now()}`,
+      title: 'Réservation confirmée',
+      message: `${booking.serviceName} avec ${booking.proName}`,
+      read: false,
+      createdAt: Date.now(),
+    });
+    setShowSuccess(true);
   };
 
-  const formatCardNumber = (v: string) => {
-    const digits = v.replace(/\D/g, '').slice(0, 16);
-    return digits.replace(/(.{4})/g, '$1 ').trim();
+  const handleSuccessComplete = () => {
+    navigateToLiveStatus();
   };
 
-  const formatExpiry = (v: string) => {
-    const digits = v.replace(/\D/g, '').slice(0, 4);
-    if (digits.length >= 2) return digits.slice(0, 2) + '/' + digits.slice(2);
-    return digits;
-  };
+  if (showSuccess) {
+    return <SuccessAnimation onComplete={handleSuccessComplete} />;
+  }
 
-  const totalPrice = selectedService
-    ? (selectedService.priceDomicile ?? selectedService.priceStudio ?? 0)
-    : 0;
+  const canNext =
+    (step === 1 && selectedService) ||
+    (step === 2 && selectedSlot) ||
+    (step === 3 && address.trim().length > 0) ||
+    step === 4;
 
-  // ── CONFIRMATION ──────────────────────────────────────────────────────────
-  if (step === 'confirmation') {
-    return (
-      <div
-        style={{
-          background: '#0A0A0A',
-          minHeight: '100vh',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '24px',
-          textAlign: 'center',
-        }}
-      >
-        {showConfetti && <ConfettiAnimation />}
-        <div style={{ maxWidth: '360px', width: '100%' }}>
-          <div
+  const cities = SWISS_CITIES || ['Genève', 'Lausanne', 'Berne', 'Zurich', 'Bâle', 'Fribourg'];
+
+  return (
+    <div
+      style={{
+        height: '100%',
+        background: '#050507',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Header */}
+      <div style={{ padding: '16px 20px 0', flexShrink: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <button
+            onClick={() => (step > 1 ? setStep(s => s - 1) : navigateTo('proProfile'))}
             style={{
-              width: '80px',
-              height: '80px',
-              borderRadius: '50%',
-              background: 'rgba(232,200,154,0.15)',
-              border: '2px solid #E8C89A',
+              width: 40,
+              height: 40,
+              borderRadius: 12,
+              background: '#0D0D13',
+              border: '1px solid rgba(255,255,255,0.06)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              margin: '0 auto 24px',
-            }}
-          >
-            <Check size={36} style={{ color: '#E8C89A' }} />
-          </div>
-          <h2 style={{ fontSize: '24px', fontWeight: 900, marginBottom: '12px', color: '#fff' }}>
-            Demande envoyée ! ✨
-          </h2>
-          <p style={{ color: '#ccc', marginBottom: '8px', fontSize: '15px' }}>
-            Votre demande a été envoyée à{' '}
-            <span style={{ color: '#E8C89A', fontWeight: 700 }}>{provider.name}</span>
-          </p>
-          <p style={{ color: '#666', fontSize: '13px', marginBottom: '32px' }}>
-            Vous recevrez une confirmation dès que le professionnel accepte votre demande.
-          </p>
-
-          <div
-            style={{
-              background: '#1A1A1A',
-              borderRadius: '16px',
-              padding: '16px',
-              marginBottom: '24px',
-              border: '1px solid #222',
-              textAlign: 'left',
-            }}
-          >
-            {[
-              { label: 'Service', value: selectedService?.name ?? '-' },
-              { label: 'Date', value: selectedDate ?? '-' },
-              { label: 'Heure', value: selectedTime ?? '-' },
-              { label: 'Montant', value: `${totalPrice} CHF`, gold: true },
-            ].map(({ label, value, gold }) => (
-              <div
-                key={label}
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  padding: '6px 0',
-                  fontSize: '13px',
-                  borderBottom: '1px solid #222',
-                }}
-              >
-                <span style={{ color: '#666' }}>{label}</span>
-                <span style={{ fontWeight: 600, color: gold ? '#E8C89A' : '#fff' }}>{value}</span>
-              </div>
-            ))}
-          </div>
-
-          <button
-            onClick={() => navigate('clientDashboard')}
-            style={{
-              width: '100%',
-              background: '#E8C89A',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '14px',
-              color: '#0a0a0a',
-              fontWeight: 700,
               cursor: 'pointer',
-              marginBottom: '12px',
-              fontSize: '14px',
             }}
           >
-            Suivre ma réservation
+            <ArrowLeft size={18} color="#F4F4F8" />
           </button>
-          <button
-            onClick={() => navigate('explorer')}
-            style={{
-              width: '100%',
-              background: 'transparent',
-              border: '1px solid #333',
-              borderRadius: '50px',
-              padding: '12px',
-              color: '#666',
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontSize: '13px',
-            }}
-          >
-            Retour à l'Explorer
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── PAYMENT ───────────────────────────────────────────────────────────────
-  if (step === 'payment') {
-    return (
-      <div style={{ background: '#0A0A0A', minHeight: '100vh' }}>
-        <div
-          style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid #1A1A1A',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <button
-            onClick={() => setStep('recap')}
-            style={{ background: '#1A1A1A', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff' }}
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <h1 style={{ fontWeight: 900, fontSize: '18px', color: '#fff' }}>Paiement sécurisé</h1>
-        </div>
-
-        <div style={{ padding: '24px 20px', maxWidth: '400px', margin: '0 auto' }}>
-          <div
-            style={{
-              background: '#1A1A1A',
-              borderRadius: '16px',
-              padding: '16px',
-              marginBottom: '20px',
-              border: '1px solid #222',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-            }}
-          >
-            <div>
-              <div style={{ fontWeight: 600, fontSize: '14px', color: '#fff' }}>{selectedService?.name}</div>
-              <div style={{ fontSize: '12px', color: '#666' }}>
-                {provider.name} · {selectedDate} à {selectedTime}
-              </div>
+          <div>
+            <div style={{ fontSize: 16, fontWeight: 800, color: '#F4F4F8', fontFamily: 'Inter, sans-serif' }}>
+              {step === 5 ? 'NEXUS PAY' : `Étape ${step}/4`}
             </div>
-            <div style={{ fontWeight: 900, fontSize: '18px', color: '#E8C89A' }}>
-              {totalPrice} CHF
-            </div>
+            <div style={{ fontSize: 12, color: '#54546C', fontFamily: 'Inter, sans-serif' }}>{STEPS[step - 1]}</div>
           </div>
-
-          <div style={{ marginBottom: '16px' }}>
-            <label style={{ fontSize: '13px', fontWeight: 500, color: '#888', display: 'block', marginBottom: '8px' }}>
-              Numéro de carte
-            </label>
-            <div style={{ position: 'relative' }}>
-              <input
-                placeholder="1234 5678 9012 3456"
-                value={cardNumber}
-                onChange={(e) => setCardNumber(formatCardNumber(e.target.value))}
-                maxLength={19}
-                style={{
-                  width: '100%',
-                  background: '#1A1A1A',
-                  border: '1px solid #2A2A2A',
-                  borderRadius: '10px',
-                  padding: '12px 44px 12px 14px',
-                  color: '#fff',
-                  fontSize: '15px',
-                  fontFamily: "'Inter', sans-serif",
-                  outline: 'none',
-                }}
-              />
-              <CreditCard
-                size={18}
-                style={{ position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)', color: '#555' }}
-              />
-            </div>
-          </div>
-
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
-            <div>
-              <label style={{ fontSize: '13px', fontWeight: 500, color: '#888', display: 'block', marginBottom: '8px' }}>
-                Expiration
-              </label>
-              <input
-                placeholder="MM/AA"
-                value={cardExpiry}
-                onChange={(e) => setCardExpiry(formatExpiry(e.target.value))}
-                maxLength={5}
-                style={{
-                  width: '100%',
-                  background: '#1A1A1A',
-                  border: '1px solid #2A2A2A',
-                  borderRadius: '10px',
-                  padding: '12px 14px',
-                  color: '#fff',
-                  fontSize: '15px',
-                  fontFamily: "'Inter', sans-serif",
-                  outline: 'none',
-                }}
-              />
-            </div>
-            <div>
-              <label style={{ fontSize: '13px', fontWeight: 500, color: '#888', display: 'block', marginBottom: '8px' }}>
-                CVC
-              </label>
-              <input
-                placeholder="123"
-                value={cardCvc}
-                onChange={(e) => setCardCvc(e.target.value.replace(/\D/g, '').slice(0, 3))}
-                maxLength={3}
-                style={{
-                  width: '100%',
-                  background: '#1A1A1A',
-                  border: '1px solid #2A2A2A',
-                  borderRadius: '10px',
-                  padding: '12px 14px',
-                  color: '#fff',
-                  fontSize: '15px',
-                  fontFamily: "'Inter', sans-serif",
-                  outline: 'none',
-                }}
-              />
-            </div>
-          </div>
-
-          <button
-            onClick={handlePayAndConfirm}
-            disabled={submitting}
-            className="btn-tap-gold"
-            style={{
-              width: '100%',
-              background: '#E8C89A',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '16px',
-              color: '#0a0a0a',
-              fontWeight: 700,
-              cursor: submitting ? 'not-allowed' : 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              fontSize: '15px',
-              opacity: submitting ? 0.7 : 1,
-            }}
-          >
-            {submitting ? (
-              <Loader2
-                size={18}
-                style={{ animation: 'spin 1s linear infinite' }}
-              />
-            ) : null}
-            Confirmer et Payer
-          </button>
-
-          <p style={{ textAlign: 'center', fontSize: '11px', color: '#444', marginTop: '12px' }}>
-            Simulation visuelle · Aucun débit réel
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ── RECAP ─────────────────────────────────────────────────────────────────
-  if (step === 'recap') {
-    return (
-      <div style={{ background: '#0A0A0A', minHeight: '100vh' }}>
-        <div
-          style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid #1A1A1A',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <button
-            onClick={() => setStep('address')}
-            style={{ background: '#1A1A1A', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff' }}
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <h1 style={{ fontWeight: 900, fontSize: '18px', color: '#fff' }}>Récapitulatif</h1>
         </div>
 
-        <div style={{ padding: '24px 20px', maxWidth: '400px', margin: '0 auto' }}>
-          <div
-            style={{
-              background: '#1A1A1A',
-              borderRadius: '20px',
-              padding: '20px',
-              marginBottom: '20px',
-              border: '1px solid #222',
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '16px' }}>
-              <div
-                style={{
-                  width: '48px',
-                  height: '48px',
-                  borderRadius: '12px',
-                  overflow: 'hidden',
-                  background: '#222',
-                  flexShrink: 0,
-                }}
-              >
-                <img
-                  src={provider.coverPhotoUrl}
-                  alt={provider.name}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              </div>
-              <div>
-                <div style={{ fontWeight: 700, color: '#fff' }}>{provider.name}</div>
-                <div style={{ fontSize: '13px', color: '#888' }}>{provider.category}</div>
-              </div>
-            </div>
-
-            <div style={{ borderTop: '1px solid #222', paddingTop: '12px' }}>
-              {[
-                { label: 'Service', value: selectedService?.name ?? '-' },
-                { label: 'Durée', value: selectedService?.duration ?? '-' },
-                { label: 'Date', value: selectedDate ?? '-' },
-                { label: 'Heure', value: selectedTime ?? '-' },
-                ...(address ? [{ label: 'Adresse', value: address }] : []),
-              ].map(({ label, value }) => (
+        {/* Progress bar */}
+        {step < 5 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 0, marginBottom: 24 }}>
+            {[1, 2, 3, 4].map((s, i) => (
+              <React.Fragment key={s}>
                 <div
-                  key={label}
                   style={{
+                    width: 28,
+                    height: 28,
+                    borderRadius: '50%',
+                    background: s < step ? '#00D97E' : s === step ? 'transparent' : '#1C1C26',
+                    border: s === step ? '2px solid #F2D06B' : s < step ? '2px solid #00D97E' : '2px solid #2E2E3E',
                     display: 'flex',
-                    justifyContent: 'space-between',
-                    padding: '6px 0',
-                    fontSize: '13px',
-                    borderBottom: '1px solid #1a1a1a',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'all 0.3s',
                   }}
                 >
-                  <span style={{ color: '#666' }}>{label}</span>
-                  <span style={{ fontWeight: 500, maxWidth: '60%', textAlign: 'right', color: '#fff' }}>{value}</span>
+                  {s < step ? (
+                    <Check size={14} color="#fff" strokeWidth={3} />
+                  ) : (
+                    <span style={{ fontSize: 12, fontWeight: 800, color: s === step ? '#F2D06B' : '#2E2E3E', fontFamily: 'Inter, sans-serif' }}>
+                      {s}
+                    </span>
+                  )}
+                </div>
+                {i < 3 && (
+                  <div
+                    style={{
+                      flex: 1,
+                      height: 2,
+                      background: s < step ? '#00D97E' : '#1C1C26',
+                      transition: 'background 0.3s',
+                    }}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px' }}>
+        {/* Step 1: Service */}
+        {step === 1 && (
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#F4F4F8', marginBottom: 16, fontFamily: 'Inter, sans-serif' }}>
+              Choisissez un service
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {services.map((svc: any) => {
+                const isSelected = selectedService?.id === svc.id;
+                return (
+                  <div
+                    key={svc.id}
+                    onClick={() => setSelectedService(svc)}
+                    style={{
+                      padding: '16px',
+                      borderRadius: 16,
+                      background: isSelected ? 'rgba(242,208,107,0.06)' : '#0D0D13',
+                      border: isSelected ? '1px solid #F2D06B' : '1px solid rgba(255,255,255,0.05)',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div>
+                      <div style={{ fontSize: 15, fontWeight: 700, color: '#F4F4F8', marginBottom: 4, fontFamily: 'Inter, sans-serif' }}>
+                        {svc.name}
+                      </div>
+                      <div style={{ fontSize: 12, color: '#54546C', fontFamily: 'Inter, sans-serif' }}>{svc.duration}</div>
+                    </div>
+                    <div style={{ textAlign: 'right' }}>
+                      <div style={{ fontSize: 20, fontWeight: 900, color: '#F2D06B', fontFamily: 'Inter, sans-serif' }}>
+                        {svc.price} CHF
+                      </div>
+                      {svc.badge && (
+                        <div style={{ fontSize: 10, fontWeight: 700, color: '#F2D06B', background: 'rgba(242,208,107,0.1)', padding: '2px 6px', borderRadius: 6, marginTop: 4 }}>
+                          {svc.badge}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Step 2: Time slots */}
+        {step === 2 && (
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#F4F4F8', marginBottom: 16, fontFamily: 'Inter, sans-serif' }}>
+              Choisissez un créneau
+            </h2>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              {TIME_SLOTS.map(slot => {
+                const isSelected = selectedSlot?.id === slot.id;
+                return (
+                  <div
+                    key={slot.id}
+                    onClick={() => setSelectedSlot(slot)}
+                    style={{
+                      padding: '20px 16px',
+                      borderRadius: 18,
+                      background: isSelected ? 'rgba(242,208,107,0.08)' : '#0D0D13',
+                      border: isSelected ? '1px solid #F2D06B' : '1px solid rgba(255,255,255,0.05)',
+                      cursor: 'pointer',
+                      textAlign: 'center',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    <div style={{ fontSize: 16, fontWeight: 800, color: isSelected ? '#F2D06B' : '#F4F4F8', marginBottom: 6, fontFamily: 'Inter, sans-serif' }}>
+                      {slot.label}
+                    </div>
+                    <div style={{ fontSize: 12, color: '#54546C', fontFamily: 'Inter, sans-serif' }}>{slot.sublabel}</div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Step 3: Address */}
+        {step === 3 && (
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#F4F4F8', marginBottom: 16, fontFamily: 'Inter, sans-serif' }}>
+              Votre adresse
+            </h2>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div>
+                <label style={{ fontSize: 12, color: '#54546C', fontWeight: 600, marginBottom: 6, display: 'block', fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  Adresse
+                </label>
+                <input
+                  value={address}
+                  onChange={e => setAddress(e.target.value)}
+                  placeholder="Rue et numéro..."
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    borderRadius: 14,
+                    background: '#0D0D13',
+                    border: '1px solid #1E1E26',
+                    color: '#F4F4F8',
+                    fontSize: 15,
+                    outline: 'none',
+                    boxSizing: 'border-box',
+                    fontFamily: 'Inter, sans-serif',
+                  }}
+                  onFocus={e => { e.target.style.borderColor = '#F2D06B'; }}
+                  onBlur={e => { e.target.style.borderColor = '#1E1E26'; }}
+                />
+              </div>
+              <div style={{ position: 'relative' }}>
+                <label style={{ fontSize: 12, color: '#54546C', fontWeight: 600, marginBottom: 6, display: 'block', fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  Ville
+                </label>
+                <button
+                  onClick={() => setShowCityDropdown(v => !v)}
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    borderRadius: 14,
+                    background: '#0D0D13',
+                    border: '1px solid #1E1E26',
+                    color: '#F4F4F8',
+                    fontSize: 15,
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    fontFamily: 'Inter, sans-serif',
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <MapPin size={14} color="#F2D06B" />
+                    {city}
+                  </span>
+                  <ChevronDown size={14} color="#54546C" />
+                </button>
+                {showCityDropdown && (
+                  <div style={{
+                    position: 'absolute',
+                    top: '100%',
+                    left: 0,
+                    right: 0,
+                    background: '#0D0D13',
+                    border: '1px solid #1E1E26',
+                    borderRadius: 14,
+                    overflow: 'hidden',
+                    zIndex: 10,
+                    marginTop: 4,
+                  }}>
+                    {cities.map((c: string) => (
+                      <button
+                        key={c}
+                        onClick={() => { setCity(c); setShowCityDropdown(false); }}
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          background: c === city ? 'rgba(242,208,107,0.06)' : 'none',
+                          border: 'none',
+                          color: c === city ? '#F2D06B' : '#F4F4F8',
+                          fontSize: 14,
+                          cursor: 'pointer',
+                          textAlign: 'left',
+                          fontFamily: 'Inter, sans-serif',
+                        }}
+                      >
+                        {c}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <label style={{ fontSize: 12, color: '#54546C', fontWeight: 600, marginBottom: 6, display: 'block', fontFamily: 'Inter, sans-serif', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  Note (optionnel)
+                </label>
+                <textarea
+                  value={note}
+                  onChange={e => setNote(e.target.value)}
+                  placeholder="Instructions particulières..."
+                  rows={3}
+                  style={{
+                    width: '100%',
+                    padding: '14px 16px',
+                    borderRadius: 14,
+                    background: '#0D0D13',
+                    border: '1px solid #1E1E26',
+                    color: '#F4F4F8',
+                    fontSize: 15,
+                    outline: 'none',
+                    resize: 'none',
+                    boxSizing: 'border-box',
+                    fontFamily: 'Inter, sans-serif',
+                  }}
+                  onFocus={e => { e.target.style.borderColor = '#F2D06B'; }}
+                  onBlur={e => { e.target.style.borderColor = '#1E1E26'; }}
+                />
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Step 4: Recap */}
+        {step === 4 && (
+          <div>
+            <h2 style={{ fontSize: 20, fontWeight: 800, color: '#F4F4F8', marginBottom: 16, fontFamily: 'Inter, sans-serif' }}>
+              Récapitulatif
+            </h2>
+            <div style={{ background: '#0D0D13', border: '1px solid rgba(255,255,255,0.05)', borderRadius: 18, padding: '20px', marginBottom: 16 }}>
+              {[
+                { label: 'Pro', value: pro?.name || 'Pro' },
+                { label: 'Service', value: selectedService?.name || 'Service' },
+                { label: 'Créneau', value: selectedSlot?.label || '—' },
+                { label: 'Adresse', value: `${address}, ${city}` },
+              ].map(row => (
+                <div key={row.label} style={{ display: 'flex', justifyContent: 'space-between', padding: '10px 0', borderBottom: '1px solid rgba(255,255,255,0.04)' }}>
+                  <span style={{ fontSize: 13, color: '#54546C', fontFamily: 'Inter, sans-serif' }}>{row.label}</span>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#F4F4F8', fontFamily: 'Inter, sans-serif' }}>{row.value}</span>
                 </div>
               ))}
+              <div style={{ display: 'flex', justifyContent: 'space-between', paddingTop: 14 }}>
+                <span style={{ fontSize: 15, fontWeight: 700, color: '#F4F4F8', fontFamily: 'Inter, sans-serif' }}>Total</span>
+                <span style={{ fontSize: 20, fontWeight: 900, color: '#F2D06B', fontFamily: 'Inter, sans-serif' }}>{totalPrice} CHF</span>
+              </div>
             </div>
+          </div>
+        )}
 
-            <div
+        {/* Step 5: Payment */}
+        {step === 5 && (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', paddingTop: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 24 }}>
+              <Lock size={16} color="#F2D06B" />
+              <span style={{ fontSize: 13, color: '#54546C', fontFamily: 'Inter, sans-serif' }}>Paiement sécurisé NEXUS PAY</span>
+            </div>
+            <QRCode />
+            <div style={{ marginTop: 24, textAlign: 'center' }}>
+              <div
+                style={{
+                  fontSize: 48,
+                  fontWeight: 900,
+                  color: '#F2D06B',
+                  fontFamily: 'Inter, sans-serif',
+                  transition: 'transform 0.1s',
+                  transform: amountBeat ? 'scale(1.05)' : 'scale(1)',
+                }}
+              >
+                {totalPrice} CHF
+              </div>
+              <div style={{ fontSize: 13, color: '#54546C', marginTop: 8, fontFamily: 'Inter, sans-serif' }}>
+                {selectedService?.name || 'Service'} · {pro?.name || 'Pro'}
+              </div>
+            </div>
+            <button
+              onClick={handlePayment}
               style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                marginTop: '16px',
-                paddingTop: '12px',
-                borderTop: '1px solid #333',
+                marginTop: 32,
+                width: '100%',
+                padding: '18px',
+                borderRadius: 18,
+                background: '#F2D06B',
+                border: 'none',
+                color: '#050507',
+                fontSize: 16,
+                fontWeight: 900,
+                cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
               }}
             >
-              <span style={{ fontWeight: 700, fontSize: '16px', color: '#fff' }}>Total</span>
-              <span style={{ fontWeight: 900, fontSize: '22px', color: '#E8C89A' }}>{totalPrice} CHF</span>
-            </div>
+              Payer maintenant
+            </button>
           </div>
+        )}
+      </div>
 
+      {/* Footer CTA */}
+      {step < 5 && (
+        <div style={{ padding: '16px 20px', paddingBottom: 'calc(16px + env(safe-area-inset-bottom, 0px))', flexShrink: 0 }}>
           <button
-            onClick={() => setStep('payment')}
-            className="btn-tap-gold"
+            onClick={() => setStep(s => s + 1)}
+            disabled={!canNext}
             style={{
               width: '100%',
-              background: '#E8C89A',
+              padding: '18px',
+              borderRadius: 18,
+              background: canNext ? '#F2D06B' : '#1C1C26',
               border: 'none',
-              borderRadius: '50px',
-              padding: '16px',
-              color: '#0a0a0a',
-              fontWeight: 700,
-              cursor: 'pointer',
-              fontSize: '15px',
+              color: canNext ? '#050507' : '#2E2E3E',
+              fontSize: 16,
+              fontWeight: 900,
+              cursor: canNext ? 'pointer' : 'not-allowed',
+              fontFamily: 'Inter, sans-serif',
+              transition: 'all 0.2s',
             }}
           >
-            Procéder au paiement →
+            {step === 4 ? 'Procéder au paiement' : 'Continuer'}
           </button>
         </div>
-      </div>
-    );
-  }
-
-  // ── ADDRESS ───────────────────────────────────────────────────────────────
-  if (step === 'address') {
-    return (
-      <div style={{ background: '#0A0A0A', minHeight: '100vh' }}>
-        <div
-          style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid #1A1A1A',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <button
-            onClick={() => setStep('datetime')}
-            style={{ background: '#1A1A1A', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff' }}
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <h1 style={{ fontWeight: 900, fontSize: '18px', color: '#fff' }}>Votre adresse</h1>
-        </div>
-
-        <div style={{ padding: '24px 20px', maxWidth: '400px', margin: '0 auto' }}>
-          <p style={{ color: '#888', fontSize: '14px', marginBottom: '20px' }}>
-            Où souhaitez-vous recevoir le professionnel ?
-          </p>
-          <textarea
-            placeholder="Entrez votre adresse complète..."
-            value={address}
-            onChange={(e) => setAddress(e.target.value)}
-            rows={4}
-            style={{
-              width: '100%',
-              background: '#1A1A1A',
-              border: '1px solid #2A2A2A',
-              borderRadius: '12px',
-              padding: '14px',
-              color: '#fff',
-              fontSize: '15px',
-              fontFamily: "'Inter', sans-serif",
-              outline: 'none',
-              resize: 'none',
-              marginBottom: '20px',
-            }}
-          />
-          <button
-            onClick={() => setStep('recap')}
-            disabled={!address.trim()}
-            className="btn-tap-gold"
-            style={{
-              width: '100%',
-              background: address.trim() ? '#E8C89A' : '#222',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '16px',
-              color: address.trim() ? '#0a0a0a' : '#444',
-              fontWeight: 700,
-              cursor: address.trim() ? 'pointer' : 'not-allowed',
-              fontSize: '15px',
-            }}
-          >
-            Continuer →
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── DATETIME ──────────────────────────────────────────────────────────────
-  if (step === 'datetime') {
-    return (
-      <div style={{ background: '#0A0A0A', minHeight: '100vh' }}>
-        <div
-          style={{
-            padding: '16px 20px',
-            borderBottom: '1px solid #1A1A1A',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-          }}
-        >
-          <button
-            onClick={() => setStep('service')}
-            style={{ background: '#1A1A1A', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff' }}
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <h1 style={{ fontWeight: 900, fontSize: '18px', color: '#fff' }}>Date & Heure</h1>
-        </div>
-
-        <div style={{ padding: '24px 20px' }}>
-          <p
-            style={{
-              color: '#888',
-              fontSize: '13px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: '12px',
-            }}
-          >
-            Choisissez une date
-          </p>
-          <div
-            style={{
-              display: 'flex',
-              gap: '8px',
-              overflowX: 'auto',
-              paddingBottom: '8px',
-              marginBottom: '24px',
-              scrollbarWidth: 'none',
-            }}
-          >
-            {days.map((day) => (
-              <button
-                key={day.dateStr}
-                onClick={() => setSelectedDate(day.dateStr)}
-                style={{
-                  flexShrink: 0,
-                  width: '60px',
-                  padding: '12px 8px',
-                  borderRadius: '12px',
-                  border: 'none',
-                  background: selectedDate === day.dateStr ? '#E8C89A' : '#1A1A1A',
-                  color: selectedDate === day.dateStr ? '#0A0A0A' : '#888',
-                  cursor: 'pointer',
-                  textAlign: 'center',
-                }}
-              >
-                <div style={{ fontSize: '11px', fontWeight: 600, marginBottom: '4px' }}>{day.label}</div>
-                <div style={{ fontSize: '18px', fontWeight: 700 }}>{day.num}</div>
-              </button>
-            ))}
-          </div>
-
-          <p
-            style={{
-              color: '#888',
-              fontSize: '13px',
-              fontWeight: 600,
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              marginBottom: '12px',
-            }}
-          >
-            Choisissez une heure
-          </p>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '8px',
-              marginBottom: '24px',
-            }}
-          >
-            {TIME_SLOTS.map((slot) => (
-              <button
-                key={slot}
-                onClick={() => setSelectedTime(slot)}
-                style={{
-                  padding: '10px 4px',
-                  borderRadius: '10px',
-                  border: 'none',
-                  background: selectedTime === slot ? '#E8C89A' : '#1A1A1A',
-                  color: selectedTime === slot ? '#0A0A0A' : '#888',
-                  fontSize: '13px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
-                {slot}
-              </button>
-            ))}
-          </div>
-
-          <button
-            onClick={() => setStep('address')}
-            disabled={!selectedDate || !selectedTime}
-            className="btn-tap-gold"
-            style={{
-              width: '100%',
-              background: selectedDate && selectedTime ? '#E8C89A' : '#222',
-              border: 'none',
-              borderRadius: '50px',
-              padding: '16px',
-              color: selectedDate && selectedTime ? '#0a0a0a' : '#444',
-              fontWeight: 700,
-              cursor: selectedDate && selectedTime ? 'pointer' : 'not-allowed',
-              fontSize: '15px',
-            }}
-          >
-            Continuer →
-          </button>
-        </div>
-      </div>
-    );
-  }
-
-  // ── SERVICE SELECTION ─────────────────────────────────────────────────────
-  return (
-    <div style={{ background: '#0A0A0A', minHeight: '100vh' }}>
-      <div
-        style={{
-          padding: '16px 20px',
-          borderBottom: '1px solid #1A1A1A',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-        }}
-      >
-        <button
-          onClick={() => navigate('providerDetail')}
-          style={{ background: '#1A1A1A', border: 'none', borderRadius: '8px', padding: '8px', cursor: 'pointer', color: '#fff' }}
-        >
-          <ChevronLeft size={18} />
-        </button>
-        <h1 style={{ fontWeight: 900, fontSize: '18px', color: '#fff' }}>Choisir un service</h1>
-      </div>
-
-      <div style={{ padding: '24px 20px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
-          <div
-            style={{
-              width: '48px',
-              height: '48px',
-              borderRadius: '12px',
-              overflow: 'hidden',
-              background: '#222',
-              flexShrink: 0,
-            }}
-          >
-            <img
-              src={provider.coverPhotoUrl}
-              alt={provider.name}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          </div>
-          <div>
-            <div style={{ fontWeight: 700, color: '#fff', fontSize: '16px' }}>{provider.name}</div>
-            <div style={{ fontSize: '13px', color: '#888' }}>{provider.category}</div>
-          </div>
-        </div>
-
-        <p
-          style={{
-            color: '#888',
-            fontSize: '13px',
-            fontWeight: 600,
-            textTransform: 'uppercase',
-            letterSpacing: '0.1em',
-            marginBottom: '16px',
-          }}
-        >
-          Services disponibles
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
-          {/* Fallback services if none passed */}
-          {[
-            { id: 's1', name: 'Service standard', priceStudio: 50, priceDomicile: 60, duration: '45 min' },
-            { id: 's2', name: 'Service premium', priceStudio: 80, priceDomicile: 90, duration: '60 min' },
-          ].map((service) => {
-            const isSelected = selectedService?.id === service.id;
-            const price = service.priceDomicile ?? service.priceStudio ?? 0;
-            return (
-              <button
-                key={service.id}
-                onClick={() => setSelectedService(service)}
-                style={{
-                  background: isSelected ? 'rgba(232,200,154,0.08)' : '#1A1A1A',
-                  border: `1px solid ${isSelected ? '#E8C89A' : '#2A2A2A'}`,
-                  borderRadius: '16px',
-                  padding: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: '16px', fontWeight: 700, color: '#fff', marginBottom: '4px' }}>
-                    {service.name}
-                  </div>
-                  <div style={{ fontSize: '12px', color: '#666' }}>{service.duration}</div>
-                </div>
-                <div style={{ fontSize: '20px', fontWeight: 800, color: '#E8C89A', flexShrink: 0, marginLeft: '12px' }}>
-                  {price} CHF
-                </div>
-              </button>
-            );
-          })}
-        </div>
-
-        <button
-          onClick={() => selectedService && setStep('datetime')}
-          disabled={!selectedService}
-          className="btn-tap-gold"
-          style={{
-            width: '100%',
-            background: selectedService ? '#E8C89A' : '#222',
-            border: 'none',
-            borderRadius: '50px',
-            padding: '16px',
-            color: selectedService ? '#0a0a0a' : '#444',
-            fontWeight: 700,
-            cursor: selectedService ? 'pointer' : 'not-allowed',
-            fontSize: '15px',
-          }}
-        >
-          Continuer →
-        </button>
-      </div>
+      )}
     </div>
   );
 }

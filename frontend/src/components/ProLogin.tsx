@@ -1,54 +1,88 @@
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
-import { useAuthContext } from '../context/AuthContext';
-import { Loader2 } from 'lucide-react';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
 
-const ProLogin: React.FC = () => {
-  const { navigate } = useAppContext();
-  const { login, isLoading } = useAuthContext();
+export default function ProLogin() {
+  const { navigateTo } = useAppContext();
+  const { login, loginStatus } = useInternetIdentity();
+
+  const isLoggingIn = loginStatus === 'logging-in';
 
   const handleLogin = async () => {
     try {
       await login();
-    } catch {
-      // handled
+      navigateTo('nexusOS');
+    } catch (error) {
+      console.error('Login error:', error);
     }
   };
 
   return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh', padding: '20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '40px' }}>
-        <div onClick={() => navigate('splash')} style={{ fontFamily: 'Inter, system-ui, sans-serif', fontSize: '22px', fontWeight: 900, letterSpacing: '-0.5px', cursor: 'pointer', color: '#E8C89A' }}>
-          NEXUS
+    <div
+      style={{
+        height: '100%',
+        background: 'var(--void)',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        padding: '40px 24px',
+      }}
+    >
+      <div style={{ textAlign: 'center', marginBottom: 40 }}>
+        <div
+          style={{
+            fontSize: 13,
+            color: 'var(--gold)',
+            fontWeight: 700,
+            letterSpacing: '0.15em',
+            marginBottom: 12,
+          }}
+        >
+          NEXUS PRO
         </div>
-      </div>
-
-      <div style={{ maxWidth: '400px', margin: '0 auto', paddingTop: '60px' }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '-0.5px', marginBottom: '12px' }}>
-          Mon Espace Pro
+        <h1 style={{ fontSize: 28, fontWeight: 900, color: 'var(--t1)', marginBottom: 8 }}>
+          Espace Professionnel
         </h1>
-        <p style={{ color: 'rgba(255, 255, 255, 0.55)', marginBottom: '40px', fontSize: '14px' }}>
-          Connectez-vous pour accéder à votre tableau de bord professionnel
+        <p style={{ fontSize: 14, color: 'var(--t2)' }}>
+          Connectez-vous pour accéder à votre tableau de bord
         </p>
-
-        <button
-          onClick={handleLogin}
-          disabled={isLoading}
-          style={{ width: '100%', background: '#E8C89A', border: 'none', borderRadius: '12px', padding: '16px', color: '#0a0a0a', fontSize: '14px', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.08em', cursor: isLoading ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', opacity: isLoading ? 0.7 : 1 }}
-        >
-          {isLoading ? <Loader2 size={18} className="animate-spin" /> : null}
-          SE CONNECTER
-        </button>
-
-        <button
-          onClick={() => navigate('splash')}
-          style={{ width: '100%', background: 'transparent', border: '1px solid rgba(255, 255, 255, 0.15)', borderRadius: '12px', padding: '14px', color: 'rgba(255, 255, 255, 0.55)', fontSize: '13px', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', cursor: 'pointer', marginTop: '12px' }}
-        >
-          RETOUR
-        </button>
       </div>
+
+      <button
+        onClick={handleLogin}
+        disabled={isLoggingIn}
+        style={{
+          width: '100%',
+          padding: '18px',
+          borderRadius: 18,
+          background: isLoggingIn
+            ? 'var(--d3)'
+            : 'linear-gradient(135deg, var(--gold) 0%, #b8860b 100%)',
+          border: 'none',
+          color: isLoggingIn ? 'var(--t3)' : '#000',
+          fontSize: 16,
+          fontWeight: 900,
+          cursor: isLoggingIn ? 'not-allowed' : 'pointer',
+          boxShadow: isLoggingIn ? 'none' : '0 4px 24px rgba(212,175,55,0.4)',
+          marginBottom: 16,
+        }}
+      >
+        {isLoggingIn ? 'Connexion...' : 'SE CONNECTER'}
+      </button>
+
+      <button
+        onClick={() => navigateTo('splash')}
+        style={{
+          background: 'none',
+          border: 'none',
+          color: 'var(--t3)',
+          fontSize: 14,
+          cursor: 'pointer',
+        }}
+      >
+        ← Retour
+      </button>
     </div>
   );
-};
-
-export default ProLogin;
+}

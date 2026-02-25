@@ -1,97 +1,191 @@
-import React, { useState } from 'react';
-import { Bell, X, Zap, CheckCircle, DollarSign, Star, AlertTriangle, Calendar, MessageSquare } from 'lucide-react';
+import React from 'react';
 import { useAppContext, Notification } from '../context/AppContext';
+import { X, Bell } from 'lucide-react';
 
-function getNotificationIcon(type: Notification['type']) {
-  switch (type) {
-    case 'flash': return <Zap size={16} className="text-yellow-400" />;
-    case 'confirmed': return <CheckCircle size={16} className="text-nexus-success" />;
-    case 'payment': return <DollarSign size={16} className="text-nexus-gold" />;
-    case 'review': return <Star size={16} className="text-yellow-400" />;
-    case 'dispute': return <AlertTriangle size={16} className="text-nexus-urgent" />;
-    case 'reminder': return <Calendar size={16} className="text-blue-400" />;
-    case 'sms': return <MessageSquare size={16} className="text-purple-400" />;
-    default: return <Bell size={16} className="text-nexus-secondary" />;
-  }
+function getNotificationColor(_notification: Notification): string {
+  return '#F2D06B';
 }
 
-function formatTime(timestamp: number): string {
-  const diff = Date.now() - timestamp;
-  const minutes = Math.floor(diff / 60000);
-  if (minutes < 1) return 'À l\'instant';
-  if (minutes < 60) return `Il y a ${minutes} min`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `Il y a ${hours}h`;
-  return `Il y a ${Math.floor(hours / 24)}j`;
-}
+export default function NotificationCenter({ onClose }: { onClose?: () => void }) {
+  const { notifications, unreadCount, markAllRead, removeNotification } = useAppContext();
 
-export default function NotificationCenter() {
-  const [isOpen, setIsOpen] = useState(false);
-  const { notifications, unreadCount, markAllRead } = useAppContext();
-
-  const handleOpen = () => {
-    setIsOpen(true);
-    markAllRead();
-  };
+  const getBody = (notif: Notification) => notif.message || notif.body || '';
 
   return (
-    <div className="relative">
-      <button
-        onClick={handleOpen}
-        className="relative p-2 rounded-full hover:bg-nexus-card transition-colors"
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(0,0,0,0.7)',
+        zIndex: 300,
+        display: 'flex',
+        alignItems: 'flex-end',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          width: '100%',
+          maxHeight: '80vh',
+          background: '#0D0D13',
+          borderRadius: '24px 24px 0 0',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+        onClick={e => e.stopPropagation()}
       >
-        <Bell size={22} className="text-white" />
-        {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 w-5 h-5 bg-nexus-urgent rounded-full flex items-center justify-center text-white text-xs font-bold red-pulse">
-            {unreadCount > 9 ? '9+' : unreadCount}
-          </span>
-        )}
-      </button>
-
-      {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-start justify-end pt-16 pr-4" onClick={() => setIsOpen(false)}>
-          <div
-            className="w-80 max-h-96 bg-nexus-card border border-nexus-border rounded-nexus shadow-card overflow-hidden slide-up"
-            onClick={e => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between p-4 border-b border-nexus-border">
-              <h3 className="text-white font-semibold">Notifications</h3>
-              <button onClick={() => setIsOpen(false)} className="text-nexus-secondary hover:text-white">
-                <X size={18} />
+        {/* Header */}
+        <div
+          style={{
+            padding: '20px 20px 16px',
+            borderBottom: '1px solid rgba(255,255,255,0.05)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            flexShrink: 0,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <Bell size={18} color="#F2D06B" />
+            <span style={{ fontSize: 16, fontWeight: 800, color: '#F4F4F8', fontFamily: 'Inter, sans-serif' }}>
+              Notifications
+            </span>
+            {unreadCount > 0 && (
+              <span
+                style={{
+                  background: '#FF3D5A',
+                  color: '#fff',
+                  fontSize: 11,
+                  fontWeight: 700,
+                  padding: '2px 7px',
+                  borderRadius: 10,
+                }}
+              >
+                {unreadCount}
+              </span>
+            )}
+          </div>
+          <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+            {unreadCount > 0 && (
+              <button
+                onClick={markAllRead}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: 12,
+                  color: '#F2D06B',
+                  fontWeight: 600,
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                Tout lire
               </button>
-            </div>
-
-            <div className="overflow-y-auto max-h-80">
-              {notifications.length === 0 ? (
-                <div className="p-6 text-center text-nexus-secondary">
-                  <Bell size={32} className="mx-auto mb-2 opacity-30" />
-                  <p className="text-sm">Aucune notification</p>
-                </div>
-              ) : (
-                notifications.map(notif => (
-                  <div
-                    key={notif.id}
-                    className={`p-3 border-b border-nexus-border last:border-0 ${!notif.read ? 'bg-nexus-bg/50' : ''}`}
-                  >
-                    <div className="flex items-start gap-3">
-                      <div className="mt-0.5 flex-shrink-0">
-                        {getNotificationIcon(notif.type)}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm text-white leading-snug">{notif.message}</p>
-                        <p className="text-xs text-nexus-secondary mt-1">{formatTime(notif.timestamp)}</p>
-                      </div>
-                      {!notif.read && (
-                        <div className="w-2 h-2 bg-nexus-gold rounded-full flex-shrink-0 mt-1" />
-                      )}
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+            )}
+            {onClose && (
+              <button
+                onClick={onClose}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  padding: 4,
+                }}
+              >
+                <X size={20} color="#54546C" />
+              </button>
+            )}
           </div>
         </div>
-      )}
+
+        {/* List */}
+        <div style={{ overflowY: 'auto', flex: 1 }}>
+          {notifications.length === 0 ? (
+            <div
+              style={{
+                padding: '48px 20px',
+                textAlign: 'center',
+                color: '#54546C',
+                fontSize: 14,
+                fontFamily: 'Inter, sans-serif',
+              }}
+            >
+              Aucune notification
+            </div>
+          ) : (
+            notifications.map(notif => {
+              const color = getNotificationColor(notif);
+              return (
+                <div
+                  key={notif.id}
+                  style={{
+                    padding: '14px 20px',
+                    borderBottom: '1px solid rgba(255,255,255,0.04)',
+                    display: 'flex',
+                    gap: 12,
+                    alignItems: 'flex-start',
+                    background: notif.read ? 'transparent' : 'rgba(242,208,107,0.02)',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      background: `${color}15`,
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0,
+                    }}
+                  >
+                    <Bell size={16} color={color} />
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div
+                      style={{
+                        fontSize: 13,
+                        fontWeight: notif.read ? 500 : 700,
+                        color: '#F4F4F8',
+                        marginBottom: 3,
+                        fontFamily: 'Inter, sans-serif',
+                      }}
+                    >
+                      {notif.title}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 12,
+                        color: '#54546C',
+                        lineHeight: 1.5,
+                        fontFamily: 'Inter, sans-serif',
+                      }}
+                    >
+                      {getBody(notif)}
+                    </div>
+                    <div style={{ fontSize: 10, color: '#2E2E3E', marginTop: 4, fontFamily: 'Inter, sans-serif' }}>
+                      {new Date(notif.createdAt).toLocaleTimeString('fr-CH', { hour: '2-digit', minute: '2-digit' })}
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => removeNotification(notif.id)}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      padding: 4,
+                      flexShrink: 0,
+                    }}
+                  >
+                    <X size={14} color="#2E2E3E" />
+                  </button>
+                </div>
+              );
+            })
+          )}
+        </div>
+      </div>
     </div>
   );
 }

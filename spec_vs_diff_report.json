@@ -1,79 +1,82 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-24T23:34:18.221Z",
-  "summary": "The diff implements the majority of the 10 REQs for the NEXUS premium dark UI overhaul. Most requirements are well-covered, but several specific acceptance criteria details are missing or only partially implemented based on the available diff evidence.",
+  "generatedAt": "2026-02-25T12:37:57.143Z",
+  "summary": "The diff implements most of the 8 requirements but has several gaps. REQ-1 through REQ-8 are largely addressed, but key sub-requirements are missing or incomplete: GlobalHeader still uses lucide-react Bell and User icons; Subscription.tsx and SubscriptionScreen.tsx advantage lists use green CheckIcon instead of SVG thin-dash bullets; the 'Voir mon profil public' button and pro-profile-at-position-1 logic are absent; Explorer card border uses 0.05 opacity instead of specified 0.06. Two hallucinated features appear in BookingFlow.tsx.",
   "missing_requirements": [
     {
-      "requirement": "REQ-2: Notification bell should show unread count (number) as a badge, not just a dot. The GlobalHeader only renders an 8px dot without displaying the actual count value.",
-      "reason": "The GlobalHeader.tsx renders a small dot span (8px circle) for the notification badge but does not display the notificationCount number visually inside or next to the badge.",
+      "id": "REQ-1",
+      "requirement": "GlobalHeader bell and user icons must be replaced with inline SVG icons (stroke 1.5px, currentColor); lucide-react icons must not be used.",
+      "reason": "GlobalHeader.tsx still imports Bell and User from lucide-react and renders them directly, violating the SVG-only icon rule.",
       "evidence": [
         "frontend/src/components/GlobalHeader.tsx"
       ]
     },
     {
-      "requirement": "REQ-7: Messages tab and Profil tab should navigate to their own dedicated screens. The diff wires 'messages' to 'explorer' and 'profile' to the reservations screen.",
-      "reason": "BottomNav.tsx shows messages tab screen is 'explorer' and profile tab screen is reservationsScreen — neither has a dedicated screen, violating the 'wire each tab to its corresponding screen' requirement.",
+      "id": "REQ-1",
+      "requirement": "Subscription modal advantage list must use SVG thin-dash bullets (no emoji, no green check icons).",
+      "reason": "Both Subscription.tsx and SubscriptionScreen.tsx still render a green CheckIcon (SVG checkmark) next to each benefit item instead of the required SVG thin-dash bullet.",
       "evidence": [
-        "frontend/src/components/BottomNav.tsx"
-      ]
-    },
-    {
-      "requirement": "REQ-9: Skeleton loading states use a golden shimmer animation on #1A1A1A backgrounds — actual skeleton placeholder components should be rendered during data fetching states.",
-      "reason": "The CSS for skeleton shimmer is defined in index.css, but no actual skeleton placeholder components are visible in the diff being rendered during loading states in Explorer, ProviderDetail, or other screens.",
-      "evidence": [
-        "frontend/src/index.css",
-        "frontend/src/components/Explorer.tsx"
+        "frontend/src/components/Subscription.tsx",
+        "frontend/src/components/SubscriptionScreen.tsx"
       ]
     },
     {
       "id": "REQ-3",
-      "requirement": "Tapping the search input opens a dropdown with Swiss Romande city options, and a golden distance slider opens on tapping the pill.",
-      "reason": "Explorer.tsx is truncated in the diff; the dropdown and distance slider interaction implementations cannot be confirmed from the visible portion.",
+      "requirement": "'Voir mon profil public' button must navigate to Explorer with the pro profile visible at position 1.",
+      "reason": "No evidence of a 'Voir mon profil public' button or logic to inject the pro profile at position 1 in Explorer is present in any modified file.",
       "evidence": [
+        "frontend/src/components/NexusOS.tsx",
         "frontend/src/components/Explorer.tsx"
       ]
     },
     {
-      "id": "REQ-10",
-      "requirement": "Tapping the sticky bottom CTA button initiates the booking flow for the selected service.",
-      "reason": "ProviderDetail.tsx is truncated and the booking flow wiring from the sticky CTA cannot be confirmed from the visible portion of the diff.",
+      "id": "REQ-4",
+      "requirement": "Explorer cards border must be 1px solid rgba(255,255,255,0.06).",
+      "reason": "Explorer.tsx uses rgba(255,255,255,0.05) on cards instead of the required rgba(255,255,255,0.06).",
       "evidence": [
-        "frontend/src/components/ProviderDetail.tsx"
+        "frontend/src/components/Explorer.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "The GlobalHeader includes a clickable NEXUS logo that navigates to the 'explorer' screen on click.",
-      "reason": "The build request only specifies the header should display the NEXUS logo visually; no click/navigation behavior was requested for the header logo.",
+      "description": "BookingFlow.tsx includes a SuccessAnimation component with confetti particles and a progress bar not requested for the booking flow.",
+      "reason": "The spec's confetti and progress bar success overlay are specified only for the ProSubscriptionModal activation flow (REQ-3). A separate SuccessAnimation in BookingFlow was not requested in any of C1-C8.",
       "evidence": [
-        "frontend/src/components/GlobalHeader.tsx"
+        "frontend/src/components/BookingFlow.tsx"
       ]
     },
     {
-      "description": "The BottomNav Reservations tab navigates to different screens depending on appRole (nexusOS for professionals, clientDashboard for clients).",
-      "reason": "The build request specifies the Reservations tab should navigate to its corresponding screen but does not specify role-based conditional navigation logic for the bottom nav.",
+      "description": "BookingFlow.tsx includes a QRCode component that renders a visual QR code pattern.",
+      "reason": "No QR code feature was requested anywhere in REQ-1 through REQ-8 or the build constraints.",
       "evidence": [
-        "frontend/src/components/BottomNav.tsx"
+        "frontend/src/components/BookingFlow.tsx"
       ]
     }
   ],
   "confidence": 0.72,
   "changed_files": [
-    "frontend-file-summaries.txt",
     "frontend/src/components/BookingFlow.tsx",
     "frontend/src/components/BottomNav.tsx",
+    "frontend/src/components/Builder.tsx",
     "frontend/src/components/ClientDashboard.tsx",
     "frontend/src/components/Explorer.tsx",
     "frontend/src/components/GlobalHeader.tsx",
+    "frontend/src/components/MessagingSheet.tsx",
+    "frontend/src/components/MonBusiness.tsx",
     "frontend/src/components/NexusOS.tsx",
-    "frontend/src/components/ProviderDetail.tsx",
+    "frontend/src/components/NotificationCenter.tsx",
+    "frontend/src/components/ProDashboard.tsx",
+    "frontend/src/components/ProSubscriptionModal.tsx",
+    "frontend/src/components/RadarPro.tsx",
+    "frontend/src/components/RoleSelection.tsx",
     "frontend/src/components/ScreenRouter.tsx",
-    "frontend/src/components/Splash.tsx",
-    "frontend/src/hooks/useQueries.ts",
-    "frontend/src/index.css",
-    "frontend/tailwind.config.js",
+    "frontend/src/components/Subscription.tsx",
+    "frontend/src/components/SubscriptionScreen.tsx",
+    "frontend/src/components/WalletPro.tsx",
+    "frontend/src/context/AppContext.tsx",
+    "frontend/src/utils/demoData.ts",
     "project_state.json"
   ]
 }

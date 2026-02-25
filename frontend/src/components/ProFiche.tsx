@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAppContext } from '../context/AppContext';
-import { IconArrowLeft, IconStar, IconClock, IconFlash } from './icons/Icons';
+import { IconArrowLeft, IconStar, IconClock, IconFlash, IconCheck } from './icons/Icons';
 
 function useCountUp(target: number, duration: number, start: boolean) {
   const [value, setValue] = useState(0);
@@ -19,8 +19,8 @@ function useCountUp(target: number, duration: number, start: boolean) {
   return value;
 }
 
-export default function ProProfile() {
-  const { selectedPro, navigateTo } = useAppContext();
+export default function ProFiche() {
+  const { selectedPro, setCurrentScreen } = useAppContext();
   const [animStart, setAnimStart] = useState(false);
 
   useEffect(() => {
@@ -28,79 +28,85 @@ export default function ProProfile() {
     return () => clearTimeout(t);
   }, []);
 
-  // All hooks must be called before any early return
-  const noteVal = useCountUp(selectedPro ? Math.round(selectedPro.note * 10) : 0, 800, animStart);
-  const avisVal = useCountUp(selectedPro?.avis ?? 0, 800, animStart);
+  // Use new field names from utils/demoData DemoPro type
+  const note = useCountUp(selectedPro ? Math.round(selectedPro.note * 10) : 0, 800, animStart);
+  const avis = useCountUp(selectedPro?.avis ?? 0, 800, animStart);
+  // responseTime is a string like "2 min", extract numeric part for count-up
+  const responseTimeNum = parseInt(selectedPro?.responseTime ?? '0', 10) || 0;
+  const reponse = useCountUp(responseTimeNum, 800, animStart);
+  const acceptation = useCountUp(selectedPro?.acceptanceRate ?? 0, 800, animStart);
+  const prestations = useCountUp(selectedPro?.serviceCount ?? 0, 800, animStart);
 
   if (!selectedPro) {
     return (
       <div style={{ minHeight: '100vh', background: 'var(--void)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <button onClick={() => navigateTo('explorerV2')} style={{ color: 'var(--gold)', background: 'none', border: 'none', cursor: 'pointer' }}>
-          Retour
+        <button onClick={() => setCurrentScreen('explorerV2')} style={{ color: 'var(--gold)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'Inter, sans-serif', fontSize: '14px' }}>
+          Retour a l'explorer
         </button>
       </div>
     );
   }
 
-  const pro = selectedPro;
-  const services = pro.services ?? [
-    { nom: 'Service', prix: pro.startingPrice, duree: 30, badge: undefined },
+  const services = selectedPro.services ?? [
+    { nom: 'Coupe homme', prix: selectedPro.startingPrice, duree: 30, badge: undefined },
   ];
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--void)', paddingBottom: '100px' }}>
       {/* Cover */}
-      <div style={{ height: '260px', background: pro.gradient, position: 'relative', overflow: 'hidden' }}>
+      <div style={{ height: '240px', background: selectedPro.gradient, position: 'relative', overflow: 'hidden' }}>
         <button
-          onClick={() => navigateTo('explorerV2')}
+          onClick={() => setCurrentScreen('explorerV2')}
           style={{ position: 'absolute', top: '16px', left: '16px', width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
         >
           <IconArrowLeft size={18} color="var(--t1)" />
         </button>
-        {pro.isFlash && (
+        {selectedPro.isFlash && (
           <div style={{ position: 'absolute', top: '16px', right: '16px', background: 'var(--alert)', borderRadius: '999px', padding: '6px 12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
             <IconFlash size={12} color="#fff" />
-            <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '11px', color: '#fff' }}>FLASH</span>
+            <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '11px', color: '#fff', letterSpacing: '0.05em' }}>FLASH</span>
           </div>
         )}
+        {/* Avatar */}
         <div style={{ position: 'absolute', bottom: '-28px', left: '20px', width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', border: '3px solid var(--void)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '24px', color: 'var(--t1)' }}>{pro.initials}</span>
+          <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '24px', color: 'var(--t1)' }}>{selectedPro.initials}</span>
         </div>
       </div>
 
       <div style={{ padding: '44px 20px 0' }}>
+        {/* Name & info */}
         <h1 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '24px', color: 'var(--t1)', letterSpacing: '-0.03em', marginBottom: '4px' }}>
-          {pro.prenom} {pro.nom}
+          {selectedPro.prenom} {selectedPro.nom}
         </h1>
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '13px', color: 'var(--t3)', marginBottom: '20px' }}>
-          {pro.categorie} · {pro.ville}
+          {selectedPro.categorie} · {selectedPro.ville}
         </p>
 
-        {/* Stats */}
-        <div style={{ display: 'flex', gap: '12px', marginBottom: '24px' }}>
-          <div style={{ flex: 1, background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '20px', color: 'var(--gold)' }}>{(noteVal / 10).toFixed(1)}</div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '10px', color: 'var(--t4)', letterSpacing: '0.08em' }}>NOTE</div>
-          </div>
-          <div style={{ flex: 1, background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '20px', color: 'var(--t1)' }}>{avisVal}</div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '10px', color: 'var(--t4)', letterSpacing: '0.08em' }}>AVIS</div>
-          </div>
-          <div style={{ flex: 1, background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '14px', padding: '14px', textAlign: 'center' }}>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '20px', color: 'var(--t1)' }}>{pro.serviceCount}</div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '10px', color: 'var(--t4)', letterSpacing: '0.08em' }}>SERVICES</div>
-          </div>
+        {/* Stats bar */}
+        <div style={{ display: 'flex', gap: '0', background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '16px', overflow: 'hidden', marginBottom: '24px' }}>
+          {[
+            { label: 'NOTE', value: (note / 10).toFixed(1), color: 'var(--gold)' },
+            { label: 'AVIS', value: avis.toString(), color: 'var(--t1)' },
+            { label: 'REPONSE', value: `${reponse}min`, color: 'var(--flash)' },
+            { label: 'ACCEPT.', value: `${acceptation}%`, color: 'var(--t1)' },
+            { label: 'PRESTA.', value: prestations.toString(), color: 'var(--t1)' },
+          ].map((stat, i, arr) => (
+            <div key={stat.label} style={{ flex: 1, padding: '14px 8px', textAlign: 'center', borderRight: i < arr.length - 1 ? '1px solid var(--edge1)' : 'none' }}>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '16px', color: stat.color, marginBottom: '2px' }}>{stat.value}</div>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '9px', color: 'var(--t4)', letterSpacing: '0.08em' }}>{stat.label}</div>
+            </div>
+          ))}
         </div>
 
         {/* Slogan & bio */}
-        {pro.slogan && (
+        {selectedPro.slogan && (
           <p style={{ fontFamily: 'Inter, sans-serif', fontStyle: 'italic', fontWeight: 500, fontSize: '15px', color: 'var(--t2)', marginBottom: '12px' }}>
-            "{pro.slogan}"
+            "{selectedPro.slogan}"
           </p>
         )}
-        {pro.bio && (
+        {selectedPro.bio && (
           <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', color: 'var(--t3)', lineHeight: 1.6, marginBottom: '28px' }}>
-            {pro.bio}
+            {selectedPro.bio}
           </p>
         )}
 
@@ -110,12 +116,26 @@ export default function ProProfile() {
         </h2>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {services.map((service, i) => (
-            <div key={i} style={{ background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '16px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div
+              key={i}
+              style={{ background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '16px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}
+            >
               <div style={{ flex: 1 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
                   <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '15px', color: 'var(--t1)' }}>{service.nom}</span>
                   {service.badge && (
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '10px', padding: '2px 8px', borderRadius: '999px', background: 'rgba(242,208,107,0.12)', color: 'var(--gold)', border: '1px solid rgba(242,208,107,0.2)', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+                    <span style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontWeight: 600,
+                      fontSize: '10px',
+                      padding: '2px 8px',
+                      borderRadius: '999px',
+                      background: service.badge.toLowerCase() === 'populaire' ? 'rgba(242,208,107,0.12)' : 'rgba(0,217,122,0.12)',
+                      color: service.badge.toLowerCase() === 'populaire' ? 'var(--gold)' : 'var(--flash)',
+                      border: `1px solid ${service.badge.toLowerCase() === 'populaire' ? 'rgba(242,208,107,0.2)' : 'rgba(0,217,122,0.2)'}`,
+                      letterSpacing: '0.04em',
+                      textTransform: 'uppercase',
+                    }}>
                       {service.badge}
                     </span>
                   )}
@@ -132,36 +152,12 @@ export default function ProProfile() {
             </div>
           ))}
         </div>
-
-        {/* Reviews */}
-        {pro.reviews && pro.reviews.length > 0 && (
-          <>
-            <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '18px', color: 'var(--t1)', marginBottom: '16px', marginTop: '28px' }}>
-              Avis clients
-            </h2>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {pro.reviews.map((review, i) => (
-                <div key={i} style={{ background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '16px', padding: '16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
-                    <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '14px', color: 'var(--t1)' }}>{review.auteur}</span>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                      <IconStar size={12} color="var(--gold)" />
-                      <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '12px', color: 'var(--gold)' }}>{review.note}</span>
-                    </div>
-                  </div>
-                  <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '13px', color: 'var(--t3)', lineHeight: 1.5, marginBottom: '6px' }}>{review.texte}</p>
-                  <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '11px', color: 'var(--t4)' }}>{review.date}</span>
-                </div>
-              ))}
-            </div>
-          </>
-        )}
       </div>
 
       {/* Sticky CTA */}
       <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '430px', padding: '16px 20px', background: 'rgba(5,5,7,0.97)', backdropFilter: 'blur(20px)', borderTop: '1px solid var(--edge1)', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}>
         <button
-          onClick={() => navigateTo('bookingFlow')}
+          onClick={() => setCurrentScreen('bookingFlow')}
           style={{ width: '100%', height: '56px', background: 'var(--gold)', color: '#050507', border: 'none', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '15px', letterSpacing: '0.04em', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '0 4px 20px rgba(242,208,107,0.25)' }}
         >
           Reserver maintenant

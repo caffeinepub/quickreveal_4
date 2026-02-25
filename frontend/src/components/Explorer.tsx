@@ -1,313 +1,117 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
-import type { ProProfileData } from '../context/AppContext';
-import BottomNav from './BottomNav';
-import GlobalHeader from './GlobalHeader';
-import { DEMO_PROS } from '../utils/demoData';
+import { DEMO_PROS } from '../data/mockData';
+import { IconSearch, IconStar } from './icons/Icons';
 
-const StarIcon = () => (
-  <svg width="12" height="12" viewBox="0 0 12 12" fill="#F2D06B" stroke="#F2D06B" strokeWidth="0.5">
-    <polygon points="6,1 7.5,4.5 11,5 8.5,7.5 9,11 6,9.5 3,11 3.5,7.5 1,5 4.5,4.5" />
-  </svg>
-);
-
-const SearchIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-    <circle cx="7" cy="7" r="4.5" />
-    <line x1="10.5" y1="10.5" x2="14" y2="14" />
-  </svg>
-);
-
-const LightningIcon = () => (
-  <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#00D97A" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <polyline points="6,1 3,5.5 5.5,5.5 4,9 7,4.5 4.5,4.5" />
-  </svg>
-);
-
-const CATEGORIES = ['Tous', 'Coiffure', 'Esthétique', 'Massage', 'Barbier', 'Ongles'];
-
-function getInitials(name: string) {
-  return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
-}
-
-// Convert DemoPro to ProProfileData shape
-function toProProfileData(pro: typeof DEMO_PROS[0]): ProProfileData {
-  return {
-    ...pro,
-    flashResponseTime: typeof pro.flashResponseTime === 'number' ? pro.flashResponseTime : undefined,
-  };
-}
+const CATEGORIES = ['Tous', 'Barber', 'Coiffure', 'Esthetique', 'Massage'];
 
 export default function Explorer() {
-  const { navigateToProProfile } = useAppContext();
-  const [search, setSearch] = useState('');
+  const { navigateTo, setSelectedPro } = useAppContext();
   const [activeCategory, setActiveCategory] = useState('Tous');
+  const [searchQuery, setSearchQuery] = useState('');
 
-  const filtered = DEMO_PROS.filter(pro => {
-    const matchSearch = pro.name.toLowerCase().includes(search.toLowerCase()) ||
-      pro.category.toLowerCase().includes(search.toLowerCase()) ||
-      pro.city.toLowerCase().includes(search.toLowerCase());
-    const matchCat = activeCategory === 'Tous' || pro.category === activeCategory;
-    return matchSearch && matchCat;
+  const filteredPros = DEMO_PROS.filter(pro => {
+    const matchCat = activeCategory === 'Tous' || pro.categorie.toLowerCase() === activeCategory.toLowerCase();
+    const matchSearch = !searchQuery ||
+      pro.prenom.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      pro.ville.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchCat && matchSearch;
   });
 
-  const flashPros = DEMO_PROS.filter(p => p.flashActive);
-
   return (
-    <div style={{ minHeight: '100vh', background: '#050507', paddingBottom: '80px' }}>
-      <GlobalHeader />
+    <div style={{ minHeight: '100vh', background: 'var(--void)', paddingBottom: '80px' }}>
+      {/* Header */}
+      <div style={{ padding: '20px 20px 0' }}>
+        <h1 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 900, fontSize: '28px', color: 'var(--t1)', letterSpacing: '-0.04em', marginBottom: '16px' }}>
+          Explorer
+        </h1>
 
-      <div style={{ paddingTop: '72px' }}>
         {/* Search */}
-        <div style={{ padding: '16px 16px 0' }}>
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px',
-            background: '#0D0D13',
-            border: '1px solid #1E1E26',
-            borderRadius: '12px',
-            padding: '0 14px',
-            height: '44px',
-          }}>
-            <span style={{ color: '#54546C' }}><SearchIcon /></span>
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Rechercher un expert..."
-              style={{
-                flex: 1,
-                background: 'none',
-                border: 'none',
-                outline: 'none',
-                color: '#F4F4F8',
-                fontSize: '14px',
-                fontFamily: 'Inter, sans-serif',
-              }}
-            />
+        <div style={{ position: 'relative', marginBottom: '16px' }}>
+          <div style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)' }}>
+            <IconSearch size={16} color="var(--t4)" />
           </div>
+          <input
+            type="text"
+            placeholder="Rechercher..."
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            style={{ width: '100%', height: '46px', background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '12px', paddingLeft: '40px', paddingRight: '16px', fontFamily: 'Inter, sans-serif', fontSize: '14px', color: 'var(--t1)', outline: 'none', boxSizing: 'border-box' }}
+          />
         </div>
 
-        {/* Category pills */}
-        <div style={{
-          display: 'flex',
-          gap: '8px',
-          padding: '12px 16px',
-          overflowX: 'auto',
-          scrollbarWidth: 'none',
-        }}>
+        {/* Category filters */}
+        <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '4px', marginBottom: '20px', scrollbarWidth: 'none' }}>
           {CATEGORIES.map(cat => (
             <button
               key={cat}
               onClick={() => setActiveCategory(cat)}
               style={{
                 flexShrink: 0,
-                padding: '6px 14px',
-                borderRadius: '20px',
-                border: `1px solid ${activeCategory === cat ? '#F2D06B' : '#1E1E26'}`,
-                background: activeCategory === cat ? 'rgba(242,208,107,0.08)' : '#0D0D13',
-                color: activeCategory === cat ? '#F2D06B' : '#54546C',
-                fontSize: '13px',
-                fontWeight: activeCategory === cat ? 600 : 400,
-                cursor: 'pointer',
+                height: '34px',
+                padding: '0 16px',
+                borderRadius: '999px',
+                border: `1px solid ${activeCategory === cat ? 'var(--gold)' : 'var(--edge1)'}`,
+                background: activeCategory === cat ? 'rgba(242,208,107,0.1)' : 'var(--d2)',
+                color: activeCategory === cat ? 'var(--gold)' : 'var(--t3)',
                 fontFamily: 'Inter, sans-serif',
+                fontWeight: activeCategory === cat ? 600 : 400,
+                fontSize: '13px',
+                cursor: 'pointer',
               }}
             >
               {cat}
             </button>
           ))}
         </div>
-
-        {/* Flash Live section */}
-        {flashPros.length > 0 && (
-          <div style={{ padding: '0 16px 16px' }}>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '6px',
-              marginBottom: '12px',
-            }}>
-              <LightningIcon />
-              <span style={{
-                fontSize: '15px',
-                fontWeight: 700,
-                color: '#F4F4F8',
-                fontFamily: 'Inter, sans-serif',
-              }}>
-                Flash Live
-              </span>
-            </div>
-
-            <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', scrollbarWidth: 'none' }}>
-              {flashPros.map(pro => (
-                <button
-                  key={pro.id + '-flash'}
-                  onClick={() => navigateToProProfile(toProProfileData(pro))}
-                  style={{
-                    flexShrink: 0,
-                    width: '120px',
-                    background: '#0D0D13',
-                    border: '1px solid rgba(0,217,122,0.2)',
-                    borderRadius: '12px',
-                    padding: '12px',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                  }}
-                >
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    background: pro.gradient || 'linear-gradient(135deg, #1C1C26, #2E2E3E)',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    marginBottom: '8px',
-                    fontSize: '14px',
-                    fontWeight: 700,
-                    color: '#F4F4F8',
-                  }}>
-                    {getInitials(pro.name)}
-                  </div>
-                  <div style={{ fontSize: '12px', fontWeight: 600, color: '#F4F4F8', marginBottom: '2px', fontFamily: 'Inter, sans-serif' }}>
-                    {pro.name.split(' ')[0]}
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#00D97A', fontWeight: 500, fontFamily: 'Inter, sans-serif' }}>
-                    Répond en {pro.flashResponseTime || 5}min
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Pro list */}
-        <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{
-            fontSize: '11px',
-            fontWeight: 600,
-            color: '#54546C',
-            marginBottom: '4px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            fontFamily: 'Inter, sans-serif',
-          }}>
-            {filtered.length} expert{filtered.length !== 1 ? 's' : ''} disponible{filtered.length !== 1 ? 's' : ''}
-          </div>
-
-          {filtered.map(pro => (
-            <button
-              key={pro.id}
-              onClick={() => navigateToProProfile(toProProfileData(pro))}
-              style={{
-                width: '100%',
-                height: '80px',
-                background: '#0D0D13',
-                border: '1px solid rgba(255,255,255,0.05)',
-                borderRadius: '14px',
-                padding: '0 16px',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '14px',
-                cursor: 'pointer',
-                textAlign: 'left',
-              }}
-            >
-              {/* Avatar */}
-              <div style={{
-                width: '44px',
-                height: '44px',
-                borderRadius: '50%',
-                flexShrink: 0,
-                background: pro.gradient || 'linear-gradient(135deg, #1C1C26, #2E2E3E)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '16px',
-                fontWeight: 700,
-                color: '#F4F4F8',
-                overflow: 'hidden',
-              }}>
-                {pro.photos && pro.photos.length > 0 ? (
-                  <img
-                    src={pro.photos[0]}
-                    alt={pro.name}
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }}
-                  />
-                ) : (
-                  getInitials(pro.name)
-                )}
-              </div>
-
-              {/* Info */}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{
-                  fontSize: '16px',
-                  fontWeight: 700,
-                  color: '#F4F4F8',
-                  fontFamily: 'Inter, sans-serif',
-                  whiteSpace: 'nowrap',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                }}>
-                  {pro.name}
-                </div>
-                <div style={{
-                  fontSize: '13px',
-                  fontWeight: 400,
-                  color: '#54546C',
-                  fontFamily: 'Inter, sans-serif',
-                  marginTop: '2px',
-                }}>
-                  {pro.category} · {pro.city}
-                </div>
-                {pro.flashActive && (
-                  <div style={{
-                    fontSize: '12px',
-                    fontWeight: 500,
-                    color: '#00D97A',
-                    marginTop: '2px',
-                    fontFamily: 'Inter, sans-serif',
-                  }}>
-                    Répond en {pro.flashResponseTime || 5}min
-                  </div>
-                )}
-              </div>
-
-              {/* Rating + Price */}
-              <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '3px',
-                  justifyContent: 'flex-end',
-                  marginBottom: '4px',
-                }}>
-                  <StarIcon />
-                  <span style={{
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#F4F4F8',
-                    fontFamily: 'Inter, sans-serif',
-                  }}>
-                    {pro.rating.toFixed(1)}
-                  </span>
-                </div>
-                <div style={{
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  color: '#F2D06B',
-                  fontFamily: 'Inter, sans-serif',
-                }}>
-                  dès {pro.startingPrice} CHF
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
       </div>
 
-      <BottomNav activeTab="explorer" />
+      {/* Pro list */}
+      <div style={{ padding: '0 20px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+        {filteredPros.map(pro => (
+          <button
+            key={pro.id}
+            onClick={() => {
+              setSelectedPro(pro);
+              navigateTo('providerDetail');
+            }}
+            style={{
+              width: '100%',
+              background: 'transparent',
+              border: 'none',
+              borderBottom: '1px solid var(--edge1)',
+              padding: '16px 0',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '14px',
+              textAlign: 'left',
+            }}
+          >
+            {/* Avatar */}
+            <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: pro.gradient, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '18px', color: 'var(--t1)' }}>{pro.initials}</span>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '15px', color: 'var(--t1)', marginBottom: '2px' }}>
+                {pro.prenom} {pro.nom}
+              </div>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '12px', color: 'var(--t3)', marginBottom: '4px' }}>
+                {pro.categorie} · {pro.ville}
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                <IconStar size={11} color="var(--gold)" />
+                <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '12px', color: 'var(--gold)' }}>{pro.note}</span>
+              </div>
+            </div>
+            <div style={{ textAlign: 'right', flexShrink: 0 }}>
+              {/* Use startingPrice (new field name) */}
+              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '15px', color: 'var(--t1)' }}>des {pro.startingPrice}</div>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '11px', color: 'var(--t3)' }}>CHF</div>
+            </div>
+          </button>
+        ))}
+      </div>
     </div>
   );
 }

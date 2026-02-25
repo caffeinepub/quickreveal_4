@@ -1,201 +1,96 @@
-import React, { useState } from 'react';
-import { ArrowLeft, Star, Zap } from 'lucide-react';
+import React from 'react';
 import { useAppContext } from '../context/AppContext';
+import { IconArrowLeft, IconStar } from './icons/Icons';
 
 export default function ProviderDetail() {
   const { selectedPro, navigateTo } = useAppContext();
-  const [selectedService, setSelectedService] = useState<any>(null);
 
-  const pro = selectedPro;
-
-  if (!pro) {
+  if (!selectedPro) {
     return (
-      <div
-        style={{
-          height: '100%',
-          background: 'var(--void)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <button
-          onClick={() => navigateTo('explorer')}
-          style={{ color: 'var(--gold)', background: 'none', border: 'none', cursor: 'pointer' }}
-        >
-          ← Retour
+      <div style={{ minHeight: '100vh', background: 'var(--void)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button onClick={() => navigateTo('explorer')} style={{ color: 'var(--gold)', background: 'none', border: 'none', cursor: 'pointer' }}>
+          Retour
         </button>
       </div>
     );
   }
 
-  const services = (pro as any).services || [
-    { id: 's1', name: 'Coupe + Brushing', duration: '45min', price: 35, badge: 'Populaire' },
-    { id: 's2', name: 'Coloration', duration: '90min', price: 85 },
+  const pro = selectedPro;
+  // Use new field names from utils/demoData DemoPro type
+  const services = pro.services ?? [
+    { nom: 'Coupe homme', prix: pro.startingPrice, duree: 30, badge: undefined as string | undefined },
+  ];
+
+  const stats = [
+    { label: 'Note', value: pro.note.toFixed(1) },
+    { label: 'Avis', value: String(pro.avis) },
+    { label: 'Des', value: `${pro.startingPrice} CHF` },
   ];
 
   return (
-    <div
-      style={{
-        height: '100%',
-        background: 'var(--void)',
-        overflowY: 'auto',
-        paddingBottom: 100,
-      }}
-    >
+    <div style={{ minHeight: '100vh', background: 'var(--void)', paddingBottom: '100px' }}>
       {/* Cover */}
-      <div
-        style={{
-          height: 220,
-          background: (pro as any).coverGradient || (pro as any).gradient || 'linear-gradient(135deg, #1a1a2e, #16213e)',
-          position: 'relative',
-        }}
-      >
+      <div style={{ height: '220px', background: pro.gradient, position: 'relative' }}>
         <button
           onClick={() => navigateTo('explorer')}
-          style={{
-            position: 'absolute',
-            top: 16,
-            left: 16,
-            width: 40,
-            height: 40,
-            borderRadius: 12,
-            background: 'rgba(0,0,0,0.5)',
-            backdropFilter: 'blur(12px)',
-            border: '1px solid rgba(255,255,255,0.1)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer',
-          }}
+          style={{ position: 'absolute', top: '16px', left: '16px', width: '40px', height: '40px', borderRadius: '12px', background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}
         >
-          <ArrowLeft size={18} color="#fff" />
+          <IconArrowLeft size={18} color="var(--t1)" />
         </button>
+        <div style={{ position: 'absolute', bottom: '-28px', left: '20px', width: '72px', height: '72px', borderRadius: '20px', background: 'rgba(255,255,255,0.1)', backdropFilter: 'blur(10px)', border: '3px solid var(--void)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '24px', color: 'var(--t1)' }}>{pro.initials}</span>
+        </div>
       </div>
 
-      <div style={{ padding: '0 20px', marginTop: -40 }}>
-        <div
-          style={{
-            width: 80,
-            height: 80,
-            borderRadius: '50%',
-            background: (pro as any).gradient || 'linear-gradient(135deg, #667eea, #764ba2)',
-            border: '3px solid var(--gold)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: 28,
-            marginBottom: 12,
-          }}
-        >
-          {(pro as any).emoji || '✨'}
-        </div>
-
-        <h1 style={{ fontSize: 22, fontWeight: 800, color: 'var(--t1)', marginBottom: 4 }}>
-          {pro.name}
+      <div style={{ padding: '44px 20px 0' }}>
+        <h1 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '24px', color: 'var(--t1)', letterSpacing: '-0.03em', marginBottom: '4px' }}>
+          {pro.prenom} {pro.nom}
         </h1>
-        <p style={{ fontSize: 13, color: 'var(--t2)', fontStyle: 'italic', marginBottom: 12 }}>
-          {(pro as any).slogan || 'Expert beauté certifié NEXUS'}
+        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '13px', color: 'var(--t3)', marginBottom: '20px' }}>
+          {pro.categorie} · {pro.ville}
         </p>
 
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 20 }}>
-          <span
-            style={{
-              padding: '4px 10px',
-              borderRadius: 20,
-              background: 'rgba(212,175,55,0.15)',
-              border: '1px solid var(--edge-gold)',
-              fontSize: 12,
-              fontWeight: 700,
-              color: 'var(--gold)',
-            }}
-          >
-            ⚡ Flash
-          </span>
-          <span
-            style={{
-              padding: '4px 10px',
-              borderRadius: 20,
-              background: 'rgba(251,191,36,0.15)',
-              border: '1px solid rgba(251,191,36,0.3)',
-              fontSize: 12,
-              fontWeight: 700,
-              color: '#fbbf24',
-            }}
-          >
-            ⭐ {(pro as any).rating || '4.9'}
-          </span>
+        {/* Stats */}
+        <div style={{ display: 'flex', gap: '0', background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '16px', overflow: 'hidden', marginBottom: '24px' }}>
+          {stats.map((stat, i, arr) => (
+            <div key={stat.label} style={{ flex: 1, padding: '14px 8px', textAlign: 'center', borderRight: i < arr.length - 1 ? '1px solid var(--edge1)' : 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '3px', marginBottom: '2px' }}>
+                {stat.label === 'Note' && <IconStar size={12} color="var(--gold)" />}
+                <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '16px', color: stat.label === 'Note' ? 'var(--gold)' : 'var(--t1)' }}>{stat.value}</div>
+              </div>
+              <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '9px', color: 'var(--t4)', letterSpacing: '0.08em' }}>{stat.label.toUpperCase()}</div>
+            </div>
+          ))}
         </div>
 
+        {/* Bio */}
+        {pro.bio && (
+          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', color: 'var(--t3)', lineHeight: 1.6, marginBottom: '28px' }}>
+            {pro.bio}
+          </p>
+        )}
+
         {/* Services */}
-        <div style={{ marginBottom: 24 }}>
-          <h2 style={{ fontSize: 15, fontWeight: 800, color: 'var(--t1)', marginBottom: 12 }}>
-            Services
-          </h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            {services.map((svc: any) => (
-              <div
-                key={svc.id}
-                onClick={() => setSelectedService(svc)}
-                style={{
-                  padding: '14px 16px',
-                  borderRadius: 14,
-                  background: selectedService?.id === svc.id ? 'rgba(212,175,55,0.1)' : 'var(--d2)',
-                  border:
-                    selectedService?.id === svc.id
-                      ? '1px solid var(--gold)'
-                      : '1px solid var(--d4)',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}
-              >
-                <div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: 'var(--t1)' }}>
-                    {svc.name}
-                  </div>
-                  <div style={{ fontSize: 12, color: 'var(--t3)' }}>{svc.duration}</div>
-                </div>
-                <div style={{ fontSize: 18, fontWeight: 900, color: 'var(--gold)' }}>
-                  {svc.price} CHF
-                </div>
-              </div>
-            ))}
-          </div>
+        <h2 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '18px', color: 'var(--t1)', marginBottom: '16px' }}>
+          Services
+        </h2>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {services.map((service, i) => (
+            <div key={i} style={{ background: 'var(--d2)', border: '1px solid var(--edge1)', borderRadius: '16px', padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '15px', color: 'var(--t1)' }}>{service.nom}</span>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '16px', color: 'var(--gold)' }}>{service.prix} CHF</span>
+            </div>
+          ))}
         </div>
       </div>
 
       {/* Sticky CTA */}
-      <div
-        style={{
-          position: 'fixed',
-          bottom: 0,
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '100%',
-          maxWidth: 430,
-          padding: '12px 20px 28px',
-          background: 'linear-gradient(to top, var(--void) 60%, transparent)',
-          zIndex: 50,
-        }}
-      >
+      <div style={{ position: 'fixed', bottom: 0, left: '50%', transform: 'translateX(-50%)', width: '100%', maxWidth: '430px', padding: '16px 20px', background: 'rgba(5,5,7,0.97)', backdropFilter: 'blur(20px)', borderTop: '1px solid var(--edge1)', paddingBottom: 'calc(16px + env(safe-area-inset-bottom))' }}>
         <button
           onClick={() => navigateTo('bookingFlow')}
-          style={{
-            width: '100%',
-            padding: '16px',
-            borderRadius: 16,
-            background: 'linear-gradient(135deg, var(--gold) 0%, #b8860b 100%)',
-            border: 'none',
-            color: '#000',
-            fontSize: 15,
-            fontWeight: 900,
-            cursor: 'pointer',
-            boxShadow: '0 4px 20px rgba(212,175,55,0.4)',
-          }}
+          style={{ width: '100%', height: '56px', background: 'var(--gold)', color: '#050507', border: 'none', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '15px', letterSpacing: '0.04em', textTransform: 'uppercase', cursor: 'pointer', boxShadow: '0 4px 20px rgba(242,208,107,0.25)' }}
         >
-          ⚡ RÉSERVER — {selectedService?.price || (pro as any).startingPrice || 35} CHF
+          Reserver maintenant
         </button>
       </div>
     </div>

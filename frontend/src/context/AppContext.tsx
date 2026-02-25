@@ -1,382 +1,311 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import { DemoPro } from '../data/mockData';
 
-export type AppRole = 'client' | 'pro' | null;
-
-export type Screen =
-  | 'splash'
+export type AppScreen =
+  | 'login'
   | 'roleSelection'
-  | 'otpVerification'
-  | 'otp'
-  | 'subscription'
-  | 'subscriptionScreen'
-  | 'proLogin'
-  | 'clientDashboard'
-  | 'nexusOS'
-  | 'explorer'
-  | 'monBusiness'
-  | 'walletPro'
-  | 'radarPro'
-  | 'notificationCenter'
-  | 'proProfile'
+  | 'roleSelectionV2'
+  | 'clientOtp'
+  | 'proOnboarding'
+  | 'explorerV2'
+  | 'proFiche'
   | 'bookingFlow'
   | 'liveStatus'
-  | 'landing'
-  | 'builder'
+  | 'monBusiness'
+  | 'subscriptionModal'
+  | 'subscriptionSuccess'
+  | 'proSuccess'
+  | 'nexusOS'
+  | 'radarPro'
+  | 'walletPro'
+  | 'clientDashboard'
+  | 'otpVerification'
+  | 'otp'
+  | 'notificationCenter'
+  | 'splash'
   | 'welcome'
-  | 'pro-dashboard'
-  | 'radar-pro'
-  | 'wallet-pro'
-  | 'mon-business';
+  | 'explorer'
+  | 'providerDetail'
+  | 'bookingLocation'
+  | 'bookingDate'
+  | 'bookingContact'
+  | 'subscription'
+  | 'builder'
+  | 'proLogin'
+  | 'upgradeModal'
+  | 'subscriptionScreen';
 
-export interface ProProfileData {
-  id: string;
-  name: string;
-  category: string;
-  city: string;
-  rating: number;
-  reviewCount: number;
-  startingPrice: number;
-  isFlash: boolean;
-  flashActive: boolean;
-  flashResponseTime?: number;
-  responseTime?: number;
-  acceptanceRate?: number;
-  serviceCount?: number;
-  gradient?: string;
-  coverGradient?: string;
-  slogan?: string;
-  bio?: string;
-  emoji?: string;
-  services?: Service[];
-  reviews?: Review[];
-  galleryGradients?: string[];
-  hasRevolut?: boolean;
-  revolutHandle?: string;
-  photos?: string[];
-}
-
-export interface Service {
-  id: string;
-  name: string;
-  duration: number | string;
-  price: number;
-  description?: string;
-  badge?: string;
-}
-
-export interface Review {
-  id: string;
-  author?: string;
-  name?: string;
-  rating: number;
-  comment?: string;
-  text?: string;
-  date?: string;
-}
+export type AppRole = 'client' | 'pro' | null;
 
 export interface Notification {
   id: string;
   title: string;
-  message: string;
-  body?: string; // kept for backward compat
+  body?: string;
+  message?: string;
   read: boolean;
   createdAt: number;
+  timestamp?: number;
 }
-
-// Alias for backward compatibility
-export type LocalBooking = Booking;
 
 export interface Booking {
   id: string;
-  proId?: string;
   proName: string;
-  serviceId?: string;
-  serviceName?: string;
-  service?: string;
-  price: number;
+  service: string;
   date: string;
-  timeSlot?: string;
   time?: string;
-  address?: string;
   status: 'pending' | 'confirmed' | 'cancelled';
-  createdAt?: number;
+  price: number;
+}
+
+export interface BookingData {
+  proId?: string;
+  proName?: string;
+  service?: string;
+  servicePrice?: number;
+  location?: 'domicile' | 'studio';
+  date?: string;
+  timeSlot?: string;
+  clientName?: string;
+  clientPhone?: string;
+  clientAddress?: string;
+}
+
+export interface SMSToastData {
+  visible: boolean;
+  message: string;
+  phone: string;
 }
 
 export interface WalletData {
-  balance: number;
-  escrow: number;
-  transactions: Transaction[];
+  solde: number;
+  sequestre: number;
+  transactions: any[];
+  chartData: any[];
 }
 
-export interface Transaction {
-  id: string;
-  label: string;
-  amount: number;
-  date: string;
-  type: 'credit' | 'debit';
-}
+// Legacy type aliases
+export type ProData = DemoPro;
+export type ProProfileData = DemoPro;
 
-// FlashRequest kept for backward compat with MessagingSheet
-export interface FlashRequest {
+export interface ServiceItem {
   id: string;
-  clientName: string;
-  clientAvatar: string;
-  clientRating: number;
-  service: string;
+  name: string;
   price: number;
-  distance: string;
-  expiresAt: number;
-  status: 'pending' | 'confirmed' | 'declined';
+  duration: number;
+  badge?: 'Populaire' | 'Nouveau' | 'Promo' | null;
+}
+
+export interface ReviewItem {
+  author: string;
+  note: number;
+  text: string;
+  date: string;
 }
 
 interface AppContextType {
-  // Navigation
-  currentScreen: Screen;
-  navigateTo: (screen: Screen) => void;
-  navigate: (screen: Screen) => void;
+  currentScreen: AppScreen;
+  setCurrentScreen: (screen: AppScreen) => void;
+  navigateTo: (screen: AppScreen) => void;
   goBack: () => void;
-  screenHistory: Screen[];
-
-  // User
   appRole: AppRole;
   setAppRole: (role: AppRole) => void;
-  userName: string;
-  setUserName: (name: string) => void;
-
-  // Pro
-  proProfile: ProProfileData | null;
-  setProProfile: (profile: ProProfileData | null) => void;
+  selectedPro: DemoPro | null;
+  setSelectedPro: (pro: DemoPro | null) => void;
+  currentBooking: BookingData;
+  setCurrentBooking: (booking: BookingData) => void;
+  smsToast: SMSToastData;
+  showSMSToast: (message: string, phone?: string) => void;
+  hideSMSToast: () => void;
   flashActive: boolean;
   setFlashActive: (active: boolean) => void;
-  proActif: boolean;
-  setProActif: (active: boolean) => void;
-  essaiJours: number;
-  setEssaiJours: (days: number) => void;
-
-  // Wallet
-  wallet: WalletData;
-  setWallet: (wallet: WalletData) => void;
-
-  // Bookings
-  bookings: Booking[];
-  addBooking: (booking: Booking) => void;
-  updateBookingStatus: (id: string, status: Booking['status']) => void;
-  currentBooking: Booking | null;
-  setCurrentBooking: (booking: Booking | null) => void;
-
-  // Notifications
-  notifications: Notification[];
-  unreadCount: number;
-  addNotification: (notification: Notification) => void;
-  markAllRead: () => void;
-  markNotificationsRead: () => void;
-  removeNotification: (id: string) => void;
-
-  // Radar
-  radarBadgePulse: boolean;
-  setRadarBadgePulse: (pulse: boolean) => void;
-
-  // Subscription
   subscriptionActive: boolean;
   setSubscriptionActive: (active: boolean) => void;
-
-  // Selected pro for profile view
-  selectedPro: ProProfileData | null;
-  navigateToProProfile: (pro: ProProfileData) => void;
-  navigateToBookingFlow: (pro: ProProfileData, service?: any) => void;
-  navigateToLiveStatus: () => void;
-
-  // Upgrade
-  upgradeToProAccount: () => void;
-
-  // Landing
-  goToLanding: () => void;
-
-  // Notification center
+  proActif: boolean;
+  setProActif: (v: boolean) => void;
+  userName: string;
+  setUserName: (name: string) => void;
+  notifications: Notification[];
+  addNotification: (notif: Omit<Notification, 'id' | 'createdAt'>) => void;
+  markAllRead: () => void;
+  removeNotification: (id: string) => void;
+  unreadCount: number;
   notificationCenterOpen: boolean;
   setNotificationCenterOpen: (open: boolean) => void;
-
-  // Flash requests (for RadarPro / MessagingSheet compat)
-  flashRequests: FlashRequest[];
-  addFlashRequest: (req: FlashRequest) => void;
-  updateFlashRequest: (id: string, status: 'confirmed' | 'declined') => void;
+  subscriptionModalOpen: boolean;
+  openSubscriptionModal: () => void;
+  closeSubscriptionModal: () => void;
+  bookings: Booking[];
+  setBookings: (bookings: Booking[]) => void;
+  wallet: WalletData;
+  selectedBookingService: ServiceItem | null;
+  setSelectedBookingService: (s: ServiceItem | null) => void;
+  essaiJours: number;
+  setEssaiJours: (days: number) => void;
+  proProfile: DemoPro | null;
+  // Legacy helpers
+  navigateToProProfile: (pro: DemoPro) => void;
+  navigateToBookingFlow: () => void;
+  setProProfile: (pro: DemoPro) => void;
+  upgradeToProAccount: () => void;
+  goToLanding: () => void;
 }
 
 const AppContext = createContext<AppContextType | null>(null);
 
-const INITIAL_WALLET: WalletData = {
-  balance: 240,
-  escrow: 55,
+const DEFAULT_WALLET: WalletData = {
+  solde: 240,
+  sequestre: 55,
   transactions: [
-    { id: '1', label: 'Réservation - Julien Rossi', amount: 85, date: '2026-02-20', type: 'credit' },
-    { id: '2', label: 'Réservation - Lucie Esthetics', amount: 120, date: '2026-02-18', type: 'credit' },
-    { id: '3', label: 'Virement Revolut', amount: -200, date: '2026-02-15', type: 'debit' },
-    { id: '4', label: 'Réservation - Zen Touch', amount: 95, date: '2026-02-12', type: 'credit' },
+    { nom: 'Thomas M.', montant: 55, type: 'entree', date: "Aujourd'hui 10:00" },
+    { nom: 'Lucas B.', montant: 45, type: 'entree', date: "Aujourd'hui 13:30" },
+    { nom: 'Antoine R.', montant: 40, type: 'entree', date: "Hier 16:00" },
+    { nom: 'Mehdi A.', montant: 35, type: 'entree', date: "Hier 11:00" },
+    { nom: 'Julien P.', montant: 30, type: 'entree', date: "Lun 14:30" },
+    { nom: 'Virement IBAN', montant: -65, type: 'sortie', date: "Lun 09:00" },
   ],
+  chartData: [40, 65, 55, 90, 110, 80, 20],
 };
 
-const INITIAL_NOTIFICATIONS: Notification[] = [
-  {
-    id: '1',
-    title: 'Nouvelle réservation',
-    message: 'Marie D. a réservé une coupe pour demain à 14h',
-    read: false,
-    createdAt: Date.now() - 3600000,
-  },
-  {
-    id: '2',
-    title: 'Paiement reçu',
-    message: '85 CHF crédités sur votre wallet',
-    read: false,
-    createdAt: Date.now() - 7200000,
-  },
-  {
-    id: '3',
-    title: 'Avis client',
-    message: 'Sophie L. vous a laissé 5 étoiles',
-    read: true,
-    createdAt: Date.now() - 86400000,
-  },
-];
-
 export function AppContextProvider({ children }: { children: ReactNode }) {
-  const [currentScreen, setCurrentScreen] = useState<Screen>('splash');
-  const [screenHistory, setScreenHistory] = useState<Screen[]>(['splash']);
+  const [currentScreen, setCurrentScreen] = useState<AppScreen>('login');
+  const [history, setHistory] = useState<AppScreen[]>([]);
   const [appRole, setAppRole] = useState<AppRole>(null);
-  const [userName, setUserName] = useState('');
-  const [proProfile, setProProfile] = useState<ProProfileData | null>(null);
+  const [selectedPro, setSelectedPro] = useState<DemoPro | null>(null);
+  const [currentBooking, setCurrentBooking] = useState<BookingData>({});
+  const [smsToast, setSmsToast] = useState<SMSToastData>({ visible: false, message: '', phone: '' });
   const [flashActive, setFlashActive] = useState(false);
-  const [proActif, setProActif] = useState(false);
-  const [essaiJours, setEssaiJours] = useState(0);
-  const [wallet, setWallet] = useState<WalletData>(INITIAL_WALLET);
-  const [bookings, setBookings] = useState<Booking[]>([]);
-  const [currentBooking, setCurrentBooking] = useState<Booking | null>(null);
-  const [notifications, setNotifications] = useState<Notification[]>(INITIAL_NOTIFICATIONS);
-  const [radarBadgePulse, setRadarBadgePulse] = useState(true);
   const [subscriptionActive, setSubscriptionActive] = useState(false);
-  const [selectedPro, setSelectedPro] = useState<ProProfileData | null>(null);
+  const [proActif, setProActif] = useState(false);
+  const [userName, setUserName] = useState('');
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [notificationCenterOpen, setNotificationCenterOpen] = useState(false);
-  const [flashRequests, setFlashRequests] = useState<FlashRequest[]>([]);
+  const [subscriptionModalOpen, setSubscriptionModalOpen] = useState(false);
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [selectedBookingService, setSelectedBookingService] = useState<ServiceItem | null>(null);
+  const [essaiJours, setEssaiJours] = useState(7);
 
-  const navigateTo = useCallback((screen: Screen) => {
+  const navigateTo = useCallback((screen: AppScreen) => {
+    setHistory(prev => [...prev, currentScreen]);
     setCurrentScreen(screen);
-    setScreenHistory(prev => [...prev, screen]);
-  }, []);
-
-  const navigate = navigateTo;
+  }, [currentScreen]);
 
   const goBack = useCallback(() => {
-    setScreenHistory(prev => {
-      if (prev.length <= 1) return prev;
-      const newHistory = prev.slice(0, -1);
-      setCurrentScreen(newHistory[newHistory.length - 1]);
+    setHistory(prev => {
+      if (prev.length === 0) return prev;
+      const newHistory = [...prev];
+      const last = newHistory.pop()!;
+      setCurrentScreen(last);
       return newHistory;
     });
   }, []);
 
-  const addBooking = useCallback((booking: Booking) => {
-    setBookings(prev => [...prev, booking]);
+  const showSMSToast = useCallback((message: string, phone = '+41 79 000 00 00') => {
+    setSmsToast({ visible: true, message, phone });
   }, []);
 
-  const updateBookingStatus = useCallback((id: string, status: Booking['status']) => {
-    setBookings(prev => prev.map(b => b.id === id ? { ...b, status } : b));
+  const hideSMSToast = useCallback(() => {
+    setSmsToast(prev => ({ ...prev, visible: false }));
   }, []);
 
-  const addNotification = useCallback((notification: Notification) => {
-    setNotifications(prev => [notification, ...prev]);
+  const addNotification = useCallback((notif: Omit<Notification, 'id' | 'createdAt'>) => {
+    const newNotif: Notification = {
+      ...notif,
+      id: Date.now().toString() + Math.random().toString(36).slice(2),
+      createdAt: Date.now(),
+    };
+    setNotifications(prev => [newNotif, ...prev]);
   }, []);
 
   const markAllRead = useCallback(() => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   }, []);
 
-  const markNotificationsRead = markAllRead;
-
   const removeNotification = useCallback((id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   }, []);
 
-  const navigateToProProfile = useCallback((pro: ProProfileData) => {
-    setSelectedPro(pro);
-    navigateTo('proProfile');
-  }, [navigateTo]);
+  const unreadCount = notifications.filter(n => !n.read).length;
 
-  const navigateToBookingFlow = useCallback((pro: ProProfileData, _service?: any) => {
-    setSelectedPro(pro);
-    navigateTo('bookingFlow');
-  }, [navigateTo]);
+  const openSubscriptionModal = useCallback(() => setSubscriptionModalOpen(true), []);
+  const closeSubscriptionModal = useCallback(() => setSubscriptionModalOpen(false), []);
 
-  const navigateToLiveStatus = useCallback(() => {
-    navigateTo('liveStatus');
-  }, [navigateTo]);
+  const navigateToProProfile = useCallback((pro: DemoPro) => {
+    setSelectedPro(pro);
+    setHistory(prev => [...prev, currentScreen]);
+    setCurrentScreen('proFiche');
+  }, [currentScreen]);
+
+  const navigateToBookingFlow = useCallback(() => {
+    setHistory(prev => [...prev, currentScreen]);
+    setCurrentScreen('bookingFlow');
+  }, [currentScreen]);
+
+  const setProProfile = useCallback((pro: DemoPro) => {
+    setSelectedPro(pro);
+  }, []);
 
   const upgradeToProAccount = useCallback(() => {
     setAppRole('pro');
-    navigateTo('nexusOS');
-  }, [navigateTo]);
+    setProActif(true);
+    setSubscriptionActive(true);
+    setHistory(prev => [...prev, currentScreen]);
+    setCurrentScreen('nexusOS');
+  }, [currentScreen]);
 
   const goToLanding = useCallback(() => {
-    navigateTo('landing');
-  }, [navigateTo]);
-
-  const addFlashRequest = useCallback((req: FlashRequest) => {
-    setFlashRequests(prev => [req, ...prev]);
-  }, []);
-
-  const updateFlashRequest = useCallback((id: string, status: 'confirmed' | 'declined') => {
-    setFlashRequests(prev => prev.map(r => r.id === id ? { ...r, status } : r));
-  }, []);
-
-  const unreadCount = notifications.filter(n => !n.read).length;
+    setHistory(prev => [...prev, currentScreen]);
+    setCurrentScreen('login');
+  }, [currentScreen]);
 
   return (
-    <AppContext.Provider value={{
-      currentScreen,
-      navigateTo,
-      navigate,
-      goBack,
-      screenHistory,
-      appRole,
-      setAppRole,
-      userName,
-      setUserName,
-      proProfile,
-      setProProfile,
-      flashActive,
-      setFlashActive,
-      proActif,
-      setProActif,
-      essaiJours,
-      setEssaiJours,
-      wallet,
-      setWallet,
-      bookings,
-      addBooking,
-      updateBookingStatus,
-      currentBooking,
-      setCurrentBooking,
-      notifications,
-      unreadCount,
-      addNotification,
-      markAllRead,
-      markNotificationsRead,
-      removeNotification,
-      radarBadgePulse,
-      setRadarBadgePulse,
-      subscriptionActive,
-      setSubscriptionActive,
-      selectedPro,
-      navigateToProProfile,
-      navigateToBookingFlow,
-      navigateToLiveStatus,
-      upgradeToProAccount,
-      goToLanding,
-      notificationCenterOpen,
-      setNotificationCenterOpen,
-      flashRequests,
-      addFlashRequest,
-      updateFlashRequest,
-    }}>
+    <AppContext.Provider
+      value={{
+        currentScreen,
+        setCurrentScreen,
+        navigateTo,
+        goBack,
+        appRole,
+        setAppRole,
+        selectedPro,
+        setSelectedPro,
+        currentBooking,
+        setCurrentBooking,
+        smsToast,
+        showSMSToast,
+        hideSMSToast,
+        flashActive,
+        setFlashActive,
+        subscriptionActive,
+        setSubscriptionActive,
+        proActif,
+        setProActif,
+        userName,
+        setUserName,
+        notifications,
+        addNotification,
+        markAllRead,
+        removeNotification,
+        unreadCount,
+        notificationCenterOpen,
+        setNotificationCenterOpen,
+        subscriptionModalOpen,
+        openSubscriptionModal,
+        closeSubscriptionModal,
+        bookings,
+        setBookings,
+        wallet: DEFAULT_WALLET,
+        selectedBookingService,
+        setSelectedBookingService,
+        essaiJours,
+        setEssaiJours,
+        proProfile: selectedPro,
+        navigateToProProfile,
+        navigateToBookingFlow,
+        setProProfile,
+        upgradeToProAccount,
+        goToLanding,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

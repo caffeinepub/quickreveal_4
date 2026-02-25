@@ -1,157 +1,83 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 
-const ArrowRightIcon = ({ color = '#2E2E3E' }: { color?: string }) => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="3" y1="8" x2="13" y2="8" />
-    <polyline points="9,4 13,8 9,12" />
-  </svg>
-);
-
 export default function RoleSelection() {
-  const { navigateTo, setAppRole } = useAppContext();
+  const { navigateTo } = useAppContext();
   const [selected, setSelected] = useState<'client' | 'pro' | null>(null);
 
-  const handleSelect = (role: 'client' | 'pro') => {
-    setSelected(role);
-    setTimeout(() => {
-      setAppRole(role);
-      if (role === 'client') {
-        navigateTo('otp');
-      } else {
-        navigateTo('subscription');
-      }
-    }, 180);
+  const handleContinue = () => {
+    if (selected === 'client') {
+      navigateTo('otpVerification');
+    } else if (selected === 'pro') {
+      navigateTo('proOnboarding');
+    }
   };
 
-  const clientActive = selected === 'client';
-  const proActive = selected === 'pro';
-
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: '#050507',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '0 24px',
-    }}>
-      {/* Logo */}
-      <div style={{ marginBottom: '48px', textAlign: 'center' }}>
-        <div style={{
-          fontSize: '36px',
-          fontWeight: 900,
-          color: '#F4F4F8',
-          letterSpacing: '-0.03em',
-          fontFamily: 'Inter, sans-serif',
-        }}>
-          NEXUS
-          <span style={{ color: '#F2D06B' }}>.</span>
+    <div style={{ background: 'var(--void)', minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+      <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '28px', color: 'var(--t1)', marginBottom: '8px', textAlign: 'center' }}>
+        Bienvenue sur NEXUS
+      </div>
+      <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '15px', color: 'var(--t3)', marginBottom: '40px', textAlign: 'center' }}>
+        Choisissez votre profil
+      </div>
+
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', width: '100%', maxWidth: '340px' }}>
+        {/* Client card */}
+        <div
+          onClick={() => setSelected('client')}
+          style={{
+            background: 'var(--d3)',
+            border: `1px solid ${selected === 'client' ? 'var(--gold-edge)' : 'var(--edge1)'}`,
+            borderRadius: '20px', padding: '24px',
+            cursor: 'pointer', transition: 'border 200ms',
+            height: '148px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
+          }}
+        >
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '18px', color: 'var(--t1)', marginBottom: '6px' }}>
+            Client
+          </div>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '13px', color: 'var(--t3)' }}>
+            Trouvez et reservez des professionnels pres de chez vous
+          </div>
         </div>
-        <p style={{
-          fontSize: '14px',
-          color: '#54546C',
-          marginTop: '8px',
-          fontWeight: 400,
-        }}>
-          Choisissez votre profil
-        </p>
-      </div>
 
-      {/* Cards */}
-      <div style={{ width: '100%', maxWidth: '380px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-        {/* Client Card */}
-        <button
-          onClick={() => handleSelect('client')}
+        {/* Pro card */}
+        <div
+          onClick={() => setSelected('pro')}
           style={{
-            width: '100%',
-            height: '96px',
-            background: clientActive ? 'rgba(91,127,255,0.04)' : '#0D0D13',
-            border: `1px solid ${clientActive ? '#5B7FFF' : '#1E1E26'}`,
-            borderRadius: '16px',
-            padding: '0 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            transition: 'border-color 0.15s, background 0.15s',
-            textAlign: 'left',
+            background: 'var(--d3)',
+            border: `1px solid ${selected === 'pro' ? 'rgba(91,127,255,0.5)' : 'var(--edge1)'}`,
+            borderRadius: '20px', padding: '24px',
+            cursor: 'pointer', transition: 'border 200ms',
+            height: '148px', display: 'flex', flexDirection: 'column', justifyContent: 'center',
           }}
         >
-          <div>
-            <div style={{
-              fontSize: '20px',
-              fontWeight: 700,
-              color: '#F4F4F8',
-              fontFamily: 'Inter, sans-serif',
-              lineHeight: 1.2,
-            }}>
-              Client
-            </div>
-            <div style={{
-              fontSize: '14px',
-              fontWeight: 400,
-              color: '#54546C',
-              marginTop: '4px',
-              fontFamily: 'Inter, sans-serif',
-            }}>
-              Réservez un expert à domicile
-            </div>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '18px', color: 'var(--t1)', marginBottom: '6px' }}>
+            Professionnel
           </div>
-          <ArrowRightIcon color={clientActive ? '#5B7FFF' : '#2E2E3E'} />
-        </button>
-
-        {/* Pro Card */}
-        <button
-          onClick={() => handleSelect('pro')}
-          style={{
-            width: '100%',
-            height: '96px',
-            background: proActive ? 'rgba(242,208,107,0.04)' : '#0D0D13',
-            border: `1px solid ${proActive ? '#F2D06B' : '#1E1E26'}`,
-            borderRadius: '16px',
-            padding: '0 20px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            cursor: 'pointer',
-            transition: 'border-color 0.15s, background 0.15s',
-            textAlign: 'left',
-          }}
-        >
-          <div>
-            <div style={{
-              fontSize: '20px',
-              fontWeight: 700,
-              color: '#F4F4F8',
-              fontFamily: 'Inter, sans-serif',
-              lineHeight: 1.2,
-            }}>
-              Professionnel
-            </div>
-            <div style={{
-              fontSize: '14px',
-              fontWeight: 400,
-              color: '#54546C',
-              marginTop: '4px',
-              fontFamily: 'Inter, sans-serif',
-            }}>
-              Gérez votre activité beauté
-            </div>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '13px', color: 'var(--t3)' }}>
+            Developpez votre activite et recevez des clients
           </div>
-          <ArrowRightIcon color={proActive ? '#F2D06B' : '#2E2E3E'} />
-        </button>
+        </div>
       </div>
 
-      <p style={{
-        marginTop: '32px',
-        fontSize: '12px',
-        color: '#2E2E3E',
-        textAlign: 'center',
-      }}>
-        Vous pouvez changer de rôle à tout moment
-      </p>
+      <button
+        onClick={handleContinue}
+        disabled={!selected}
+        style={{
+          marginTop: '32px',
+          width: '100%', maxWidth: '340px', height: '56px',
+          background: selected ? '#F2D06B' : 'var(--d4)',
+          color: selected ? '#050507' : 'var(--t4)',
+          border: 'none', borderRadius: '16px',
+          fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '14px',
+          cursor: selected ? 'pointer' : 'not-allowed',
+          transition: 'all 200ms',
+        }}
+      >
+        Continuer
+      </button>
     </div>
   );
 }

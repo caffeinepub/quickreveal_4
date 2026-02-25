@@ -14,9 +14,33 @@ import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 import Stripe "stripe/stripe";
 
-
-
 actor {
+  // -----------------------------------------------------------------------
+  // Payrexx Integration (disabled)
+  // -----------------------------------------------------------------------
+
+  /* PAYREXX INTEGRATION (DISABLED)
+   * To enable, follow these steps:
+   *   1. Generate a 64-character random key in your Payrexx account.
+   *   2. Store that secret key only in the backend (NEVER expose it in React).
+   *   3. Implement HTTP Outcalls from ICP to Payrexx API using Motoko.
+   *   4. Use HMAC-SHA256 for server-side signing in Motoko.
+   *   5. actor.createPayment(params) → Motoko signs request → calls Payrexx Gateway API → returns { paymentUrl: Text }
+   *   6. React redirects user via primjs window.location.href to paymentUrl.
+   *   7. DO NOT expose secret key anywhere in React JS code.
+   *   8. Payments will auto-enable upon permission from EthereumSwitzerland.
+   */
+
+  /* MOTOKO HEARTBEAT (PLANNED)
+   * Hourly ICP heartbeat execution (max 13s per execution):
+   *   1. Query bookings with statut='paye' AND liberationAt <= now() AND libere=false
+   *   2. Process each booking:
+   *      - montantPro = montant - 1.0 CHF platform fee
+   *      - Payrexx Payout to pro.iban
+   *      - Set libere=true and libereAt=now()
+   *      - Trigger SMS to pro and client
+   */
+
   // Mixins
   include MixinStorage();
 

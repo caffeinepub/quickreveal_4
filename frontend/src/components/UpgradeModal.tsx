@@ -1,13 +1,5 @@
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
-import { Check, X } from 'lucide-react';
-
-const BENEFITS = [
-  'Profil vérifié NEXUS',
-  'Réservations illimitées',
-  'Paiements Revolut intégrés',
-  'Badge Flash disponible',
-];
 
 interface UpgradeModalProps {
   onClose: () => void;
@@ -22,102 +14,59 @@ export default function UpgradeModal({ onClose }: UpgradeModalProps) {
   };
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.7)',
-        zIndex: 300,
-        display: 'flex',
-        alignItems: 'flex-end',
-      }}
-      onClick={onClose}
-    >
-      <div
-        style={{
-          width: '100%',
-          background: 'var(--d2)',
-          borderRadius: '24px 24px 0 0',
-          padding: '24px 24px 40px',
-        }}
-        onClick={e => e.stopPropagation()}
-      >
-        <div
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 20,
-          }}
-        >
-          <h2 style={{ fontSize: 20, fontWeight: 800, color: 'var(--t1)' }}>
-            Passer Pro
-          </h2>
-          <button
-            onClick={onClose}
-            style={{ background: 'none', border: 'none', cursor: 'pointer' }}
-          >
-            <X size={20} color="var(--t3)" />
-          </button>
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 50,
+      background: 'rgba(5,5,7,0.95)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      padding: '20px',
+    }}>
+      <div style={{
+        background: 'var(--d2)', border: '1px solid var(--edge1)',
+        borderRadius: '24px', padding: '28px',
+        maxWidth: '380px', width: '100%',
+      }}>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '24px', color: 'var(--t1)', marginBottom: '8px' }}>
+          Passer Pro
+        </div>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', color: 'var(--t2)', marginBottom: '24px', lineHeight: '1.6' }}>
+          Devenez professionnel sur NEXUS et commencez a recevoir des clients.
         </div>
 
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-          {BENEFITS.map((benefit, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-              <div
-                style={{
-                  width: 22,
-                  height: 22,
-                  borderRadius: '50%',
-                  background: 'rgba(212,175,55,0.15)',
-                  border: '1px solid var(--edge-gold)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                }}
-              >
-                <Check size={12} color="var(--gold)" strokeWidth={3} />
-              </div>
-              <span style={{ fontSize: 14, color: 'var(--t1)' }}>{benefit}</span>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
+          {['Profil professionnel complet', 'Reservations en temps reel', 'Paiements TWINT', 'Support prioritaire'].map((b, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <span style={{ color: 'var(--flash)', fontSize: '14px' }}>✓</span>
+              <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '14px', color: 'var(--t2)' }}>{b}</span>
             </div>
           ))}
         </div>
 
-        <button
-          onClick={handleUpgrade}
-          style={{
-            width: '100%',
-            padding: '16px',
-            borderRadius: 16,
-            background: 'linear-gradient(135deg, var(--gold) 0%, #b8860b 100%)',
-            border: 'none',
-            color: '#000',
-            fontSize: 16,
-            fontWeight: 900,
-            cursor: 'pointer',
-            boxShadow: '0 4px 20px rgba(212,175,55,0.4)',
-            marginBottom: 10,
-          }}
-        >
-          CONTINUER
-        </button>
-
-        <button
-          onClick={onClose}
-          style={{
-            width: '100%',
-            padding: '14px',
-            borderRadius: 14,
-            background: 'none',
-            border: 'none',
-            color: 'var(--t3)',
-            fontSize: 14,
-            cursor: 'pointer',
-          }}
-        >
-          ANNULER
-        </button>
+        <div style={{ display: 'flex', gap: '10px' }}>
+          <button
+            onClick={onClose}
+            style={{
+              flex: 1, height: '52px',
+              background: 'var(--d3)', border: '1px solid var(--edge1)',
+              borderRadius: '12px', fontFamily: 'Inter, sans-serif',
+              fontWeight: 600, fontSize: '14px', color: 'var(--t2)',
+              cursor: 'pointer',
+            }}
+          >
+            Annuler
+          </button>
+          <button
+            onClick={handleUpgrade}
+            style={{
+              flex: 2, height: '52px',
+              background: '#F2D06B', color: '#050507',
+              border: 'none', borderRadius: '12px',
+              fontFamily: 'Inter, sans-serif', fontWeight: 700,
+              fontSize: '14px', cursor: 'pointer',
+            }}
+          >
+            Continuer
+          </button>
+        </div>
       </div>
     </div>
   );

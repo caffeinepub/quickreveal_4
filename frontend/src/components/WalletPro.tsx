@@ -1,313 +1,228 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useAppContext } from '../context/AppContext';
-import BottomNav from './BottomNav';
-import GlobalHeader from './GlobalHeader';
-
-const ArrowUpIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="8" y1="13" x2="8" y2="3" />
-    <polyline points="4,7 8,3 12,7" />
-  </svg>
-);
-
-const ArrowDownIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-    <line x1="8" y1="3" x2="8" y2="13" />
-    <polyline points="4,9 8,13 12,9" />
-  </svg>
-);
-
-interface ToastItem {
-  id: string;
-  message: string;
-}
-
-const CHART_DATA = [
-  { day: 'L', amount: 45 },
-  { day: 'M', amount: 120 },
-  { day: 'M', amount: 80 },
-  { day: 'J', amount: 200 },
-  { day: 'V', amount: 95 },
-  { day: 'S', amount: 240 },
-  { day: 'D', amount: 60 },
-];
+import React, { useState, useEffect } from 'react';
+import { useProContext } from '../context/ProContext';
+import { IconArrowUp, IconArrowDown } from './icons/Icons';
+import { DEMO_WALLET } from '../data/mockData';
 
 export default function WalletPro() {
-  const { wallet } = useAppContext();
-  const [virementDone, setVirementDone] = useState(false);
-  const [toasts, setToasts] = useState<ToastItem[]>([]);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { walletCooldownEnd, setWalletCooldownEnd } = useProContext();
+  const [solde, setSolde] = useState(DEMO_WALLET.solde);
+  const [timeLeft, setTimeLeft] = useState(0);
 
   useEffect(() => {
-    return () => {
-      if (timerRef.current) clearTimeout(timerRef.current);
+    if (!walletCooldownEnd) {
+      setTimeLeft(0);
+      return;
+    }
+    const update = () => {
+      const remaining = Math.max(0, Math.ceil((walletCooldownEnd - Date.now()) / 1000));
+      setTimeLeft(remaining);
+      if (remaining === 0) {
+        setWalletCooldownEnd(null);
+      }
     };
-  }, []);
+    update();
+    const interval = setInterval(update, 1000);
+    return () => clearInterval(interval);
+  }, [walletCooldownEnd]);
+
+  const isCooldown = timeLeft > 0;
 
   const handleVirement = () => {
-    if (virementDone) return;
-    setVirementDone(true);
-
-    const toastId = Date.now().toString();
-    setToasts(prev => [...prev, { id: toastId, message: `Virement de ${wallet.balance} CHF vers votre Revolut` }]);
-
-    setTimeout(() => {
-      setToasts(prev => prev.filter(t => t.id !== toastId));
-    }, 5000);
-
-    timerRef.current = setTimeout(() => {
-      setVirementDone(false);
-    }, 30000);
+    if (isCooldown) return;
+    setSolde(0);
+    setWalletCooldownEnd(Date.now() + 30000);
   };
 
-  const maxAmount = Math.max(...CHART_DATA.map(d => d.amount));
-  const todayIndex = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
-
   return (
-    <div style={{ minHeight: '100vh', background: '#050507', paddingBottom: '80px' }}>
-      <GlobalHeader />
-
-      {/* Toast notifications */}
-      <div style={{
-        position: 'fixed',
-        top: '80px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        width: '90%',
-        maxWidth: '380px',
-        zIndex: 200,
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '8px',
+    <div style={{
+      minHeight: '100%',
+      background: 'var(--void)',
+      padding: '24px 20px 100px',
+    }}>
+      <span style={{
+        fontFamily: 'Inter',
+        fontSize: 22,
+        fontWeight: 700,
+        color: 'var(--t1)',
+        display: 'block',
+        marginBottom: 24,
       }}>
-        {toasts.map(toast => (
-          <div key={toast.id} style={{
-            background: '#0D0D13',
-            border: '1px solid #1E1E26',
-            borderLeft: '3px solid #00D97A',
-            borderRadius: '10px',
-            padding: '12px 16px',
-            fontSize: '13px',
-            color: '#F4F4F8',
-            fontFamily: 'Inter, sans-serif',
-            boxShadow: '0 4px 20px rgba(0,0,0,0.4)',
-          }}>
-            {toast.message}
-          </div>
-        ))}
+        Wallet
+      </span>
+
+      {/* Balance card */}
+      <div style={{
+        background: 'var(--d2)',
+        borderRadius: 20,
+        padding: '28px 24px',
+        border: '1px solid rgba(255,255,255,0.06)',
+        marginBottom: 16,
+        position: 'relative',
+        overflow: 'hidden',
+      }}>
+        <div style={{
+          position: 'absolute',
+          top: -40,
+          right: -40,
+          width: 120,
+          height: 120,
+          borderRadius: '50%',
+          background: 'rgba(242,208,107,0.05)',
+        }} />
+        <span style={{
+          fontFamily: 'Inter',
+          fontSize: 12,
+          fontWeight: 600,
+          color: 'var(--t4)',
+          letterSpacing: '0.08em',
+          textTransform: 'uppercase',
+          display: 'block',
+          marginBottom: 8,
+        }}>
+          Solde disponible
+        </span>
+        <span style={{
+          fontFamily: 'Inter',
+          fontSize: 40,
+          fontWeight: 700,
+          color: 'var(--t1)',
+          display: 'block',
+          marginBottom: 4,
+        }}>
+          {solde.toFixed(2)} CHF
+        </span>
+        <span style={{
+          fontFamily: 'Inter',
+          fontSize: 13,
+          color: 'var(--t4)',
+        }}>
+          Sequestre: {DEMO_WALLET.sequestre.toFixed(2)} CHF
+        </span>
       </div>
 
-      <div style={{ paddingTop: '80px', padding: '80px 16px 0' }}>
-        {/* Balance Card */}
+      {/* Virement button */}
+      <button
+        onClick={handleVirement}
+        disabled={isCooldown || solde === 0}
+        style={{
+          width: '100%',
+          padding: '16px',
+          borderRadius: 14,
+          border: 'none',
+          background: isCooldown || solde === 0
+            ? 'rgba(255,255,255,0.06)'
+            : '#F2D06B',
+          color: isCooldown || solde === 0
+            ? 'var(--t4)'
+            : '#050507',
+          fontFamily: 'Inter',
+          fontSize: 15,
+          fontWeight: 700,
+          cursor: isCooldown || solde === 0 ? 'not-allowed' : 'pointer',
+          marginBottom: 8,
+          transition: 'all 0.2s',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: 8,
+        }}
+      >
+        <IconArrowUp size={18} color={isCooldown || solde === 0 ? 'var(--t4)' : '#050507'} />
+        {isCooldown
+          ? `Disponible dans ${timeLeft}s`
+          : 'Virer sur mon compte'}
+      </button>
+
+      {isCooldown && (
         <div style={{
-          background: 'linear-gradient(135deg, #0A0A0A, #0F0E0A)',
+          padding: '10px 14px',
+          background: 'rgba(242,208,107,0.06)',
+          borderRadius: 10,
           border: '1px solid rgba(242,208,107,0.15)',
-          borderRadius: '20px',
-          padding: '28px 24px',
-          marginBottom: '16px',
+          marginBottom: 16,
         }}>
-          <div style={{
-            fontSize: '10px',
-            fontWeight: 600,
-            color: '#54546C',
-            letterSpacing: '0.12em',
-            textTransform: 'uppercase',
-            marginBottom: '8px',
-            fontFamily: 'Inter, sans-serif',
+          <span style={{
+            fontFamily: 'Inter',
+            fontSize: 12,
+            color: 'var(--t4)',
           }}>
-            SOLDE DISPONIBLE
-          </div>
-          <div style={{
-            fontSize: '48px',
-            fontWeight: 900,
-            color: '#F2D06B',
-            fontFamily: 'Inter, sans-serif',
-            lineHeight: 1,
-            marginBottom: '20px',
-          }}>
-            {wallet.balance} CHF
-          </div>
+            Virement en cours de traitement. Disponible dans {timeLeft} secondes.
+          </span>
+        </div>
+      )}
 
-          {/* Escrow */}
-          <div style={{
-            background: 'rgba(255,255,255,0.03)',
-            borderRadius: '10px',
-            padding: '12px 14px',
-            marginBottom: '20px',
-          }}>
-            <div style={{
-              fontSize: '13px',
-              fontWeight: 600,
-              color: '#F4F4F8',
-              fontFamily: 'Inter, sans-serif',
-            }}>
-              {wallet.escrow} CHF séquestre
-            </div>
-            <div style={{
-              fontSize: '12px',
-              fontWeight: 400,
-              color: '#54546C',
-              marginTop: '3px',
-              fontFamily: 'Inter, sans-serif',
-            }}>
-              Libéré dans 48h après prestation
-            </div>
-          </div>
-
-          {/* Virement button */}
-          <button
-            onClick={handleVirement}
-            disabled={virementDone}
-            style={{
-              width: '100%',
-              height: '48px',
-              background: virementDone ? '#1C1C26' : '#F2D06B',
-              color: virementDone ? '#54546C' : '#050507',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '14px',
-              fontWeight: 700,
-              fontFamily: 'Inter, sans-serif',
-              cursor: virementDone ? 'not-allowed' : 'pointer',
+      {/* Transactions */}
+      <div style={{ marginTop: 24 }}>
+        <span style={{
+          fontFamily: 'Inter',
+          fontSize: 14,
+          fontWeight: 600,
+          color: 'var(--t2)',
+          display: 'block',
+          marginBottom: 12,
+        }}>
+          Transactions recentes
+        </span>
+        {DEMO_WALLET.transactions.map((tx: any, i: number) => {
+          const isEntree = tx.type === 'entree';
+          return (
+            <div key={i} style={{
               display: 'flex',
               alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              transition: 'background 0.2s, color 0.2s',
-            }}
-          >
-            {virementDone ? (
-              'Virement initié'
-            ) : (
-              <>
-                <ArrowUpIcon />
-                Virer vers Revolut
-              </>
-            )}
-          </button>
-        </div>
-
-        {/* Chart */}
-        <div style={{
-          background: '#0D0D13',
-          border: '1px solid rgba(255,255,255,0.05)',
-          borderRadius: '16px',
-          padding: '20px',
-          marginBottom: '16px',
-        }}>
-          <div style={{
-            fontSize: '11px',
-            fontWeight: 600,
-            color: '#54546C',
-            marginBottom: '16px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            fontFamily: 'Inter, sans-serif',
-          }}>
-            Cette semaine
-          </div>
-          <div style={{
-            display: 'flex',
-            alignItems: 'flex-end',
-            gap: '8px',
-            height: '80px',
-          }}>
-            {CHART_DATA.map((d, i) => {
-              const isToday = i === todayIndex;
-              const barHeight = Math.max(8, (d.amount / maxAmount) * 72);
-              return (
-                <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                  <div style={{
-                    width: '100%',
-                    height: `${barHeight}px`,
-                    background: isToday ? '#F2D06B' : '#1C1C26',
-                    borderRadius: '4px 4px 0 0',
-                    transition: 'height 0.3s',
-                  }} />
-                  <span style={{
-                    fontSize: '10px',
-                    color: isToday ? '#F2D06B' : '#2E2E3E',
-                    fontWeight: isToday ? 700 : 400,
-                    fontFamily: 'Inter, sans-serif',
-                  }}>
-                    {d.day}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Transactions */}
-        <div style={{
-          background: '#0D0D13',
-          border: '1px solid rgba(255,255,255,0.05)',
-          borderRadius: '16px',
-          padding: '20px',
-        }}>
-          <div style={{
-            fontSize: '11px',
-            fontWeight: 600,
-            color: '#54546C',
-            marginBottom: '16px',
-            textTransform: 'uppercase',
-            letterSpacing: '0.08em',
-            fontFamily: 'Inter, sans-serif',
-          }}>
-            Transactions
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            {wallet.transactions.map(tx => (
-              <div key={tx.id} style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-              }}>
+              justifyContent: 'space-between',
+              padding: '14px 0',
+              borderBottom: i < DEMO_WALLET.transactions.length - 1
+                ? '1px solid rgba(255,255,255,0.05)'
+                : 'none',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                 <div style={{
-                  width: '36px',
-                  height: '36px',
-                  borderRadius: '10px',
-                  background: tx.type === 'credit' ? 'rgba(0,217,122,0.08)' : 'rgba(255,80,80,0.08)',
+                  width: 36,
+                  height: 36,
+                  borderRadius: '50%',
+                  background: isEntree
+                    ? 'rgba(242,208,107,0.1)'
+                    : 'rgba(255,255,255,0.06)',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  color: tx.type === 'credit' ? '#00D97A' : '#FF5050',
-                  flexShrink: 0,
                 }}>
-                  {tx.type === 'credit' ? <ArrowDownIcon /> : <ArrowUpIcon />}
+                  {isEntree
+                    ? <IconArrowDown size={16} color="var(--gold)" />
+                    : <IconArrowUp size={16} color="var(--t4)" />
+                  }
                 </div>
-                <div style={{ flex: 1 }}>
-                  <div style={{
-                    fontSize: '13px',
-                    fontWeight: 600,
-                    color: '#F4F4F8',
-                    fontFamily: 'Inter, sans-serif',
+                <div>
+                  <span style={{
+                    fontFamily: 'Inter',
+                    fontSize: 13,
+                    fontWeight: 500,
+                    color: 'var(--t2)',
+                    display: 'block',
                   }}>
-                    {tx.label}
-                  </div>
-                  <div style={{
-                    fontSize: '11px',
-                    color: '#54546C',
-                    fontFamily: 'Inter, sans-serif',
+                    {tx.nom}
+                  </span>
+                  <span style={{
+                    fontFamily: 'Inter',
+                    fontSize: 11,
+                    color: 'var(--t4)',
                   }}>
                     {tx.date}
-                  </div>
-                </div>
-                <div style={{
-                  fontSize: '14px',
-                  fontWeight: 700,
-                  color: tx.type === 'credit' ? '#00D97A' : '#FF5050',
-                  fontFamily: 'Inter, sans-serif',
-                }}>
-                  {tx.type === 'credit' ? '+' : ''}{tx.amount} CHF
+                  </span>
                 </div>
               </div>
-            ))}
-          </div>
-        </div>
+              <span style={{
+                fontFamily: 'Inter',
+                fontSize: 14,
+                fontWeight: 600,
+                color: isEntree ? 'var(--gold)' : 'var(--t3)',
+              }}>
+                {isEntree ? '+' : ''}{tx.montant} CHF
+              </span>
+            </div>
+          );
+        })}
       </div>
-
-      <BottomNav activeTab="wallet" />
     </div>
   );
 }

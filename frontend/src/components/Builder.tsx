@@ -1,15 +1,19 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
+import { DemoPro } from '../data/mockData';
 
 interface LocalService {
   id: string;
   name: string;
-  duration: number;
   price: number;
+  duration: number;
 }
 
-const CATEGORIES = ['Coiffure', 'Esthétique', 'Massage', 'Barbier', 'Ongles', 'Maquillage'];
-const CITIES = ['Genève', 'Lausanne', 'Berne', 'Zurich', 'Bâle', 'Fribourg', 'Neuchâtel', 'Sion'];
+const CATEGORIES = ['Barber', 'Coiffure', 'Esthetique', 'Massage', 'Nail Art', 'Maquillage'];
+const SWISS_CITIES = [
+  'Lausanne', 'Geneve', 'Fribourg', 'Neuchatel', 'Sion', 'Bienne',
+  'Yverdon', 'Montreux', 'Vevey', 'Morges', 'Nyon', 'La Chaux-de-Fonds',
+];
 
 export default function Builder() {
   const { navigateTo, setProProfile } = useAppContext();
@@ -19,153 +23,202 @@ export default function Builder() {
   const [city, setCity] = useState('');
   const [bio, setBio] = useState('');
   const [services, setServices] = useState<LocalService[]>([
-    { id: '1', name: 'Service principal', duration: 60, price: 80 },
+    { id: '1', name: '', price: 0, duration: 30 },
   ]);
 
-  const handleComplete = () => {
-    setProProfile({
-      id: `pro-${Date.now()}`,
-      name: brandName,
-      category,
-      city,
-      rating: 5.0,
-      reviewCount: 0,
-      startingPrice: services[0]?.price || 50,
-      isFlash: false,
-      flashActive: false,
+  const handleFinish = () => {
+    // Map LocalService to DemoService format — use undefined instead of null for badge
+    const mappedServices = services.map(s => ({
+      nom: s.name,
+      prix: s.price,
+      duree: s.duration,
+      badge: undefined as string | undefined,
+    }));
+
+    const proData: DemoPro = {
+      id: `builder-${Date.now()}`,
+      prenom: brandName,
+      nom: '',
+      initials: brandName.slice(0, 2).toUpperCase(),
+      gradient: 'linear-gradient(135deg, #0A0614, #180B2E)',
+      coverGradient: 'linear-gradient(135deg, #0A0614, #180B2E)',
+      coverUrl: '',
+      categorie: category.toLowerCase() || 'barber',
+      ville: city,
+      note: 5.0,
+      avis: 0,
+      slogan: '',
       bio,
-      services: services.map(s => ({
-        id: s.id,
-        name: s.name,
-        duration: s.duration,
-        price: s.price,
-      })),
-    });
+      flashActif: false,
+      isFlash: false,
+      hasRevolut: false,
+      revolutHandle: '',
+      responseTime: '—',
+      acceptanceRate: 100,
+      serviceCount: mappedServices.length,
+      startingPrice: services[0]?.price ?? 0,
+      flashResponseTime: '—',
+      services: mappedServices,
+      reviews: [],
+      galleryGradients: [],
+    };
+
+    setProProfile(proData);
     navigateTo('nexusOS');
   };
 
-  const addService = () => {
-    setServices(prev => [...prev, {
-      id: Date.now().toString(),
-      name: 'Nouveau service',
-      duration: 30,
-      price: 50,
-    }]);
-  };
-
-  const updateService = (id: string, field: keyof LocalService, value: string | number) => {
-    setServices(prev => prev.map(s => s.id === id ? { ...s, [field]: value } : s));
-  };
-
   const inputStyle: React.CSSProperties = {
-    width: '100%',
-    height: '48px',
-    background: '#0D0D13',
-    border: '1px solid #1E1E26',
-    borderRadius: '12px',
-    padding: '0 16px',
-    color: '#F4F4F8',
-    fontSize: '15px',
-    fontFamily: 'Inter, sans-serif',
-    outline: 'none',
-    boxSizing: 'border-box',
+    width: '100%', height: '52px',
+    background: 'var(--d3)', border: '1px solid var(--d4)',
+    borderRadius: '12px', padding: '0 16px',
+    fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '15px',
+    color: 'var(--t1)', outline: 'none', boxSizing: 'border-box',
   };
 
   const labelStyle: React.CSSProperties = {
-    display: 'block',
-    fontSize: '12px',
-    fontWeight: 600,
-    color: '#54546C',
-    marginBottom: '8px',
-    textTransform: 'uppercase',
-    letterSpacing: '0.08em',
-    fontFamily: 'Inter, sans-serif',
+    display: 'block', fontFamily: 'Inter, sans-serif',
+    fontWeight: 600, fontSize: '12px', color: 'var(--t3)',
+    letterSpacing: '0.1em', marginBottom: '8px',
   };
 
   return (
-    <div style={{ minHeight: '100vh', background: '#050507', padding: '48px 24px 40px', display: 'flex', flexDirection: 'column' }}>
-      <div style={{ marginBottom: '32px' }}>
-        <div style={{ fontSize: '22px', fontWeight: 800, color: '#F4F4F8', fontFamily: 'Inter, sans-serif', marginBottom: '4px' }}>
-          Créez votre profil
+    <div style={{ background: 'var(--void)', minHeight: '100vh', padding: '24px 20px', paddingBottom: '40px' }}>
+      {/* Header */}
+      <div style={{ marginBottom: '24px' }}>
+        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '22px', color: 'var(--t1)' }}>
+          Creer mon profil
         </div>
-        <div style={{ fontSize: '13px', color: '#54546C', fontFamily: 'Inter, sans-serif' }}>
-          Étape {step}/3
+        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', color: 'var(--t3)', marginTop: '4px' }}>
+          Etape {step} sur 3
         </div>
-        <div style={{ height: '3px', background: '#1C1C26', borderRadius: '2px', marginTop: '12px' }}>
-          <div style={{ height: '100%', width: `${(step / 3) * 100}%`, background: '#F2D06B', borderRadius: '2px', transition: 'width 0.3s' }} />
+        {/* Progress */}
+        <div style={{ height: '3px', background: 'var(--d4)', borderRadius: '999px', marginTop: '12px', overflow: 'hidden' }}>
+          <div style={{ height: '100%', background: 'var(--gold)', width: `${(step / 3) * 100}%`, transition: 'width 300ms ease', borderRadius: '999px' }} />
         </div>
       </div>
 
-      <div style={{ flex: 1 }}>
-        {step === 1 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Nom de marque</label>
-              <input value={brandName} onChange={e => setBrandName(e.target.value)} placeholder="Ex: Studio Lumière" style={inputStyle} onFocus={e => { e.target.style.borderColor = '#F2D06B'; }} onBlur={e => { e.target.style.borderColor = '#1E1E26'; }} />
-            </div>
-            <div>
-              <label style={labelStyle}>Catégorie</label>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-                {CATEGORIES.map(cat => (
-                  <button key={cat} onClick={() => setCategory(cat)} style={{ padding: '10px', background: category === cat ? 'rgba(242,208,107,0.08)' : '#0D0D13', border: `1px solid ${category === cat ? '#F2D06B' : '#1E1E26'}`, borderRadius: '10px', color: category === cat ? '#F2D06B' : '#54546C', fontSize: '13px', fontWeight: category === cat ? 600 : 400, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
-                    {cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-            <div>
-              <label style={labelStyle}>Ville</label>
-              <select value={city} onChange={e => setCity(e.target.value)} style={{ ...inputStyle, cursor: 'pointer' }}>
-                <option value="">Choisir une ville</option>
-                {CITIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+      {step === 1 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={labelStyle}>NOM DE MARQUE</label>
+            <input type="text" value={brandName} onChange={e => setBrandName(e.target.value)} placeholder="Ex: Studio Julien" style={inputStyle} />
+          </div>
+          <div>
+            <label style={labelStyle}>CATEGORIE</label>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  style={{
+                    height: '48px',
+                    background: category === cat ? 'var(--gold-bg)' : 'var(--d3)',
+                    border: `1px solid ${category === cat ? 'var(--gold-edge)' : 'var(--d4)'}`,
+                    borderRadius: '12px',
+                    fontFamily: 'Inter, sans-serif', fontWeight: category === cat ? 600 : 400,
+                    fontSize: '13px', color: category === cat ? 'var(--gold)' : 'var(--t3)',
+                    cursor: 'pointer', transition: 'all 200ms',
+                  }}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
-        )}
-
-        {step === 2 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-            <div>
-              <label style={labelStyle}>Bio</label>
-              <textarea value={bio} onChange={e => setBio(e.target.value)} placeholder="Décrivez votre activité..." rows={5} style={{ ...inputStyle, height: 'auto', padding: '12px 16px', resize: 'none' }} onFocus={e => { e.target.style.borderColor = '#F2D06B'; }} onBlur={e => { e.target.style.borderColor = '#1E1E26'; }} />
-            </div>
+          <div>
+            <label style={labelStyle}>VILLE</label>
+            <select value={city} onChange={e => setCity(e.target.value)} style={{ ...inputStyle, appearance: 'none', cursor: 'pointer' }}>
+              <option value="">Choisir une ville</option>
+              {SWISS_CITIES.map(c => <option key={c} value={c}>{c}</option>)}
+            </select>
           </div>
-        )}
+          <button
+            onClick={() => setStep(2)}
+            disabled={!brandName || !category || !city}
+            style={{
+              height: '56px', background: brandName && category && city ? '#F2D06B' : 'var(--d4)',
+              color: brandName && category && city ? '#050507' : 'var(--t4)',
+              border: 'none', borderRadius: '14px',
+              fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '14px',
+              cursor: brandName && category && city ? 'pointer' : 'not-allowed',
+              marginTop: '8px',
+            }}
+          >
+            Continuer
+          </button>
+        </div>
+      )}
 
-        {step === 3 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-            <div style={{ fontSize: '14px', fontWeight: 600, color: '#54546C', fontFamily: 'Inter, sans-serif', marginBottom: '4px' }}>
-              Vos services
-            </div>
-            {services.map(svc => (
-              <div key={svc.id} style={{ background: '#0D0D13', border: '1px solid rgba(255,255,255,0.05)', borderRadius: '12px', padding: '14px' }}>
-                <input value={svc.name} onChange={e => updateService(svc.id, 'name', e.target.value)} style={{ ...inputStyle, marginBottom: '8px' }} onFocus={e => { e.target.style.borderColor = '#F2D06B'; }} onBlur={e => { e.target.style.borderColor = '#1E1E26'; }} />
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <input type="number" value={svc.price} onChange={e => updateService(svc.id, 'price', Number(e.target.value))} placeholder="Prix CHF" style={{ ...inputStyle, flex: 1 }} onFocus={e => { e.target.style.borderColor = '#F2D06B'; }} onBlur={e => { e.target.style.borderColor = '#1E1E26'; }} />
-                  <input type="number" value={svc.duration} onChange={e => updateService(svc.id, 'duration', Number(e.target.value))} placeholder="Durée min" style={{ ...inputStyle, flex: 1 }} onFocus={e => { e.target.style.borderColor = '#F2D06B'; }} onBlur={e => { e.target.style.borderColor = '#1E1E26'; }} />
-                </div>
-              </div>
-            ))}
-            <button onClick={addService} style={{ width: '100%', height: '44px', background: 'none', border: '1px dashed #2E2E3E', borderRadius: '12px', color: '#54546C', fontSize: '14px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
-              + Ajouter un service
+      {step === 2 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div>
+            <label style={labelStyle}>BIO</label>
+            <textarea
+              value={bio}
+              onChange={e => setBio(e.target.value)}
+              placeholder="Decrivez votre activite..."
+              style={{ ...inputStyle, height: '120px', padding: '12px 16px', resize: 'none' }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+            <button onClick={() => setStep(1)} style={{ flex: 1, height: '52px', background: 'var(--d3)', border: '1px solid var(--edge1)', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '14px', color: 'var(--t2)', cursor: 'pointer' }}>
+              Retour
+            </button>
+            <button onClick={() => setStep(3)} style={{ flex: 2, height: '52px', background: '#F2D06B', color: '#050507', border: 'none', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
+              Continuer
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <div style={{ display: 'flex', gap: '12px', marginTop: '32px' }}>
-        {step > 1 && (
-          <button onClick={() => setStep(s => s - 1)} style={{ flex: 1, height: '52px', background: '#0D0D13', border: '1px solid #1E1E26', borderRadius: '14px', color: '#54546C', fontSize: '15px', cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}>
-            Retour
+      {step === 3 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '14px', color: 'var(--t2)', marginBottom: '4px' }}>
+            Vos services
+          </div>
+          {services.map((service, i) => (
+            <div key={service.id} style={{ background: 'var(--d3)', border: '1px solid var(--edge1)', borderRadius: '14px', padding: '14px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <input
+                type="text"
+                value={service.name}
+                onChange={e => setServices(prev => prev.map((s, idx) => idx === i ? { ...s, name: e.target.value } : s))}
+                placeholder="Nom du service"
+                style={{ ...inputStyle, height: '44px' }}
+              />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <input
+                  type="number"
+                  value={service.price || ''}
+                  onChange={e => setServices(prev => prev.map((s, idx) => idx === i ? { ...s, price: Number(e.target.value) } : s))}
+                  placeholder="Prix CHF"
+                  style={{ ...inputStyle, height: '44px', flex: 1 }}
+                />
+                <input
+                  type="number"
+                  value={service.duration || ''}
+                  onChange={e => setServices(prev => prev.map((s, idx) => idx === i ? { ...s, duration: Number(e.target.value) } : s))}
+                  placeholder="Duree min"
+                  style={{ ...inputStyle, height: '44px', flex: 1 }}
+                />
+              </div>
+            </div>
+          ))}
+          <button
+            onClick={() => setServices(prev => [...prev, { id: String(Date.now()), name: '', price: 0, duration: 30 }])}
+            style={{ height: '44px', background: 'var(--d3)', border: '1px dashed var(--edge2)', borderRadius: '12px', fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '13px', color: 'var(--t3)', cursor: 'pointer' }}
+          >
+            + Ajouter un service
           </button>
-        )}
-        <button
-          onClick={() => step < 3 ? setStep(s => s + 1) : handleComplete()}
-          style={{ flex: 2, height: '52px', background: '#F2D06B', border: 'none', borderRadius: '14px', color: '#050507', fontSize: '15px', fontWeight: 700, cursor: 'pointer', fontFamily: 'Inter, sans-serif' }}
-        >
-          {step === 3 ? 'Terminer' : 'Continuer'}
-        </button>
-      </div>
+          <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+            <button onClick={() => setStep(2)} style={{ flex: 1, height: '52px', background: 'var(--d3)', border: '1px solid var(--edge1)', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '14px', color: 'var(--t2)', cursor: 'pointer' }}>
+              Retour
+            </button>
+            <button onClick={handleFinish} style={{ flex: 2, height: '52px', background: '#F2D06B', color: '#050507', border: 'none', borderRadius: '14px', fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '14px', cursor: 'pointer' }}>
+              Terminer
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

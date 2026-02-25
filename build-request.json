@@ -1,185 +1,325 @@
 {
   "kind": "build_request",
-  "title": "NEXUS Patch v6.0 — Full UI Corrections (C1–C8)",
+  "title": "NEXUS v6.1 — Patch: Pro Space Fix + Real Explorer Images",
   "projectName": "NEXUS",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Replace every emoji in the UI with inline SVG icons (stroke 1.5px, currentColor, 16px default). Pro tab bar: Radar = circle + 2 concentric arcs, Wallet = rectangle with centered $, Dashboard = 3 horizontal lines, Mon Business = simple pencil. Client tab bar: Explorer = thin magnifier, Réservations = simple calendar, Alertes = thin bell, Profil = circle + clean silhouette. Section titles: 'Flash Live' = plain text + 14px lightning SVG before. Radar buttons: 'Accepter' + 14px check SVG, 'Décliner' + 14px × SVG. Subscription modal list: SVG thin dash bullet, no emoji. 'Mon Business' section title = plain text only. 'Me Rendre Visible' button label → 'Activer mon profil'. Confetti particles: color #F2D06B only.",
+      "text": "Create a global ProContext and ProProvider that holds proActif (boolean), setProActif, proData (object with fields: prenom='Alexandre', ville='Lausanne', categorie='barber', iban='', photos=[], services=[], flashActif=false, slogan='', bio=''), and setProData. ProProvider must wrap all pro screens so state persists across tab navigation.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-2"
         ],
         "quotes": [
-          "Remplacer chaque emoji par SVG inline stroke 1.5px couleur héritée currentColor"
+          "proActif state doit persister entre les tabs",
+          "ProProvider wraps ALL pro screens. State persists across tab navigation."
         ]
       },
       "acceptanceCriteria": [
-        "Zero emoji characters appear anywhere in the rendered UI",
-        "All SVG icons use stroke 1.5px and inherit currentColor",
-        "Both tab bars (pro and client) display SVG-only icons",
-        "Radar Accept/Decline buttons show SVG check and × alongside text",
-        "Confetti renders only in #F2D06B"
+        "ProContext is created with the specified default values",
+        "ProProvider wraps all pro screens (ProLayout and its children)",
+        "proActif and proData values are accessible from any pro screen via useContext(ProContext)",
+        "Switching tabs does not reset proActif or proData"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "Implement a 2×2 photo upload grid in the MonBusiness gallery section. Each empty slot contains a hidden <input type='file' accept='image/*'>; tapping the slot triggers .click() on the input. onChange uses FileReader.readAsDataURL and stores the dataURL in state per slot index. Filled slots show <img src={dataURL} style='object-fit:cover; width:100%; height:100%'> with an absolute × button (top: 8px, right: 8px) that clears that slot. Display a live counter 'X/4 photos' and a gold progress bar at (count/4)*100% width. When count >= 3, show the text 'Minimum atteint ✓'.",
+      "text": "Refactor ProLayout to use useState('dashboard') for activeTab and render the 4 pro screens (RadarScreen, WalletScreen, DashboardScreen, BusinessScreen) via conditional rendering — NOT React Router. ProLayout must be a fixed full-screen container with flex column layout, with the content area (flex:1, overflowY:'auto') and ProTabBar at the bottom. ProTabBar receives active and onChange props.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-2"
         ],
         "quotes": [
-          "4 slots 2×2 grid. Chaque slot vide : <input type=\"file\" accept=\"image/*\"> caché"
+          "Navigation par useState activeTab dans ProLayout wrapper, PAS de React Router pour les tabs (evite les crashes)"
         ]
       },
       "acceptanceCriteria": [
-        "Grid renders as 2×2 layout with 4 slots",
-        "Tapping an empty slot opens the native file picker",
-        "Selected image displays as full cover within its slot",
-        "× button removes the photo and resets that slot",
-        "Counter 'X/4 photos' updates in real time",
-        "Progress bar width equals (filledCount/4)*100% in gold",
-        "Text 'Minimum atteint ✓' appears when 3 or more slots are filled"
+        "ProLayout has const [activeTab, setActiveTab] = useState('dashboard')",
+        "Tapping each of the 4 ProTabBar tabs renders the corresponding screen without crashing or page reload",
+        "ProTabBar correctly highlights the active tab",
+        "No React Router navigation is used for tab switching within the pro space"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "Implement the complete subscription activation flow in ProSubscriptionModal. 'Activer mon profil' tap opens a fullscreen modal with: title '7 jours gratuits' (Inter 800 32px white), subtitle 'puis 19.90 CHF/mois' (Inter 400 16px #9898B4), a 6-item advantage list using SVG thin-dash bullets (no emoji), email input (bg #0D0D13, border #1E1E26, focus border #F2D06B), and a 'Commencer l'essai gratuit' button (bg #F2D06B, color #050507, Inter 700 14px, height 56px). On button tap: (1) a gold progress bar at the top of the screen animates from 0→100% over 2s; (2) a fullscreen overlay (#050507) appears showing an 80px circle (#00D97E) with an animated SVG check (stroke-dashoffset 400ms), text 'Profil activé' (Inter 800 28px #F4F4F8), subtext 'Visible par les clients dès maintenant' (Inter 400 15px #9898B4), and 40 gold confetti particles (#F2D06B only); (3) after 2500ms, navigate to Pro Dashboard and set state { proActif: true, essaiJours: 7 }. Pro Dashboard after activation shows a pill badge 'ESSAI GRATUIT · J1/7' (#00D97A at 10% opacity bg + border + text color). Flash toggle defaults to ON when proActif is true. 'Voir mon profil public' button navigates to Explorer with the pro profile visible at position 1.",
+      "text": "Refactor BusinessScreen (MonBusiness) to use useState('identite') for activeSubTab with 4 sub-tabs: Identite / Paiement / Services / Galerie. Each sub-tab content is rendered via conditional rendering only (no routing). Sub-tab state must NOT reset when switching between sub-tabs — all data is held in ProContext.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-2"
         ],
         "quotes": [
-          "Tap 'Activer mon profil' → modal fullscreen"
+          "4 sub-tabs dans Business screen : Identite / Paiement / Services / Galerie",
+          "Meme logique : useState activeSubTab PAS de routing. Conditional render only.",
+          "Chaque sub-tab garde son state local via ProContext (pas de reset au changement)."
         ]
       },
       "acceptanceCriteria": [
-        "Fullscreen modal opens with correct typography and colors on 'Activer mon profil' tap",
-        "Email input has correct styling with gold focus border",
-        "Button has #F2D06B background and #050507 text — never gold on gold",
-        "Top progress bar animates 0→100% over 2s on submit",
-        "Success overlay appears with animated green check circle and gold confetti",
-        "Navigation to Pro Dashboard occurs after 2500ms",
-        "proActif and essaiJours state are set correctly",
-        "Pro Dashboard shows 'ESSAI GRATUIT · J1/7' badge in green pill style",
-        "Flash toggle is ON by default when proActif is true"
+        "BusinessScreen has const [activeSubTab, setActiveSubTab] = useState('identite')",
+        "All 4 sub-tabs render their content without routing",
+        "Switching sub-tabs does not reset form fields or data stored in ProContext",
+        "All sub-tab data reads from and writes to ProContext proData"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "Simplify the color palette across the app. Explorer cards: background #0D0D13 (remove all violet/bordeaux tints), border 1px solid rgba(255,255,255,0.06). Wallet card: background linear-gradient(135deg, #0A0A0A, #0F0E0A), border 1px solid rgba(242,208,107,0.15), remove orange-brown saturated gradient. Balance display: '240 CHF' in Inter 900 48px #F2D06B, 'SOLDE DISPONIBLE' in Inter 600 10px #54546C. Bar chart: inactive bars #1C1C26, today's active bar #F2D06B, remove all gold/brown gradients on bars. Tab bar (both client and pro): background rgba(5,5,7,0.96) backdrop-blur(24px), border-top 1px solid rgba(255,255,255,0.04), active tab icon SVG #F2D06B with a 2px #F2D06B top indicator 20px wide, inactive tab icon SVG #2E2E3E, no colored background on active tab.",
+      "text": "Replace the existing photo upload implementation in the Galerie sub-tab with the ref-based approach: use an array of 4 useRef(null) for file inputs, handleSlotClick triggers the corresponding hidden input, handleFileChange validates type (must be image/*) and size (max 10MB), reads as base64 via FileReader and stores in proData.photos[index] via ProContext setProData. Each slot renders a hidden <input type='file' accept='image/*'>, shows the uploaded image with objectFit:'cover' and a remove button (IconX, stopPropagation), or shows an empty slot with dashed border, IconCamera, and 'Add' label. Remove button sets photos[index] to null.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-2"
         ],
         "quotes": [
-          "Explorer cards 2 colonnes : Fond : #0D0D13 (NEUTRE — supprimer violet/bordeaux)"
+          "Remplacer implementation actuelle par :",
+          "const fileInputRefs = [useRef(null), useRef(null), useRef(null), useRef(null)]",
+          "e.target.value = ''  // reset input"
         ]
       },
       "acceptanceCriteria": [
-        "No violet or bordeaux colors appear on Explorer cards",
-        "Wallet card uses the specified neutral dark gradient",
-        "Bar chart inactive bars are #1C1C26 and today's bar is #F2D06B with no gradients",
-        "Tab bar background is rgba(5,5,7,0.96) with backdrop-blur",
-        "Active tab shows a 2px gold top indicator and gold SVG icon, no colored background"
+        "Tapping an empty slot opens the file picker",
+        "Only image/* files are accepted",
+        "Files over 10MB show an alert and are rejected",
+        "Uploaded image appears in the correct slot with objectFit:'cover'",
+        "The X button removes the image from the slot and from proData.photos",
+        "Clicking X does not trigger the slot click handler (stopPropagation)",
+        "File input value is reset after each upload so the same file can be re-selected"
       ]
     },
     {
       "id": "REQ-5",
-      "text": "Redesign Explorer professional cards as a full-width vertical list. Each card: height 80px, background #0D0D13, border 1px solid rgba(255,255,255,0.05), border-radius 14px, padding 0 16px, display flex, align-items center, gap 14px. Left: 44px circle — if photo: img object-fit cover border-radius 50%; if no photo: subtle gradient + Inter 700 16px initials. Center (flex-1): name in Inter 700 16px #F4F4F8; 'Catégorie · Ville' in Inter 400 13px #54546C; if flash active: 'Répond en Xmin' in Inter 500 12px #00D97A (text only, no emoji). Right (text-right): SVG star 12px + '4.9' in Inter 600 13px; 'dès 35 CHF' in Inter 700 14px #F2D06B.",
+      "text": "Fix the subscription flow: SubscriptionSuccess must use a useEffect with a 4500ms timer that calls setProActif(true) via ProContext and then calls an onSuccessComplete callback prop. The parent that renders SubscriptionSuccess must pass onSuccessComplete as () => setActiveTab('dashboard') so the navigation goes to the Dashboard tab in ProLayout — NOT via React Router route change.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-2"
         ],
         "quotes": [
-          "Passer en liste plein largeur : height 80px"
+          "Modal → Success → Dashboard",
+          "Le navigate vers Dashboard doit setActiveTab dans ProLayout, pas changer de route.",
+          "onSuccessComplete = () => setActiveTab('dashboard')"
         ]
       },
       "acceptanceCriteria": [
-        "Explorer displays professionals as a full-width list, not a grid",
-        "Each card is exactly 80px tall with the specified flex layout",
-        "Avatar circle is 44px with photo cover or initials fallback",
-        "Flash response time shows as text in #00D97A with no emoji",
-        "Star rating uses an SVG icon, not an emoji",
-        "Price displays in #F2D06B"
+        "Tapping 'Activer mon profil' opens the subscription modal",
+        "Tapping 'Commencer l essai gratuit' starts the 4.5s animation sequence",
+        "After 4.5s, setProActif(true) is called via ProContext and the Dashboard tab becomes active",
+        "No route change occurs — navigation is handled entirely via setActiveTab",
+        "Dashboard displays the 'FREE TRIAL DAY 1/7' badge after activation"
       ]
     },
     {
       "id": "REQ-6",
-      "text": "Update the WalletPro component: below the '55 CHF séquestre' line, add the text 'Libéré dans 48h après prestation' in Inter 400 12px #54546C. After the user initiates a transfer, disable the transfer button and display its label as 'Virement initié' for 30 seconds. Show a toast notification for 5s reading 'Virement de 240 CHF vers votre Revolut' with a 3px left border in #00D97A.",
+      "text": "Fix the 'Activer mon profil' button in the Galerie sub-tab: the button must be enabled and visible when photos.filter(Boolean).length >= 3, regardless of IBAN value. IBAN is not required in demo mode. Do not block activation based on IBAN being empty.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-2"
         ],
         "quotes": [
-          "Sous '55 CHF séquestre' ajouter : 'Libéré dans 48h après prestation'"
+          "Le bouton 'Activer mon profil' dans Galerie NE DOIT PAS bloquer si IBAN vide en demo.",
+          "Condition d affichage du bouton : photos.filter(Boolean).length >= 3 (IBAN non requis pour demo)"
         ]
       },
       "acceptanceCriteria": [
-        "Escrow explanation text 'Libéré dans 48h après prestation' appears below the escrow amount",
-        "Transfer button becomes disabled and shows 'Virement initié' immediately after tap",
-        "Button re-enables after 30 seconds",
-        "Toast notification appears for 5s with the transfer message and #00D97A left border"
+        "The 'Activate my profile' button appears when at least 3 photo slots are filled",
+        "The button is NOT blocked or hidden when IBAN is empty",
+        "The button correctly triggers the subscription/activation flow"
       ]
     },
     {
       "id": "REQ-7",
-      "text": "Redesign the RoleSelection screen. Replace current cards with 2 full-width cards, each 96px tall, zero emojis, zero iOS-style icons. Client card: title 'Client' Inter 700 20px #F4F4F8, subtitle 'Réservez un expert à domicile' Inter 400 14px #54546C, SVG arrow right 16px #2E2E3E positioned absolute right, background #0D0D13, border #1E1E26, border-radius 16px; on tap: border changes to #5B7FFF, background rgba(91,127,255,0.04). Professional card: title 'Professionnel' Inter 700 20px #F4F4F8, subtitle 'Gérez votre activité beauté' Inter 400 14px #54546C, SVG arrow right 16px #2E2E3E, background #0D0D13, border #1E1E26, border-radius 16px; on tap: border changes to #F2D06B, background rgba(242,208,107,0.04).",
+      "text": "Replace the colored gradient backgrounds on Explorer pro cards with real Unsplash images using the exact URLs provided. Add a coverUrl field to each demo pro data entry with the following values: Studio Blade → https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=400&h=500&fit=crop&q=80, Karim Cuts → https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=400&h=500&fit=crop&q=80, Tom Barber → https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=400&h=500&fit=crop&q=80, Elise Coiffure → https://images.unsplash.com/photo-1562322140-8baeececf3df?w=400&h=500&fit=crop&q=80, Sarah Style → https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=400&h=500&fit=crop&q=80, Nadia Beauty → https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=400&h=500&fit=crop&q=80, Clara Nails → https://images.unsplash.com/photo-1604654894610-df63bc536371?w=400&h=500&fit=crop&q=80, Zen by Marco → https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=400&h=500&fit=crop&q=80.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-2"
         ],
         "quotes": [
-          "2 cards full-width height 96px : Zéro emoji. Zéro icône iOS."
+          "Remplacer les gradients colorés des cards par de vraies images Unsplash haute qualité.",
+          "URLs directes, pas de placeholders génériques."
         ]
       },
       "acceptanceCriteria": [
-        "Role selection shows exactly 2 full-width cards at 96px height",
-        "No emoji or iOS-style icons appear on either card",
-        "SVG arrow is visible on the right of each card",
-        "Tapping Client card highlights it with blue border and subtle blue tint",
-        "Tapping Professional card highlights it with gold border and subtle gold tint"
+        "Each pro card displays the correct Unsplash image as its cover/background",
+        "Images load correctly from the provided URLs",
+        "onError fallback restores the gradient background if the image fails to load"
       ]
     },
     {
       "id": "REQ-8",
-      "text": "Ensure the subscription CTA button 'Commencer l'essai gratuit' (and any similar primary CTA) always renders with background #F2D06B and text color #050507. Never apply gold/yellow text on a gold/yellow background anywhere in the app. Audit all buttons with #F2D06B background and enforce dark text #050507.",
+      "text": "Apply a mandatory dark overlay on all pro card images: linear-gradient(180deg, rgba(5,5,7,0.1) 0%, rgba(5,5,7,0.92) 100%) positioned absolute with inset:0 over the image. This applies to Flash Live cards (168x228px), Explorer list cards, and the Pro profile cover (270px height). Text content (badges, name, info) must sit above the overlay using z-index stacking.",
       "target": "frontend",
       "source": {
         "messageIds": [
-          "msg-4"
+          "msg-2"
         ],
         "quotes": [
-          "CRITIQUE : texte doré sur fond doré = illisible. Bouton 'Commencer' → background #F2D06B color #050507"
+          "Overlay sombre toujours sur les images",
+          "Overlay obligatoire sur image"
         ]
       },
       "acceptanceCriteria": [
-        "Subscription CTA button renders with #F2D06B background and #050507 text",
-        "No instance of gold/yellow text on gold/yellow background exists anywhere in the app",
-        "Button text is legible with sufficient contrast ratio"
+        "All pro card images have the dark gradient overlay rendered as an absolute-positioned div over the image",
+        "Text and badges are always legible over the image",
+        "Overlay is present on Flash Live cards, Explorer list avatars, and Pro profile cover"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Add service-level image URLs to all demo service data entries by category. Barber services: 'Coupe homme' → https://images.unsplash.com/photo-1503951914875-452162b0f3f1?w=300&h=200&fit=crop&q=80, 'Degrade premium' → https://images.unsplash.com/photo-1621605815971-fbc98d665033?w=300&h=200&fit=crop&q=80, 'Coupe + Barbe' → https://images.unsplash.com/photo-1599351431202-1e0f0137899a?w=300&h=200&fit=crop&q=80, 'Barbe design' → https://images.unsplash.com/photo-1519345182560-3f2917c472ef?w=300&h=200&fit=crop&q=80, 'Rasage traditionnel' → https://images.unsplash.com/photo-1493256338651-d82f7acb2b38?w=300&h=200&fit=crop&q=80. Coiffure services: 'Coupe femme' → https://images.unsplash.com/photo-1562322140-8baeececf3df?w=300&h=200&fit=crop&q=80, 'Couleur' → https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=300&h=200&fit=crop&q=80, 'Meches' → https://images.unsplash.com/photo-1492106087820-71f1a00d2b11?w=300&h=200&fit=crop&q=80, 'Brushing' → https://images.unsplash.com/photo-1605497788044-5a32c7078486?w=300&h=200&fit=crop&q=80. Esthetique services: 'Soin visage' → https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=300&h=200&fit=crop&q=80, 'Manucure' → https://images.unsplash.com/photo-1604654894610-df63bc536371?w=300&h=200&fit=crop&q=80, 'Pedicure' → https://images.unsplash.com/photo-1519751138087-5bf79df62d5b?w=300&h=200&fit=crop&q=80, 'Pose gel' → https://images.unsplash.com/photo-1604654894610-df63bc536371?w=300&h=200&fit=crop&q=80. Massage services: 'Massage relaxant' → https://images.unsplash.com/photo-1544161515-4ab6ce6db874?w=300&h=200&fit=crop&q=80, 'Massage sportif' → https://images.unsplash.com/photo-1600334129128-685c5582fd35?w=300&h=200&fit=crop&q=80, 'Massage duo' → https://images.unsplash.com/photo-1515377905703-c4788e51af15?w=300&h=200&fit=crop&q=80. Display these images on Explorer service cards and in pro profile service lists.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "IMAGES SERVICES (Explorer cards et Fiche pro)",
+          "BARBER services :",
+          "COIFFURE services :",
+          "ESTHETIQUE services :",
+          "MASSAGE services :"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Each service card displays the correct category-specific Unsplash image",
+        "Images render with objectFit:'cover' in service card containers",
+        "onError fallback is implemented for service images"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Update the Flash Live card layout (168x228px, borderRadius:20) to use <img> with objectFit:'cover' for the pro coverUrl, with an onError fallback that hides the image and restores the gradient background. The dark overlay div must be absolutely positioned over the image. Flash badge (top-left), rating (top-right), and pro info (bottom) must all render above the overlay.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Flash Live cards (168x228px)",
+          "onError={(e) => { e.target.style.display = 'none' e.target.parentElement.style.background = pro.gradient }"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Flash Live cards show the real image instead of gradient when coverUrl is valid",
+        "Image fills the card with objectFit:'cover'",
+        "Dark overlay is always present over the image",
+        "Badges and info text are readable above the overlay",
+        "Fallback to gradient if image fails to load"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Update Explorer list card avatars (44px circular) to display the pro's coverUrl as a circular <img> with objectFit:'cover' when available, falling back to gradient background with initials when coverUrl is absent or fails to load.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Explorer liste cards (h-80px) : Left avatar 44px : Si coverUrl disponible : <img src={pro.coverUrl} style={{width:44, height:44, borderRadius:'50%', objectFit:'cover'}}/> Sinon : gradient + initiales"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Explorer list cards show the pro's photo as a 44px circular avatar when coverUrl is set",
+        "Fallback to gradient + initials when coverUrl is missing or broken"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "text": "Update the pro profile cover (height 270px) to render the pro's coverUrl as a full-width <img> with objectFit:'cover' and objectPosition:'top center', with an onError handler that hides the image. Add a subtle noise/grain overlay (3% opacity SVG pattern) and a dark gradient overlay (linear-gradient(180deg, transparent 0%, rgba(5,5,7,0.98) 100%)) absolutely positioned over the image.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Fiche pro cover (270px height)",
+          "objectPosition:'top center'",
+          "Grain overlay opacity 3%",
+          "linear-gradient(180deg, transparent 0%, rgba(5,5,7,0.98) 100%)"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Pro profile cover shows the real Unsplash image at 270px height",
+        "Image is cropped from top-center",
+        "Grain overlay at ~3% opacity is present",
+        "Dark gradient overlay fades from transparent to near-black at the bottom",
+        "onError hides the broken image gracefully"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "text": "Ensure the 'Start free trial' (Commencer l essai gratuit) button always has background #F2D06B and color #050507. Never render gold text on a gold background. Remove any conditional styling that could produce gold-on-gold text.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Bouton 'Commencer l essai gratuit' : background #F2D06B color #050507 JAMAIS texte dore sur fond dore"
+        ]
+      },
+      "acceptanceCriteria": [
+        "The 'Start free trial' button always renders with background #F2D06B and text color #050507",
+        "No state or conditional styling ever produces gold text on a gold background"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "text": "Verify that the Wallet 30-second cooldown works correctly after tapping 'Transfer to my account'. The button must be disabled for 30 seconds after tap, show a countdown, and the balance must be zeroed. Ensure this functionality is not broken by the ProContext/ProLayout refactor.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Wallet cooldown 30s fonctionne apres tap 'Virer sur mon compte'"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Tapping 'Transfer to my account' zeros the balance",
+        "The button is disabled and shows a 30-second countdown",
+        "After 30 seconds, the button re-enables",
+        "Navigating away and back to the Wallet tab during cooldown still shows the remaining cooldown time"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Remove all emoji characters from any pro-space component code (ProLayout, BusinessScreen, ProTabBar, WalletPro, RadarPro, DashboardScreen, SubscriptionModal, SubscriptionSuccess). Use only SVG icon components (from Icons.tsx) or plain text labels.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Zero emoji dans tout le code"
+        ]
+      },
+      "acceptanceCriteria": [
+        "No emoji characters appear in any pro-space component JSX or strings",
+        "All icons are rendered via SVG icon components"
       ]
     }
   ],
   "constraints": [
-    "Do not rebuild from scratch — apply corrections to existing code only",
-    "Do not modify files under frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui",
-    "Backend schema and logic must not change",
-    "Confetti must use only #F2D06B — no other colors"
+    "Do not rebuild the client-facing screens (Explorer, ProFiche, BookingFlow, ClientDashboard, etc.)",
+    "Do not change the color palette or CSS custom properties",
+    "Do not change typography (fonts, weights, sizes)",
+    "Do not use React Router for pro tab or sub-tab navigation — use useState only",
+    "IBAN must not be required for demo-mode activation",
+    "All Unsplash URLs must be used exactly as specified — do not substitute or modify them",
+    "Never modify files in frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, or frontend/src/components/ui"
   ],
   "nonGoals": [
-    "New backend features or data model changes",
-    "New screens or navigation flows beyond those specified in C1–C8",
-    "Changes to authentication logic",
-    "Adding real payment processing"
+    "Rebuilding or redesigning any client-facing screens",
+    "Adding new features beyond the specified fixes",
+    "Implementing real payment or IBAN processing",
+    "Changing the backend schema or Motoko actor",
+    "Adding new routes or changing the React Router configuration",
+    "Adding geolocation or real-time features"
   ],
   "imageRequirements": {
     "required": [],

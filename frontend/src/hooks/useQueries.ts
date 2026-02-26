@@ -10,9 +10,18 @@ import type {
   WeeklyAvailability,
   ExternalBlob,
 } from '../backend';
-import { AppUserRole } from '../backend';
 
-// ─── User Profile ───────────────────────────────────────────────────────────
+// ── AppNotification type (exported for use in AppContext) ─────────────────────
+
+export interface AppNotification {
+  id: string;
+  type: 'nouvelle_demande' | 'paiement_confirme' | 'fonds_liberes' | 'avis_recu' | 'booking_confirme';
+  bookingId?: string;
+  timestamp: number;
+  read: boolean;
+}
+
+// ── User Profile ──────────────────────────────────────────────────────────────
 
 export function useGetCallerUserProfile() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -41,7 +50,7 @@ export function useSaveCallerUserProfile() {
   return useMutation({
     mutationFn: async (profile: UserProfile) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.saveCallerUserProfile(profile);
+      return actor.saveCallerUserProfile(profile);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['currentUserProfile'] });
@@ -49,26 +58,23 @@ export function useSaveCallerUserProfile() {
   });
 }
 
-// ─── Pro Profile ─────────────────────────────────────────────────────────────
+// ── Pro Profile ───────────────────────────────────────────────────────────────
 
-export function useGetProProfile(proId?: string) {
+export function useGetProProfile(proId?: string | null) {
   const { actor, isFetching: actorFetching } = useActor();
-  const { identity } = useInternetIdentity();
 
   return useQuery<ProProfile | null>({
-    queryKey: ['proProfile', proId ?? identity?.getPrincipal().toString()],
+    queryKey: ['proProfile', proId],
     queryFn: async () => {
-      if (!actor) throw new Error('Actor not available');
-      const id = proId ?? identity?.getPrincipal().toString();
-      if (!id) return null;
+      if (!actor || !proId) return null;
       try {
         const { Principal } = await import('@dfinity/principal');
-        return await actor.getProProfile(Principal.fromText(id));
+        return await actor.getProProfile(Principal.fromText(proId));
       } catch {
         return null;
       }
     },
-    enabled: !!actor && !actorFetching,
+    enabled: !!actor && !actorFetching && !!proId,
     retry: false,
   });
 }
@@ -81,7 +87,7 @@ export function useCreateOrUpdateProProfile() {
   return useMutation({
     mutationFn: async (profile: ProProfile) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.createOrUpdateProProfile(profile);
+      return actor.createOrUpdateProProfile(profile);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proProfile', identity?.getPrincipal().toString()] });
@@ -98,7 +104,7 @@ export function usePublishProfile() {
   return useMutation({
     mutationFn: async () => {
       if (!actor) throw new Error('Actor not available');
-      await actor.publishProfile();
+      return actor.publishProfile();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proProfile', identity?.getPrincipal().toString()] });
@@ -115,7 +121,7 @@ export function useUpdateServices() {
   return useMutation({
     mutationFn: async (services: Service[]) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.updateServices(services);
+      return actor.updateServices(services);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proProfile', identity?.getPrincipal().toString()] });
@@ -129,9 +135,15 @@ export function useUpdateGallery() {
   const { identity } = useInternetIdentity();
 
   return useMutation({
-    mutationFn: async ({ mainPhoto, galleryPhotos }: { mainPhoto: ExternalBlob | null; galleryPhotos: ExternalBlob[] }) => {
+    mutationFn: async ({
+      mainPhoto,
+      galleryPhotos,
+    }: {
+      mainPhoto: ExternalBlob | null;
+      galleryPhotos: ExternalBlob[];
+    }) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.updateGallery(mainPhoto, galleryPhotos);
+      return actor.updateGallery(mainPhoto, galleryPhotos);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proProfile', identity?.getPrincipal().toString()] });
@@ -147,7 +159,7 @@ export function useUpdateWeeklyAvailability() {
   return useMutation({
     mutationFn: async (availability: WeeklyAvailability) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.updateWeeklyAvailability(availability);
+      return actor.updateWeeklyAvailability(availability);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['proProfile', identity?.getPrincipal().toString()] });
@@ -155,9 +167,14 @@ export function useUpdateWeeklyAvailability() {
   });
 }
 
-// ─── Active Pros (Explorer) ──────────────────────────────────────────────────
+// ── Active Pros (Explorer) ────────────────────────────────────────────────────
 
-export function useActivePros(centerLat = 46.8, centerLong = 8.2, radius = BigInt(50), category?: string) {
+export function useActivePros(
+  centerLat = 46.8,
+  centerLong = 8.2,
+  radius = BigInt(50),
+  category?: string
+) {
   const { actor, isFetching: actorFetching } = useActor();
 
   return useQuery<ProProfile[]>({
@@ -184,7 +201,25 @@ export function useFlashPros() {
   });
 }
 
-// ─── Bookings ────────────────────────────────────────────────────────────────
+export function useFilterProsByLocation(
+  centerLat: number,
+  centerLong: number,
+  radius: number,
+  category: string | null
+) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<ProProfile[]>({
+    queryKey: ['prosByLocation', centerLat, centerLong, radius, category],
+    queryFn: async () => {
+      if (!actor) return [];
+      return actor.filterProsByLocation(centerLat, centerLong, BigInt(radius), category);
+    },
+    enabled: !!actor && !actorFetching,
+  });
+}
+
+// ── Bookings ──────────────────────────────────────────────────────────────────
 
 export function useMyBookings() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -213,6 +248,49 @@ export function useRadarDemandes() {
     },
     enabled: !!actor && !actorFetching && !!identity,
     refetchInterval: 15000,
+  });
+}
+
+export function useGetBookingsByUser(userId: string | null) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<Booking[]>({
+    queryKey: ['bookingsByUser', userId],
+    queryFn: async () => {
+      if (!actor || !userId) return [];
+      const { Principal } = await import('@dfinity/principal');
+      return actor.getBookingsByUser(Principal.fromText(userId), null);
+    },
+    enabled: !!actor && !actorFetching && !!userId,
+  });
+}
+
+export function useGetBookingsByProfessional(proId: string | null) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<Booking[]>({
+    queryKey: ['bookingsByPro', proId],
+    queryFn: async () => {
+      if (!actor || !proId) return [];
+      const { Principal } = await import('@dfinity/principal');
+      return actor.getBookingsByProfessional(Principal.fromText(proId));
+    },
+    enabled: !!actor && !actorFetching && !!proId,
+    refetchInterval: 30000,
+  });
+}
+
+export function useGetBooking(bookingId: string | null) {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<Booking | null>({
+    queryKey: ['booking', bookingId],
+    queryFn: async () => {
+      if (!actor || !bookingId) return null;
+      return actor.getBooking(bookingId);
+    },
+    enabled: !!actor && !actorFetching && !!bookingId,
+    refetchInterval: 30000,
   });
 }
 
@@ -245,6 +323,35 @@ export function useCreateBooking() {
   });
 }
 
+export function useCreateBookingRequest() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      proId,
+      serviceId,
+      date,
+      timeSlot,
+      address,
+    }: {
+      proId: string;
+      serviceId: string;
+      date: string;
+      timeSlot: string;
+      address: string;
+    }) => {
+      if (!actor) throw new Error('Actor not available');
+      const { Principal } = await import('@dfinity/principal');
+      return actor.createBookingRequest(Principal.fromText(proId), serviceId, date, timeSlot, address);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['myBookings'] });
+      queryClient.invalidateQueries({ queryKey: ['bookingsByUser'] });
+    },
+  });
+}
+
 export function useUpdateBookingStatus() {
   const { actor } = useActor();
   const queryClient = useQueryClient();
@@ -252,16 +359,19 @@ export function useUpdateBookingStatus() {
   return useMutation({
     mutationFn: async ({ bookingId, status }: { bookingId: string; status: BookingStatus }) => {
       if (!actor) throw new Error('Actor not available');
-      await actor.updateBookingStatus(bookingId, status);
+      return actor.updateBookingStatus(bookingId, status);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['myBookings'] });
       queryClient.invalidateQueries({ queryKey: ['radarDemandes'] });
+      queryClient.invalidateQueries({ queryKey: ['bookingsByPro'] });
+      queryClient.invalidateQueries({ queryKey: ['bookingsByUser'] });
+      queryClient.invalidateQueries({ queryKey: ['booking'] });
     },
   });
 }
 
-// ─── Wallet (derived from bookings) ─────────────────────────────────────────
+// ── Wallet (derived from bookings) ────────────────────────────────────────────
 
 export function useWalletSolde() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -280,7 +390,7 @@ export function useWalletSolde() {
   });
 }
 
-// ─── Notifications (local, derived from bookings) ────────────────────────────
+// ── Notifications (derived from bookings) ─────────────────────────────────────
 
 export function useMyNotifications() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -338,15 +448,7 @@ export function useMyNotifications() {
   });
 }
 
-export interface AppNotification {
-  id: string;
-  type: 'nouvelle_demande' | 'paiement_confirme' | 'fonds_liberes' | 'avis_recu' | 'booking_confirme';
-  bookingId?: string;
-  timestamp: number;
-  read: boolean;
-}
-
-// ─── Admin ───────────────────────────────────────────────────────────────────
+// ── Admin ─────────────────────────────────────────────────────────────────────
 
 export function useAdminAllPros() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -379,7 +481,11 @@ export function useAdminAllBookings() {
 export function useAdminMetrics() {
   const { actor, isFetching: actorFetching } = useActor();
 
-  return useQuery<{ totalBookings: bigint; totalActivePros: bigint; totalRegisteredUsers: bigint }>({
+  return useQuery<{
+    totalBookings: bigint;
+    totalActivePros: bigint;
+    totalRegisteredUsers: bigint;
+  }>({
     queryKey: ['adminMetrics'],
     queryFn: async () => {
       if (!actor) throw new Error('Actor not available');
@@ -398,7 +504,7 @@ export function useAdminValidatePro() {
     mutationFn: async (proId: string) => {
       if (!actor) throw new Error('Actor not available');
       const { Principal } = await import('@dfinity/principal');
-      await actor.adminValidatePro(Principal.fromText(proId));
+      return actor.adminValidatePro(Principal.fromText(proId));
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['adminPros'] });
@@ -407,7 +513,18 @@ export function useAdminValidatePro() {
   });
 }
 
-// ─── Stripe ──────────────────────────────────────────────────────────────────
+export function useIsCallerAdmin() {
+  const { actor, isFetching: actorFetching } = useActor();
+
+  return useQuery<boolean>({
+    queryKey: ['isCallerAdmin'],
+    queryFn: async () => {
+      if (!actor) return false;
+      return actor.isCallerAdmin();
+    },
+    enabled: !!actor && !actorFetching,
+  });
+}
 
 export function useIsStripeConfigured() {
   const { actor, isFetching: actorFetching } = useActor();
@@ -421,21 +538,3 @@ export function useIsStripeConfigured() {
     enabled: !!actor && !actorFetching,
   });
 }
-
-// ─── Role helpers ─────────────────────────────────────────────────────────────
-
-export function useIsAdmin() {
-  const { actor, isFetching: actorFetching } = useActor();
-
-  return useQuery<boolean>({
-    queryKey: ['isAdmin'],
-    queryFn: async () => {
-      if (!actor) return false;
-      return actor.isCallerAdmin();
-    },
-    enabled: !!actor && !actorFetching,
-    retry: false,
-  });
-}
-
-export { AppUserRole };

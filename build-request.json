@@ -1,383 +1,294 @@
 {
   "kind": "build_request",
-  "title": "NEXUS — Full Backend Motoko + Frontend Canister Connection + Admin Panel + In-App Notifications",
-  "projectName": "NEXUS",
+  "title": "NEXUS v8.0 — Full multi-file production platform (Payrexx TWINT, ICP mainnet, Internet Identity)",
+  "projectName": "NEXUS Beauty Platform",
   "priority": "high",
   "requirements": [
     {
       "id": "REQ-1",
-      "text": "Create backend/main.mo as a complete single Motoko actor implementing all NEXUS data types and state: UserProfile, ProProfile (with subscription status, wallet balance, validation status), Service, Booking (with escrow state), Notification, Transaction. Include stable storage maps for all entities. Implement a heartbeat that automatically releases escrow funds 48 hours after booking confirmation by transitioning booking state from #escrow to #released and crediting the pro wallet.",
-      "target": "backend",
+      "text": "Create `frontend/src/lib/payrexx.ts` with the exact implementation provided: `createSubscriptionUrl(proId, email, phone)` and `createBookingUrl(bookingId, montant, serviceName, email)` functions that call the Payrexx API directly from the frontend using `VITE_PAYREXX_INSTANCE` and `VITE_PAYREXX_SECRET` env vars, always passing `psp[0]=twint`, returning the gateway link URL. No Stripe, no Revolut references anywhere.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-2"
         ],
         "quotes": [
-          "Heartbeat : escrow 48h actif",
-          "src/backend/main.mo"
+          "FRONTEND src/lib/payrexx.ts : Fichier séparé avec vraies fonctions"
         ]
       },
       "acceptanceCriteria": [
-        "backend/main.mo compiles without errors",
-        "All stable vars persist across upgrades",
-        "Heartbeat fires and releases bookings older than 48h automatically",
-        "All entity types are defined: UserProfile, ProProfile, Service, Booking, Notification, Transaction"
+        "`createSubscriptionUrl` posts to `https://nexus.payrexx.com/api/v1/Gateway/` with amount=1990, currency=CHF, psp[0]=twint, purpose='Abonnement NEXUS Pro 7j'",
+        "`createBookingUrl` posts with Math.round(montant*100) as amount, currency=CHF, psp[0]=twint",
+        "Both functions return `data.data?.[0]?.link ?? ''`",
+        "Authorization header uses Basic btoa(`${INSTANCE}:${SECRET}`)",
+        "No Stripe or Revolut imports or references in any file"
       ]
     },
     {
       "id": "REQ-2",
-      "text": "In backend/main.mo, implement all Pro-facing canister update and query functions: updatePro(profile), addService(service), removeService(id), getMyServices(), activateSubscription(), getRadarDemandes() returning pending booking requests for the caller's pro profile, getWalletSolde() returning current wallet balance, acceptBooking(bookingId), declineBooking(bookingId), uploadGalleryPhoto(data), getMyGallery().",
-      "target": "backend",
+      "text": "Create `frontend/src/lib/twilio.ts` with `sendOTP(phone)` and `verifyOTP(phone, code)` functions that proxy through `VITE_WORKER_URL` (`/send-otp` and `/verify-otp` endpoints). Credentials are never exposed on the frontend. `verifyOTP` returns `data.valid === true`.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-2"
         ],
         "quotes": [
-          "Mon Business → updatePro()",
-          "Services → addService()",
-          "Radar → getRadarDemandes()",
-          "Wallet → getWalletSolde()"
+          "FRONTEND src/lib/twilio.ts : Via Supabase Edge Function ou Cloudflare Worker sécurisé (credentials jamais exposés)"
         ]
       },
       "acceptanceCriteria": [
-        "updatePro() updates caller's pro profile in stable map",
-        "addService() appends service to caller's service list",
-        "getRadarDemandes() returns only bookings targeted at the caller pro",
-        "getWalletSolde() returns accurate balance after escrow releases",
-        "activateSubscription() sets subscription status to active on caller's profile"
+        "`sendOTP` posts `{ phone }` to `${VITE_WORKER_URL}/send-otp`",
+        "`verifyOTP` posts `{ phone, code }` to `${VITE_WORKER_URL}/verify-otp` and returns boolean",
+        "No Twilio credentials appear anywhere in frontend source"
       ]
     },
     {
       "id": "REQ-3",
-      "text": "In backend/main.mo, implement all Client-facing canister functions: getActivePros() returning all validated and active pro profiles, getFlashPros() returning pros with flash availability enabled, createBooking(proId, serviceId, date, location, clientDetails) creating a booking in #pending state with escrow initialized, getMyBookings() returning caller's bookings, cancelBooking(bookingId). Include a stub function createPayrexxGateway(bookingId) that is commented out with a /* PAYREXX_STUB */ block ready for HTTP outcall activation.",
+      "text": "Add documented Payrexx HTTP outcall stub in `backend/main.mo` as a block comment titled `PAYREXX_INTEGRATION`, showing the full commented-out `callPayrexx` function using `IC.http_request` for future ICP mainnet HTTP outcalls activation. The stub must be preserved verbatim and never deleted.",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-2"
         ],
         "quotes": [
-          "Explorer → getActivePros()",
-          "Flash → getFlashPros()",
-          "Booking flow → createBooking()",
-          "Paiement → createPayrexxGateway()",
-          "Stubs commentés : Payrexx HTTP outcalls"
+          "CANISTER MOTOKO garde les stubs complets documentés"
         ]
       },
       "acceptanceCriteria": [
-        "getActivePros() returns only pros with isValidated=true and isActive=true",
-        "getFlashPros() returns subset of active pros with flashEnabled=true",
-        "createBooking() persists booking with escrow state and returns booking ID",
-        "createPayrexxGateway is present as a commented /* PAYREXX_STUB */ block with clear activation instructions",
-        "getMyBookings() scoped to caller's principal"
+        "Comment block `/* PAYREXX_INTEGRATION ... */` exists in main.mo",
+        "Stub shows `IC.http_request` call to `https://nexus.payrexx.com/api/v1/Gateway/`",
+        "Motoko code compiles successfully with the stub commented out"
       ]
     },
     {
       "id": "REQ-4",
-      "text": "In backend/main.mo, implement Admin-only canister functions: adminGetAllPros() returning all pro profiles regardless of validation status, adminValidatePro(proId) setting isValidated=true on the target pro, adminGetAllTransactions() returning the full transaction ledger, adminGetMetrics() returning aggregate revenue metrics (total platform fees, total bookings, total active pros, total registered users). Guard all admin functions with a caller principal check against a hardcoded admin principal list.",
-      "target": "backend",
+      "text": "Refactor the entire frontend into the exact multi-file architecture specified. Deliver every file listed: `src/App.tsx` (useState routing, ToastContainer, NotifsPanel), `src/state/useAppState.ts` (global state, `go()`, `showToast()`, `update()`), `src/lib/actor.ts` (ICP Internet Identity, createActor, login, logout), `src/lib/api.ts` (all canister functions), `src/lib/notifications.ts` (getNotifications, markRead), `src/styles/globals.css` (CSS vars palette, keyframe animations, mobile reset, scrollbar hidden), and `src/components/icons/index.tsx` (30+ SVG icon components, zero emojis).",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-2"
         ],
         "quotes": [
-          "adminGetAllPros()",
-          "adminValidatePro()",
-          "Tableau transactions",
-          "Métriques revenus NEXUS"
+          "Architecture multi-fichiers. Plus maintenable. Plus professionnel.",
+          "Structure exacte à livrer"
         ]
       },
       "acceptanceCriteria": [
-        "adminGetAllPros() returns complete pro list including unvalidated pros",
-        "adminValidatePro() only succeeds when caller is in the admin principal whitelist",
-        "adminGetAllTransactions() returns full transaction history",
-        "adminGetMetrics() returns correct aggregate counts",
-        "Non-admin callers receive #unauthorized error on all admin functions"
+        "All files in the specified directory structure exist and are non-empty",
+        "`useAppState.ts` exports `go()`, `showToast()`, `update()` and a global state object",
+        "`actor.ts` uses Internet Identity (DFINITY AuthClient) for real ICP mainnet authentication",
+        "`icons/index.tsx` contains 30+ named SVG components, none use emoji characters",
+        "`globals.css` defines CSS custom property palette, hides scrollbars, includes keyframe animations"
       ]
     },
     {
       "id": "REQ-5",
-      "text": "In backend/main.mo, implement the in-app notification system: addNotification(userId, type, message) storing notifications per principal, getMyNotifications() returning the caller's notification list with timestamps, markNotificationRead(notifId), markAllNotificationsRead(). Notification types must be: #nouvelle_demande, #paiement_confirme, #fonds_liberes, #avis_recu, #booking_confirme. Automatically call addNotification at the appropriate points (booking creation, escrow release, etc.).",
-      "target": "backend",
+      "text": "Deliver all UI component files under `src/components/ui/`: `BtnPrimary.tsx`, `BtnSecondary.tsx`, `Input.tsx`, `Label.tsx`, `Card.tsx`, `Toast.tsx`, `Header.tsx`, `TabBarClient.tsx`, `TabBarPro.tsx`, `TabBarAdmin.tsx`, `BottomSheet.tsx`, `ProgressCircle.tsx`, `Shimmer.tsx`. Each component must be fully functional with proper TypeScript props, onClick/onChange handlers, and no emojis.",
+      "target": "frontend",
       "source": {
         "messageIds": [
           "msg-2"
         ],
         "quotes": [
-          "Types : nouvelle_demande / paiement_confirme / fonds_liberes / avis_recu / booking_confirme"
+          "components/ui/ BtnPrimary.tsx BtnSecondary.tsx Input.tsx Label.tsx Card.tsx Toast.tsx Header.tsx TabBarClient.tsx TabBarPro.tsx TabBarAdmin.tsx BottomSheet.tsx ProgressCircle.tsx Shimmer.tsx"
         ]
       },
       "acceptanceCriteria": [
-        "getMyNotifications() returns only the caller's notifications",
-        "All 5 notification types are defined as variants",
-        "Notifications are auto-created at relevant state transitions (booking created, escrow released, etc.)",
-        "markAllNotificationsRead() sets all caller notifications to isRead=true"
+        "All 13 component files exist under `src/components/ui/`",
+        "Every button component has an `onClick` prop wired",
+        "Every input component has an `onChange` prop wired",
+        "No emoji characters in any component file",
+        "Gold background elements use `color: #050507` for text"
       ]
     },
     {
       "id": "REQ-6",
-      "text": "In backend/main.mo, add commented-out Twilio SMS stub blocks at every point where an SMS would logically be sent (booking confirmed, funds released, new request received). Each stub must follow this exact format: /* TWILIO_STUB — sendSMS(to: Text, body: Text) — Uncomment in production — Replace TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN with real credentials — Estimated activation time: 5 minutes */. The surrounding functional code must work without the stub.",
+      "text": "Deliver all auth screens: `src/screens/auth/LoginScreen.tsx` (Internet Identity login, real ICP mainnet), `src/screens/auth/RoleScreen.tsx` (client / professional / admin role selection), `src/screens/auth/OTPScreen.tsx` (6-digit SMS OTP input verified via `lib/twilio.ts` Cloudflare Worker). All screens must have back navigation and no emoji.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "screens/auth/ LoginScreen.tsx RoleScreen.tsx OTPScreen.tsx"
+        ]
+      },
+      "acceptanceCriteria": [
+        "LoginScreen uses real Internet Identity via `actor.ts`, no hardcoded credentials",
+        "OTPScreen renders 6 individual digit inputs (not 4)",
+        "OTPScreen calls `verifyOTP` from `lib/twilio.ts`, not a hardcoded demo code",
+        "All screens have a back button with onClick handler"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "text": "Deliver all client screens: `ExplorerScreen.tsx`, `FicheProScreen.tsx`, `Booking1Screen.tsx` through `Booking5Screen.tsx` (5-step booking flow), `LiveStatusScreen.tsx`, `ReservationsScreen.tsx`, `AlertesScreen.tsx`, `ClientProfilScreen.tsx`. All screens use `go()` from `useAppState` for navigation. Booking confirmation must call `createBookingUrl` from `lib/payrexx.ts` and redirect via `window.location.href` to the Payrexx TWINT gateway. No setTimeout fake payment flows.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "screens/client/ ExplorerScreen.tsx FicheProScreen.tsx Booking1Screen.tsx ... LiveStatusScreen.tsx ReservationsScreen.tsx AlertesScreen.tsx ClientProfilScreen.tsx"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All 11 client screen files exist and are non-empty",
+        "Booking5Screen (confirmation) calls `createBookingUrl` and uses `window.location.href` for redirect",
+        "No `setTimeout` used to simulate payment",
+        "No Stripe references",
+        "No `100vh` CSS values",
+        "Layout uses `flex flex-col` with fixed inset-0, scroll zone uses `flex-1 overflow-y-auto`, CTA button uses `flex-shrink-0`"
+      ]
+    },
+    {
+      "id": "REQ-8",
+      "text": "Deliver all pro screens: `ProDashboardScreen.tsx`, `ProRadarScreen.tsx`, `ProWalletScreen.tsx`, `ProBusinessScreen.tsx` (5 tabs: profile, services, tarifs, payment, gallery), `SubscriptionModal.tsx` (calls `createSubscriptionUrl` from `lib/payrexx.ts`, redirects to Payrexx TWINT), `SuccessScreen.tsx`. No Stripe, no emoji.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "screens/pro/ ProDashboardScreen.tsx ProRadarScreen.tsx ProWalletScreen.tsx ProBusinessScreen.tsx SubscriptionModal.tsx SuccessScreen.tsx"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All 6 pro screen files exist",
+        "SubscriptionModal calls `createSubscriptionUrl` and redirects via `window.location.href`",
+        "SubscriptionModal amount is 1990 CHF cents (19.90 CHF), TWINT only",
+        "ProBusinessScreen has 5 tabs: profile, services, tarifs, payment/IBAN, gallery",
+        "No emoji in any pro screen file"
+      ]
+    },
+    {
+      "id": "REQ-9",
+      "text": "Deliver all admin screens: `AdminLoginScreen.tsx`, `AdminDashboardScreen.tsx`, `AdminProsScreen.tsx`, `AdminBookingsScreen.tsx`, `AdminRevenusScreen.tsx`. Admin login must use credentials stored in localStorage (set during first-run SetupScreen). No emoji.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "screens/admin/ AdminLoginScreen.tsx AdminDashboardScreen.tsx AdminProsScreen.tsx AdminBookingsScreen.tsx AdminRevenusScreen.tsx"
+        ]
+      },
+      "acceptanceCriteria": [
+        "All 5 admin screen files exist",
+        "AdminLoginScreen validates against credentials stored in localStorage by SetupScreen",
+        "AdminDashboardScreen shows real canister data via `lib/api.ts`",
+        "No emoji in any admin screen"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "text": "Implement `SetupScreen` (first-run configuration screen). Display it before `AdminLoginScreen` if any of `VITE_PAYREXX_INSTANCE`, `VITE_PAYREXX_SECRET`, or `VITE_WORKER_URL` are empty OR if no admin credentials exist in localStorage. The screen must have: title 'NEXUS Initial Configuration' (Inter 800 28px), Payrexx section (Instance input placeholder 'nexus', Secret API input type=password), Twilio section (Worker URL input placeholder 'https://...'), Admin section (email, password, confirm password). 'Initialize NEXUS' CTA button with gold background and `#050507` text saves all values to localStorage and to the canister admin config via `lib/api.ts`.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-2"
+        ],
+        "quotes": [
+          "Écran de configuration admin au premier démarrage. Si variables env vides → afficher SetupScreen avant AdminLogin"
+        ]
+      },
+      "acceptanceCriteria": [
+        "SetupScreen renders when env vars are empty or admin credentials absent from localStorage",
+        "All inputs have onChange handlers",
+        "Password and confirm password fields validate they match before saving",
+        "'Initialize NEXUS' button is gold background with #050507 text",
+        "On submit, values are persisted to localStorage AND written to canister via `lib/api.ts`",
+        "After successful setup, navigates to AdminLoginScreen"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "text": "Create `backend/main.mo` (full Motoko actor) and `backend/Types.mo` implementing: user auth (Internet Identity principal), pro profiles (status, location, category, services, gallery, avis), explorer query (active pros + flash pros), 5-step booking lifecycle (pending → confirmed → in_progress → completed → cancelled), wallet (CHF balance, transfer with 30s cooldown), notifications, admin functions (validate pro, list all bookings, revenue stats), 48h escrow heartbeat, and admin config storage (SetupScreen values). Include the commented-out `PAYREXX_INTEGRATION` stub as specified.",
       "target": "backend",
       "source": {
         "messageIds": [
           "msg-2"
         ],
         "quotes": [
-          "/* TWILIO_STUB\\n     sendSMS(to, body)\\n     Décommenter en production\\n     Remplacer credentials\\n  */",
-          "Prêts à activer en 5 minutes"
+          "backend/ main.mo Types.mo"
         ]
       },
       "acceptanceCriteria": [
-        "TWILIO_STUB comment blocks present at booking confirmation, escrow release, and new request events",
-        "Each stub block includes sendSMS signature, credential replacement instructions, and activation time estimate",
-        "Actor compiles and all functions work normally without uncommenting stubs"
-      ]
-    },
-    {
-      "id": "REQ-7",
-      "text": "Create frontend/src/lib/actor.ts that initializes the ICP backend actor using @dfinity/agent and the generated canister IDL. Export a getActor(identity?) function that returns an authenticated actor when an identity is provided and an anonymous actor otherwise. Cache the actor instance. This file replaces all direct canister calls currently scattered in mock imports.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "src/lib/actor.ts",
-          "mockData.ts → actor.ts + api.ts"
-        ]
-      },
-      "acceptanceCriteria": [
-        "actor.ts exports getActor() with optional identity parameter",
-        "Authenticated actor uses caller's Internet Identity principal",
-        "Anonymous actor used for public queries (getActivePros, getFlashPros)",
-        "Actor instance is cached and not recreated on every call"
-      ]
-    },
-    {
-      "id": "REQ-8",
-      "text": "Create frontend/src/lib/api.ts exporting typed async wrapper functions for every canister method: getPros(), getFlashPros(), createBooking(), getMyBookings(), cancelBooking(), updatePro(), addService(), getMyServices(), activateSubscription(), getRadarDemandes(), getWalletSolde(), acceptBooking(), declineBooking(), uploadGalleryPhoto(), getMyGallery(), adminGetAllPros(), adminValidatePro(), adminGetAllTransactions(), adminGetMetrics(), createPayrexxGateway(). Each function must handle errors gracefully and return typed results matching the Motoko type definitions.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "src/lib/api.ts",
-          "useState local → canister queries"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Every canister function has a corresponding typed wrapper in api.ts",
-        "All wrappers handle Result types (ok/err variants) from Motoko",
-        "TypeScript types match the Motoko actor interface",
-        "No mock data imports remain in api.ts"
-      ]
-    },
-    {
-      "id": "REQ-9",
-      "text": "Update frontend/src/context/AppContext.tsx to replace all mock data imports from mockData.ts and demoData.ts with calls to api.ts functions. Replace local useState-based booking/pro/wallet state with React Query queries (from useQueries.ts). Replace fake setTimeout timers with real canister polling. The escrow countdown must reflect the actual booking timestamp stored on-chain.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "mockData.ts → actor.ts + api.ts",
-          "useState local → canister queries",
-          "Faux timers → heartbeat ICP réel"
-        ]
-      },
-      "acceptanceCriteria": [
-        "No imports from mockData.ts or demoData.ts remain in AppContext",
-        "Booking list is fetched from getMyBookings() canister query",
-        "Wallet balance is fetched from getWalletSolde() canister query",
-        "Escrow timer is derived from booking createdAt timestamp from canister"
-      ]
-    },
-    {
-      "id": "REQ-10",
-      "text": "Update frontend/src/components/Login.tsx to replace the 'Continuer en mode demo' button with real Internet Identity authentication. On button press, trigger the II login flow from AuthContext. On successful authentication, check if the user has a ProProfile or UserProfile on-chain and route them to the appropriate dashboard. The demo mode button must be removed entirely.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "Login screen → vrai II auth",
-          "Remplacer 'Continuer en mode demo' par authentification réelle"
-        ]
-      },
-      "acceptanceCriteria": [
-        "'Continuer en mode demo' button is removed",
-        "Internet Identity login flow is triggered on the main CTA",
-        "Successful auth routes to pro dashboard if ProProfile exists for principal, else to role selection",
-        "Loading state shown during II authentication"
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "text": "Update frontend/src/components/ProLogin.tsx to use the real Internet Identity authentication flow from AuthContext (login/logout, isAuthenticated, principal). After successful II authentication, call the canister to check if a ProProfile exists for the principal and navigate to 'nexusOS'. If no profile exists, navigate to onboarding/builder flow.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "Auth Internet Identity",
-          "Login screen → vrai II auth"
-        ]
-      },
-      "acceptanceCriteria": [
-        "II authentication is triggered on CTA press",
-        "Principal is used to look up existing ProProfile on canister",
-        "Routes to nexusOS if profile found, to builder if not",
-        "Auth errors display an error message in the existing dark premium style"
+        "`Types.mo` exports all shared types (UserProfile, ProProfile, Booking, Notification, AdminConfig, etc.)",
+        "`main.mo` imports `Types.mo` and implements all CRUD operations",
+        "Heartbeat cancels bookings not confirmed within 48h",
+        "Admin config (Payrexx instance, Worker URL) is stored in stable memory",
+        "`main.mo` compiles with `dfx build` without errors",
+        "PAYREXX_INTEGRATION comment block is present in `main.mo`"
       ]
     },
     {
       "id": "REQ-12",
-      "text": "Connect the Pro dashboard screens to the canister. Update BusinessScreen.tsx to call updatePro() on save and addService()/removeService() for service management. Update RadarPro.tsx to fetch from getRadarDemandes() and call acceptBooking()/declineBooking(). Update WalletPro.tsx to fetch balance from getWalletSolde() and real transaction history from the canister. Update DashboardScreen.tsx stats to use canister query data. Replace all hardcoded/mock data in these components with live canister queries via api.ts.",
+      "text": "Create `.env.production` file at the project root with the template: `VITE_PAYREXX_INSTANCE=nexus`, `VITE_PAYREXX_SECRET=your_secret`, `VITE_WORKER_URL=https://nexus-sms.workers.dev`, `VITE_ICP_CANISTER_ID=your_canister_id`, `VITE_ICP_HOST=https://ic0.app`. Placeholder values must be clearly marked as requiring replacement.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-2"
         ],
         "quotes": [
-          "Mon Business → updatePro()",
-          "Services → addService()",
-          "Radar → getRadarDemandes()",
-          "Wallet → getWalletSolde()"
+          "Fichier .env.production"
         ]
       },
       "acceptanceCriteria": [
-        "BusinessScreen save triggers updatePro() canister call",
-        "Service add/remove triggers addService()/removeService() canister calls",
-        "RadarPro fetches live booking requests from getRadarDemandes()",
-        "WalletPro balance reflects getWalletSolde() result",
-        "DashboardScreen stats populated from canister data",
-        "No mock data imports remain in these components"
+        "`.env.production` file exists at project root",
+        "All 5 env vars are present",
+        "No real secrets are committed — placeholder values used"
       ]
     },
     {
       "id": "REQ-13",
-      "text": "Connect the Client-facing screens to the canister. Update Explorer.tsx to fetch pros from getActivePros() and getFlashPros(). Update BookingFlow.tsx to call createBooking() on final confirmation step. Update ClientDashboard.tsx to fetch bookings from getMyBookings() and call cancelBooking() on cancel action. Replace all demoData/mockData usage in these components.",
+      "text": "Enforce absolute layout rules across ALL screens: `flex flex-col fixed inset-0` on root container, scrollable content zone uses `flex-1 overflow-y-auto`, CTA buttons use `flex-shrink-0` anchored at bottom, tab bars use `flex-shrink-0` (never `position: fixed`). Remove all `100vh` CSS. Font is Inter exclusively. Palette CSS variables defined in `globals.css`. Gold background always pairs with `color: #050507`. Zero emojis anywhere in source code.",
       "target": "frontend",
       "source": {
         "messageIds": [
           "msg-2"
         ],
         "quotes": [
-          "Explorer → getActivePros()",
-          "Flash → getFlashPros()",
-          "Booking flow → createBooking()"
+          "Navigation useState uniquement",
+          "Layout flex column fixed inset 0",
+          "Scroll zone flex 1 overflow-y auto",
+          "Bouton CTA flex-shrink 0 ancré bas",
+          "Tab bar flex-shrink 0 jamais fixed",
+          "Font Inter uniquement",
+          "Fond gold → texte #050507 TOUJOURS"
         ]
       },
       "acceptanceCriteria": [
-        "Explorer renders pros returned by getActivePros() canister query",
-        "Flash section shows getFlashPros() results",
-        "BookingFlow final step creates booking on-chain and returns a booking ID",
-        "ClientDashboard shows only the authenticated user's real bookings",
-        "Cancel action calls cancelBooking() and refreshes the booking list"
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "text": "Create a new Admin Panel screen at route key 'admin' (navigated to via useState-based navigation, no React Router). The panel must use the exact same dark premium palette (--void: #050507, --gold: #F2D06B, --flash: #00D97A, --alert: #FF3D5A, --t1: #F4F4F8, font: Inter). Implement four sections: (1) Pros list with validation status and adminValidatePro() action button, (2) Full transactions table, (3) Revenue metrics dashboard (total fees, active pros, total bookings, registered users), (4) Header with NEXUS admin branding. Register this screen in ScreenRouter.tsx.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "Admin Panel (nouveau)",
-          "Route /admin",
-          "Même palette sombre premium",
-          "adminGetAllPros()",
-          "adminValidatePro()",
-          "Tableau transactions",
-          "Métriques revenus NEXUS"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Admin panel accessible via navigateTo('admin') from AppContext",
-        "Pros table shows all pros with validation badge and a 'Validate' button",
-        "Validate button calls adminValidatePro() and refreshes the list",
-        "Transactions table renders full transaction ledger from adminGetAllTransactions()",
-        "Metrics section shows totals from adminGetMetrics()",
-        "All text uses --t1 color on --void background with --gold accents",
-        "No emoji anywhere in the component",
-        "Max-width 430px constraint respected"
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "text": "Create frontend/src/lib/notifications.ts exporting notification management utilities: polling getMyNotifications() every 15 seconds, storing unread count, and exposing addLocalNotification() for optimistic updates. Update GlobalHeader.tsx to display the bell icon with a red badge showing the unread count from this store. Update NotificationCenter.tsx to render the slide-in panel from the right with the full notification list, timestamps, notification type labels, and per-item dismiss and mark-read actions. Wire all 5 notification types (nouvelle_demande, paiement_confirme, fonds_liberes, avis_recu, booking_confirme) to their display labels.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "src/lib/notifications.ts",
-          "Cloche en haut à droite",
-          "Badge rouge avec compteur",
-          "Panel slide-in depuis la droite",
-          "Liste des notifs avec timestamp",
-          "Types : nouvelle_demande / paiement_confirme / fonds_liberes / avis_recu / booking_confirme"
-        ]
-      },
-      "acceptanceCriteria": [
-        "Bell icon visible in GlobalHeader with red badge showing unread count",
-        "Badge disappears when unread count is 0",
-        "Clicking bell opens slide-in panel from right side",
-        "Panel lists notifications with human-readable type labels and formatted timestamps",
-        "All 5 notification types render with distinct labels",
-        "Mark all read button clears badge and updates all items",
-        "Individual dismiss removes item from list",
-        "Notifications poll from canister every 15 seconds"
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "text": "Update frontend/src/hooks/useQueries.ts to add React Query hooks for all new canister endpoints: useActivePros(), useFlashPros(), useMyBookings(), useRadarDemandes(), useWalletSolde(), useMyNotifications(), useAdminAllPros(), useAdminTransactions(), useAdminMetrics(). Add mutation hooks: useCreateBooking(), useAcceptBooking(), useDeclineBooking(), useCancelBooking(), useUpdatePro(), useAddService(), useActivateSubscription(), useAdminValidatePro(). All hooks must use the actor from actor.ts.",
-      "target": "frontend",
-      "source": {
-        "messageIds": [
-          "msg-2"
-        ],
-        "quotes": [
-          "useState local → canister queries",
-          "src/lib/api.ts"
-        ]
-      },
-      "acceptanceCriteria": [
-        "All query hooks use correct cache keys and refetch intervals where appropriate",
-        "All mutation hooks invalidate relevant query cache on success",
-        "Hooks handle loading and error states",
-        "No direct mock data references in useQueries.ts"
+        "No `100vh` string found in any `.tsx` or `.css` file",
+        "No `position: fixed` on any tab bar component",
+        "No emoji characters (unicode or literal) in any source file",
+        "All gold/amber background elements have `color: #050507`",
+        "Google Fonts Inter is loaded (already in index.html) and applied via CSS variable"
       ]
     }
   ],
   "constraints": [
-    "Do not rebuild or redesign existing frontend screens — only connect them to the canister",
-    "Preserve exact design tokens: --void: #050507, --gold: #F2D06B, --flash: #00D97A, --alert: #FF3D5A, --t1: #F4F4F8, font Inter only",
-    "Zero emoji in any code or UI text",
-    "Navigation must use useState only — zero React Router",
-    "Max-width 430px on all content containers",
-    "Layout must be flex column without overflow",
-    "Gold background (#F2D06B) must use #050507 as text color",
-    "Twilio and Payrexx must remain as commented stubs only — no live HTTP outcalls",
-    "All Motoko logic must remain in a single actor file (backend/main.mo)",
-    "Immutable frontend paths must not be modified: useInternetIdentity.ts, useActor.ts, main.tsx, components/ui"
+    "TWINT via Payrexx is the ONLY payment method — remove all Stripe and Revolut references",
+    "Zero emojis in any source file (components, screens, backend, utils)",
+    "No demo mode, no simulated data, no setTimeout fake payment flows in production code",
+    "Navigation must use useState only — no React Router",
+    "Layout must use flex column with fixed inset-0, never 100vh",
+    "Payrexx and Twilio credentials must never be exposed in frontend source — use env vars and Cloudflare Worker proxy",
+    "Font must be Inter exclusively",
+    "frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, and frontend/src/components/ui are immutable — do not edit them",
+    "All images must have onError handlers",
+    "All buttons must have onClick handlers",
+    "All inputs must have onChange handlers"
   ],
   "nonGoals": [
-    "Rebuilding or redesigning any of the 13 existing frontend screens",
-    "Live Twilio SMS sending",
-    "Live Payrexx payment gateway calls",
-    "React Router or any URL-based navigation",
-    "External database or cloud storage",
-    "Multiple backend canisters or microservices architecture",
-    "Mobile framework (React Native, Flutter)",
-    "Real-time WebSocket features"
+    "Stripe integration of any kind",
+    "Revolut integration",
+    "SMS credentials on the frontend",
+    "React Router or any URL-based routing library",
+    "Real-time WebSocket features",
+    "Twilio called directly from canister (stub only, commented out)",
+    "Payrexx called directly from canister in current build (stub only, commented out)",
+    "Any emoji characters"
   ],
   "imageRequirements": {
     "required": [],

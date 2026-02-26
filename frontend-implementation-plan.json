@@ -1,226 +1,434 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "NEXUS — Frontend Canister Connection + Admin Panel + In-App Notifications",
+  "title": "NEXUS v8.0 — Frontend Production Platform (Payrexx TWINT, Internet Identity)",
   "requirements": [
     {
-      "id": "REQ-7",
-      "summary": "Create actor initialization module that returns authenticated or anonymous ICP backend actor instances with caching",
+      "id": "REQ-1",
+      "summary": "Create frontend Payrexx integration module with TWINT payment gateway functions",
       "acceptanceCriteria": [
-        "actor.ts exports getActor() with optional identity parameter",
-        "Authenticated actor uses caller's Internet Identity principal",
-        "Anonymous actor used for public queries (getActivePros, getFlashPros)",
-        "Actor instance is cached and not recreated on every call"
+        "`createSubscriptionUrl` posts to `https://nexus.payrexx.com/api/v1/Gateway/` with amount=1990, currency=CHF, psp[0]=twint, purpose='Abonnement NEXUS Pro 7j'",
+        "`createBookingUrl` posts with Math.round(montant*100) as amount, currency=CHF, psp[0]=twint",
+        "Both functions return `data.data?.[0]?.link ?? ''`",
+        "Authorization header uses Basic btoa(`${INSTANCE}:${SECRET}`)",
+        "No Stripe or Revolut imports or references in any file"
       ],
       "file_operations": [
         {
+          "path": "frontend/src/lib/payrexx.ts",
+          "operation": "create",
+          "description": "Create Payrexx module with `createSubscriptionUrl(proId, email, phone)` and `createBookingUrl(bookingId, montant, serviceName, email)` functions. Both call Payrexx Gateway API directly using VITE_PAYREXX_INSTANCE and VITE_PAYREXX_SECRET from env vars. Always pass psp[0]=twint. Authorization uses Basic auth with btoa. Return gateway link URL from response data array."
+        }
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "summary": "Create frontend Twilio SMS proxy module for OTP verification",
+      "acceptanceCriteria": [
+        "`sendOTP` posts `{ phone }` to `${VITE_WORKER_URL}/send-otp`",
+        "`verifyOTP` posts `{ phone, code }` to `${VITE_WORKER_URL}/verify-otp` and returns boolean",
+        "No Twilio credentials appear anywhere in frontend source"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/twilio.ts",
+          "operation": "create",
+          "description": "Create Twilio proxy module with `sendOTP(phone)` and `verifyOTP(phone, code)` functions. Both proxy through VITE_WORKER_URL to Cloudflare Worker endpoints (/send-otp and /verify-otp). verifyOTP returns boolean from data.valid. No Twilio credentials exposed in frontend."
+        }
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "summary": "Refactor frontend into multi-file architecture with state management, actor, API, notifications, and icons",
+      "acceptanceCriteria": [
+        "All files in the specified directory structure exist and are non-empty",
+        "`useAppState.ts` exports `go()`, `showToast()`, `update()` and a global state object",
+        "`actor.ts` uses Internet Identity (DFINITY AuthClient) for real ICP mainnet authentication",
+        "`icons/index.tsx` contains 30+ named SVG components, none use emoji characters",
+        "`globals.css` defines CSS custom property palette, hides scrollbars, includes keyframe animations"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/state/useAppState.ts",
+          "operation": "create",
+          "description": "Create global state management hook exporting useState-based navigation state with `go(screen)` function, `showToast(message, type)` for toast notifications, and `update()` for forcing re-renders. State includes currentScreen, user profile, notifications, and subscription status."
+        },
+        {
           "path": "frontend/src/lib/actor.ts",
           "operation": "create",
-          "description": "Create actor initialization module that exports getActor(identity?) function. Use @dfinity/agent to create HttpAgent and Actor instances. When identity is provided, create authenticated actor with that identity. When no identity, create anonymous actor. Cache actor instances to avoid recreation. Import canister ID and IDL from generated declarations."
+          "description": "Create ICP actor utility module using Internet Identity (DFINITY AuthClient) for mainnet authentication. Export `createActor()`, `login()`, `logout()` functions. Uses VITE_ICP_CANISTER_ID and VITE_ICP_HOST from env. Replaces current hooks/useInternetIdentity.ts and hooks/useActor.ts logic but does NOT modify those immutable files."
+        },
+        {
+          "path": "frontend/src/lib/api.ts",
+          "operation": "create",
+          "description": "Create API module wrapping all canister function calls from backend interface. Export typed functions for user profiles, pro profiles, bookings, services, gallery, availability, notifications, admin operations. All functions use the actor instance from lib/actor.ts."
+        },
+        {
+          "path": "frontend/src/lib/notifications.ts",
+          "operation": "create",
+          "description": "Create notifications utility module with `getNotifications()` and `markRead(notificationId)` functions. Fetches in-app notifications from canister and provides local state management. Returns typed Notification arrays."
+        },
+        {
+          "path": "frontend/src/styles/globals.css",
+          "operation": "create",
+          "description": "Create global stylesheet defining CSS custom properties for NEXUS color palette (gold: #D4AF37, flash: #FFB800, alert: #FF6B6B, blue: #4A90E2, dark backgrounds). Include keyframe animations for fade-in, slide-up, pulse. Add scrollbar hiding rules. Set mobile viewport resets. Font-family uses Inter from Google Fonts."
+        },
+        {
+          "path": "frontend/src/components/icons/index.tsx",
+          "operation": "create",
+          "description": "Create icon library module exporting 30+ SVG icon components: Flash, Search, Check, X, Bell, Radar, Wallet, Dashboard, Business, Star, Lock, Eye, EyeOff, Calendar, Clock, MapPin, Phone, Mail, User, Settings, ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Plus, Minus, Edit, Trash, Camera, Image, Upload, Download, Filter, Menu, Home. Each component accepts size and color props. Zero emoji characters."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Refactor App.tsx to use useState routing from useAppState instead of current routing logic. Add ToastContainer from react-toastify. Integrate NotifsPanel slide-in component. Remove any React Router dependencies. Maintain QueryClientProvider and InternetIdentityProvider wrappers. Keep fixed full-screen layout with 430px max-width constraint."
+        }
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "summary": "Deliver all UI component files with TypeScript props and handlers",
+      "acceptanceCriteria": [
+        "All 13 component files exist under `src/components/ui/`",
+        "Every button component has an `onClick` prop wired",
+        "Every input component has an `onChange` prop wired",
+        "No emoji characters in any component file",
+        "Gold background elements use `color: #050507` for text"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ui/BtnPrimary.tsx",
+          "operation": "create",
+          "description": "Create primary button component with gold background (#D4AF37), #050507 text color, rounded corners, onClick handler, disabled state, loading state with spinner. TypeScript interface for props (label, onClick, disabled, loading, className)."
+        },
+        {
+          "path": "frontend/src/components/ui/BtnSecondary.tsx",
+          "operation": "create",
+          "description": "Create secondary button component with dark border, transparent background, white text, rounded corners, onClick handler, disabled state. TypeScript interface for props (label, onClick, disabled, className)."
+        },
+        {
+          "path": "frontend/src/components/ui/Input.tsx",
+          "operation": "create",
+          "description": "Create input component with dark background, white text, border styling, onChange handler, placeholder, type (text/password/email/tel), value, name props. Support for error state with red border. TypeScript interface for all props."
+        },
+        {
+          "path": "frontend/src/components/ui/Label.tsx",
+          "operation": "create",
+          "description": "Create label component for form fields with white text, optional required indicator (*), htmlFor prop. TypeScript interface for props (text, htmlFor, required)."
+        },
+        {
+          "path": "frontend/src/components/ui/Card.tsx",
+          "operation": "create",
+          "description": "Create card container component with dark background, subtle border, rounded corners, padding, shadow. Accepts children and optional onClick for clickable cards. TypeScript interface for props (children, onClick, className)."
+        },
+        {
+          "path": "frontend/src/components/ui/Toast.tsx",
+          "operation": "create",
+          "description": "Create toast notification component with success/error/info variants, auto-dismiss timer, close button. Uses Sonner or react-toastify under the hood. TypeScript interface for props (message, type, duration, onClose)."
+        },
+        {
+          "path": "frontend/src/components/ui/Header.tsx",
+          "operation": "create",
+          "description": "Create fixed top header component with NEXUS logo, notification bell icon with unread badge, user avatar or initial. Includes back button when not on root screen. TypeScript interface for props (showBack, onBackClick, notificationCount, userName)."
+        },
+        {
+          "path": "frontend/src/components/ui/TabBarClient.tsx",
+          "operation": "create",
+          "description": "Create client bottom tab bar with 4 tabs: Explorer, Réservations, Alertes, Profil. Uses flex-shrink-0, never position:fixed. Active tab highlighted in gold. TypeScript interface for props (activeTab, onTabChange). Uses icons from icons/index.tsx."
+        },
+        {
+          "path": "frontend/src/components/ui/TabBarPro.tsx",
+          "operation": "create",
+          "description": "Create pro bottom tab bar with 4 tabs: Radar, Wallet, Dashboard, Business. Uses flex-shrink-0, never position:fixed. Active tab highlighted in gold. TypeScript interface for props (activeTab, onTabChange). Uses icons from icons/index.tsx."
+        },
+        {
+          "path": "frontend/src/components/ui/TabBarAdmin.tsx",
+          "operation": "create",
+          "description": "Create admin bottom tab bar with 3 tabs: Pros, Bookings, Revenus. Uses flex-shrink-0, never position:fixed. Active tab highlighted in gold. TypeScript interface for props (activeTab, onTabChange). Uses icons from icons/index.tsx."
+        },
+        {
+          "path": "frontend/src/components/ui/BottomSheet.tsx",
+          "operation": "create",
+          "description": "Create bottom sheet modal component with slide-up animation, overlay backdrop, drag handle, and close-on-backdrop-click. TypeScript interface for props (isOpen, onClose, title, children)."
+        },
+        {
+          "path": "frontend/src/components/ui/ProgressCircle.tsx",
+          "operation": "create",
+          "description": "Create SVG circular progress indicator with configurable size, stroke width, colors, and percentage value displayed in center. TypeScript interface for props (percentage, size, strokeWidth, color, backgroundColor)."
+        },
+        {
+          "path": "frontend/src/components/ui/Shimmer.tsx",
+          "operation": "create",
+          "description": "Create skeleton loader component with shimmer animation effect for loading states. Supports variants (rect, circle, text). TypeScript interface for props (variant, width, height, count)."
+        }
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "summary": "Deliver all authentication screens with Internet Identity and SMS OTP",
+      "acceptanceCriteria": [
+        "LoginScreen uses real Internet Identity via `actor.ts`, no hardcoded credentials",
+        "OTPScreen renders 6 individual digit inputs (not 4)",
+        "OTPScreen calls `verifyOTP` from `lib/twilio.ts`, not a hardcoded demo code",
+        "All screens have a back button with onClick handler"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/screens/auth/LoginScreen.tsx",
+          "operation": "create",
+          "description": "Create login screen using Internet Identity authentication from lib/actor.ts. On successful login, check if user profile exists via lib/api.ts. If profile exists, navigate to roleSelection screen; otherwise navigate to roleSelection to choose client/pro. Include NEXUS branding and animated background orbs. Back button returns to splash screen."
+        },
+        {
+          "path": "frontend/src/screens/auth/RoleScreen.tsx",
+          "operation": "create",
+          "description": "Create role selection screen with two large cards: Client and Professional. Each card shows icon, title, and description. Client card navigates to OTPScreen. Professional card navigates to ProOnboardingModal then builder flow. Back button returns to LoginScreen. Uses icons from icons/index.tsx."
+        },
+        {
+          "path": "frontend/src/screens/auth/OTPScreen.tsx",
+          "operation": "create",
+          "description": "Create 6-digit SMS OTP verification screen with individual digit inputs. Calls sendOTP from lib/twilio.ts on mount to send code to user's phone. User enters 6 digits, then clicks verify which calls verifyOTP from lib/twilio.ts. On success, saves role to backend via lib/api.ts and navigates to appropriate screen (explorer for client, nexusOS for pro). Back button returns to RoleScreen. No hardcoded demo code."
+        }
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "summary": "Deliver all client screens with booking flow and Payrexx TWINT payment",
+      "acceptanceCriteria": [
+        "All 11 client screen files exist and are non-empty",
+        "Booking5Screen (confirmation) calls `createBookingUrl` and uses `window.location.href` for redirect",
+        "No `setTimeout` used to simulate payment",
+        "No Stripe references",
+        "No `100vh` CSS values",
+        "Layout uses `flex flex-col` with fixed inset-0, scroll zone uses `flex-1 overflow-y-auto`, CTA button uses `flex-shrink-0`"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/screens/client/ExplorerScreen.tsx",
+          "operation": "create",
+          "description": "Create explorer screen fetching active and flash pros from backend via lib/api.ts. Display search bar, category filter pills (Barber, Coiffure, Esthétique, Massage), and scrollable pro cards with cover image, name, rating, location, and badges. Flash pros section at top. Layout: flex flex-col fixed inset-0, scroll zone flex-1 overflow-y-auto, TabBarClient at bottom with flex-shrink-0. Uses Header component and category icons from icons/index.tsx."
+        },
+        {
+          "path": "frontend/src/screens/client/FicheProScreen.tsx",
+          "operation": "create",
+          "description": "Create professional detail page showing cover image, profile info (name, category, city, rating), and 3 tabs: Services, Gallery, Reviews. Services tab lists bookable services with prices and durations. Each service has 'Réserver' button navigating to Booking1Screen. Gallery shows uploaded photos. Reviews show client feedback and ratings. Layout: flex flex-col fixed inset-0, scrollable content flex-1 overflow-y-auto. Back button returns to ExplorerScreen."
+        },
+        {
+          "path": "frontend/src/screens/client/Booking1Screen.tsx",
+          "operation": "create",
+          "description": "Create booking step 1: service selection. Display selected pro's services with radio buttons. Shows service name, price, duration, badges. 'Continuer' CTA button (gold background, #050507 text, flex-shrink-0) navigates to Booking2Screen with selected serviceId. Layout: flex flex-col fixed inset-0, scroll zone flex-1 overflow-y-auto. Back button returns to FicheProScreen."
+        },
+        {
+          "path": "frontend/src/screens/client/Booking2Screen.tsx",
+          "operation": "create",
+          "description": "Create booking step 2: location selection. Two options: 'À domicile' (at home) or 'En studio'. Display address input if at-home selected. 'Continuer' CTA (flex-shrink-0) navigates to Booking3Screen with location data. Layout: flex flex-col fixed inset-0, form content flex-1 overflow-y-auto. Back button returns to Booking1Screen."
+        },
+        {
+          "path": "frontend/src/screens/client/Booking3Screen.tsx",
+          "operation": "create",
+          "description": "Create booking step 3: date and time selection. Display calendar for date picker (today through 7 days out) and available time slots from pro's weekly availability. 'Continuer' CTA (flex-shrink-0) navigates to Booking4Screen with date and timeSlot. Layout: flex flex-col fixed inset-0, content flex-1 overflow-y-auto. Back button returns to Booking2Screen."
+        },
+        {
+          "path": "frontend/src/screens/client/Booking4Screen.tsx",
+          "operation": "create",
+          "description": "Create booking step 4: contact information. Display inputs for name, phone, email. All fields required. 'Continuer' CTA (flex-shrink-0) navigates to Booking5Screen with contact data. Layout: flex flex-col fixed inset-0, form flex-1 overflow-y-auto. Back button returns to Booking3Screen."
+        },
+        {
+          "path": "frontend/src/screens/client/Booking5Screen.tsx",
+          "operation": "create",
+          "description": "Create booking step 5: confirmation summary. Display all booking details (pro, service, date, time, location, price). 'Confirmer et payer' CTA (flex-shrink-0) creates booking via lib/api.ts, then calls createBookingUrl from lib/payrexx.ts with booking amount and service name. On receiving Payrexx gateway URL, redirect via window.location.href (NOT router navigation). No setTimeout fake flows. No Stripe references. Layout: flex flex-col fixed inset-0, summary flex-1 overflow-y-auto. Back button returns to Booking4Screen."
+        },
+        {
+          "path": "frontend/src/screens/client/LiveStatusScreen.tsx",
+          "operation": "create",
+          "description": "Create live booking status screen showing 5-step timeline: En attente → Confirmée → En cours → Terminée → (Annulée). Display elapsed time counter, pro info, service details. Real-time status updates from backend via lib/api.ts. Layout: flex flex-col fixed inset-0, timeline flex-1 overflow-y-auto. Back button returns to ReservationsScreen."
+        },
+        {
+          "path": "frontend/src/screens/client/ReservationsScreen.tsx",
+          "operation": "create",
+          "description": "Create reservations list screen fetching client bookings via lib/api.ts. Display tabs for Pending, Confirmed, History. Each booking card shows pro name, service, date, time, status badge. Click card navigates to LiveStatusScreen. Empty state shows 'Aucune réservation' with CTA to ExplorerScreen. Layout: flex flex-col fixed inset-0, list flex-1 overflow-y-auto, TabBarClient flex-shrink-0."
+        },
+        {
+          "path": "frontend/src/screens/client/AlertesScreen.tsx",
+          "operation": "create",
+          "description": "Create alerts/notifications screen fetching notifications via lib/notifications.ts. Display list of in-app notifications with unread indicators. Mark as read on tap. Empty state shows 'Aucune alerte'. Layout: flex flex-col fixed inset-0, list flex-1 overflow-y-auto, TabBarClient flex-shrink-0."
+        },
+        {
+          "path": "frontend/src/screens/client/ClientProfilScreen.tsx",
+          "operation": "create",
+          "description": "Create client profile screen displaying user info, past bookings count, favorite pros. Includes logout button calling lib/actor.ts logout. Settings section for notifications preferences. Layout: flex flex-col fixed inset-0, content flex-1 overflow-y-auto, TabBarClient flex-shrink-0."
         }
       ]
     },
     {
       "id": "REQ-8",
-      "summary": "Create typed API wrapper functions for all canister methods with error handling and result type mapping",
+      "summary": "Deliver all pro screens with subscription modal and Payrexx TWINT payment",
       "acceptanceCriteria": [
-        "Every canister function has a corresponding typed wrapper in api.ts",
-        "All wrappers handle Result types (ok/err variants) from Motoko",
-        "TypeScript types match the Motoko actor interface",
-        "No mock data imports remain in api.ts"
+        "All 6 pro screen files exist",
+        "SubscriptionModal calls `createSubscriptionUrl` and redirects via `window.location.href`",
+        "SubscriptionModal amount is 1990 CHF cents (19.90 CHF), TWINT only",
+        "ProBusinessScreen has 5 tabs: profile, services, tarifs, payment/IBAN, gallery",
+        "No emoji in any pro screen file"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/lib/api.ts",
+          "path": "frontend/src/screens/pro/ProDashboardScreen.tsx",
           "operation": "create",
-          "description": "Create typed async wrapper functions for all canister methods: getPros() wrapping getActivePros(), getFlashPros(), createBooking() wrapping createBookingRequest(), getMyBookings() wrapping getBookingsByUser(), cancelBooking() wrapping updateBookingStatus(), updatePro() wrapping createOrUpdateProProfile(), addService() wrapping updateServices(), getMyServices() reading from ProProfile services array, activateSubscription() wrapping publishProfile(), getRadarDemandes() wrapping getBookingsByProfessional(), getWalletSolde() reading from wallet state, acceptBooking() and declineBooking() wrapping updateBookingStatus(), uploadGalleryPhoto() and getMyGallery() wrapping updateGallery(), adminGetAllPros(), adminValidatePro(), adminGetAllBookings() wrapping adminGetAllBookings(), adminGetMetrics(), createPayrexxGateway() as stub. Import getActor from actor.ts. Handle errors gracefully with try-catch. Return typed results matching backend.d.ts interface."
+          "description": "Create pro dashboard screen displaying booking stats, revenue this month, acceptance rate, and profile status. Fetches data from backend via lib/api.ts. Shows activation banner if profile not published. Charts for bookings and revenue trends. Layout: flex flex-col fixed inset-0, content flex-1 overflow-y-auto, TabBarPro flex-shrink-0."
+        },
+        {
+          "path": "frontend/src/screens/pro/ProRadarScreen.tsx",
+          "operation": "create",
+          "description": "Create pro radar screen for managing booking requests. Three tabs: Pending, Confirmed, History with counts. Pending shows incoming requests with Accept/Decline actions. Actions call updateBookingStatus from lib/api.ts. Real-time updates. Layout: flex flex-col fixed inset-0, tabs and list flex-1 overflow-y-auto, TabBarPro flex-shrink-0."
+        },
+        {
+          "path": "frontend/src/screens/pro/ProWalletScreen.tsx",
+          "operation": "create",
+          "description": "Create pro wallet screen displaying CHF balance fetched via lib/api.ts. Shows recent transactions list. Transfer button with 30-second cooldown. On transfer, shows toast notification. Layout: flex flex-col fixed inset-0, balance and transactions flex-1 overflow-y-auto, TabBarPro flex-shrink-0."
+        },
+        {
+          "path": "frontend/src/screens/pro/ProBusinessScreen.tsx",
+          "operation": "create",
+          "description": "Create pro business management screen with 5 tabs: Profile (bio, slogan, languages, at-home service toggle), Services (list with add/edit/delete), Tarifs (pricing per service), Payment/IBAN (bank details for transfers), Gallery (main photo + up to 5 gallery photos using ImageUploader). Each tab has save button. Profile completion percentage shown at top. Preview button opens ExplorerPreview modal. Layout: flex flex-col fixed inset-0, tab content flex-1 overflow-y-auto, TabBarPro flex-shrink-0. All forms call lib/api.ts functions."
+        },
+        {
+          "path": "frontend/src/screens/pro/SubscriptionModal.tsx",
+          "operation": "create",
+          "description": "Create subscription modal (BottomSheet component) presenting NEXUS Pro plan: 19.90 CHF/month with 7-day free trial. Lists benefits (profile visibility, booking management, payment processing, analytics, notifications). 'Démarrer l'essai gratuit' button collects pro's email and phone, then calls createSubscriptionUrl from lib/payrexx.ts with amount=1990 (CHF cents), psp[0]=twint. On receiving Payrexx URL, redirect via window.location.href. Loading state during API call. Close button dismisses modal. No Stripe references."
+        },
+        {
+          "path": "frontend/src/screens/pro/SuccessScreen.tsx",
+          "operation": "create",
+          "description": "Create subscription success screen shown after successful Payrexx payment redirect. Display checkmark icon, success message, and subscription details. 'Accéder à NEXUS Pro' CTA navigates to ProDashboardScreen. Layout: flex flex-col fixed inset-0, content flex-1 overflow-y-auto centered."
         }
       ]
     },
     {
       "id": "REQ-9",
-      "summary": "Replace mock data imports in AppContext with real canister queries via React Query",
+      "summary": "Deliver all admin screens with localStorage credential validation",
       "acceptanceCriteria": [
-        "No imports from mockData.ts or demoData.ts remain in AppContext",
-        "Booking list is fetched from getMyBookings() canister query",
-        "Wallet balance is fetched from getWalletSolde() canister query",
-        "Escrow timer is derived from booking createdAt timestamp from canister"
+        "All 5 admin screen files exist",
+        "AdminLoginScreen validates against credentials stored in localStorage by SetupScreen",
+        "AdminDashboardScreen shows real canister data via `lib/api.ts`",
+        "No emoji in any admin screen"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/context/AppContext.tsx",
-          "operation": "modify",
-          "description": "Remove all imports from mockData.ts and demoData.ts. Replace local useState-based booking state with React Query queries from useQueries.ts hooks (useMyBookings, useWalletSolde). Remove fake setTimeout timers. Calculate escrow countdown using actual booking timestamp from canister data. Replace hardcoded wallet balance with real balance from getWalletSolde(). Ensure booking status updates trigger query invalidation."
+          "path": "frontend/src/screens/admin/AdminLoginScreen.tsx",
+          "operation": "create",
+          "description": "Create admin login screen with email and password inputs. Validates credentials against values stored in localStorage (set by SetupScreen during first-run). On successful validation, navigates to AdminDashboardScreen. If localStorage has no admin credentials, redirects to SetupScreen first. Layout: flex flex-col fixed inset-0, centered form."
+        },
+        {
+          "path": "frontend/src/screens/admin/AdminDashboardScreen.tsx",
+          "operation": "create",
+          "description": "Create admin dashboard displaying system metrics via lib/api.ts: total registered users, total active pros, total bookings, revenue stats. Charts for trends. Links to AdminProsScreen, AdminBookingsScreen, AdminRevenusScreen. Layout: flex flex-col fixed inset-0, content flex-1 overflow-y-auto, TabBarAdmin flex-shrink-0."
+        },
+        {
+          "path": "frontend/src/screens/admin/AdminProsScreen.tsx",
+          "operation": "create",
+          "description": "Create admin pros management screen listing all professionals via lib/api.ts. Display pro cards with name, category, status, verification badge. 'Valider' button calls adminValidatePro from lib/api.ts. Search and filter by status (pending, verified). Layout: flex flex-col fixed inset-0, list flex-1 overflow-y-auto, TabBarAdmin flex-shrink-0."
+        },
+        {
+          "path": "frontend/src/screens/admin/AdminBookingsScreen.tsx",
+          "operation": "create",
+          "description": "Create admin bookings screen listing all bookings via lib/api.ts. Display booking cards with client name, pro name, service, date, status. Filter by status. Export CSV functionality. Layout: flex flex-col fixed inset-0, list flex-1 overflow-y-auto, TabBarAdmin flex-shrink-0."
+        },
+        {
+          "path": "frontend/src/screens/admin/AdminRevenusScreen.tsx",
+          "operation": "create",
+          "description": "Create admin revenue screen displaying financial metrics via lib/api.ts: total revenue, revenue by category, revenue by pro, monthly trends. Charts and tables. Layout: flex flex-col fixed inset-0, content flex-1 overflow-y-auto, TabBarAdmin flex-shrink-0."
         }
       ]
     },
     {
       "id": "REQ-10",
-      "summary": "Replace demo mode button with Internet Identity authentication in Login screen",
+      "summary": "Implement first-run SetupScreen for admin configuration",
       "acceptanceCriteria": [
-        "'Continuer en mode demo' button is removed",
-        "Internet Identity login flow is triggered on the main CTA",
-        "Successful auth routes to pro dashboard if ProProfile exists for principal, else to role selection",
-        "Loading state shown during II authentication"
+        "SetupScreen renders when env vars are empty or admin credentials absent from localStorage",
+        "All inputs have onChange handlers",
+        "Password and confirm password fields validate they match before saving",
+        "'Initialize NEXUS' button is gold background with #050507 text",
+        "On submit, values are persisted to localStorage AND written to canister via `lib/api.ts`",
+        "After successful setup, navigates to AdminLoginScreen"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/Login.tsx",
-          "operation": "modify",
-          "description": "Remove 'Continuer en mode demo' button entirely. Update main CTA button to trigger Internet Identity login from AuthContext (call login() from useInternetIdentity). Show loading state during authentication. After successful auth, query canister to check if ProProfile exists for the authenticated principal. If ProProfile exists, navigate to 'nexusOS'. If no ProProfile exists, navigate to 'roleSelection'. Handle authentication errors with user-friendly error messages in the existing dark premium style."
-        }
-      ]
-    },
-    {
-      "id": "REQ-11",
-      "summary": "Connect ProLogin to Internet Identity authentication and check for existing ProProfile",
-      "acceptanceCriteria": [
-        "II authentication is triggered on CTA press",
-        "Principal is used to look up existing ProProfile on canister",
-        "Routes to nexusOS if profile found, to builder if not",
-        "Auth errors display an error message in the existing dark premium style"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/components/ProLogin.tsx",
-          "operation": "modify",
-          "description": "Use AuthContext (login, isAuthenticated, principal) to trigger Internet Identity authentication flow. After successful II login, call getProProfile(principal) from api.ts to check if ProProfile exists. If profile exists, navigate to 'nexusOS'. If no profile exists, navigate to 'builder' for onboarding. Display loading state during authentication and profile lookup. Handle auth errors with error message styled using --void, --t1, and --alert colors."
+          "path": "frontend/src/screens/SetupScreen.tsx",
+          "operation": "create",
+          "description": "Create first-run configuration screen displayed before AdminLoginScreen when VITE_PAYREXX_INSTANCE, VITE_PAYREXX_SECRET, or VITE_WORKER_URL are empty OR localStorage has no admin credentials. Title 'NEXUS Initial Configuration' (Inter 800 28px). Three sections: Payrexx (Instance input placeholder 'nexus', Secret API input type=password), Twilio (Worker URL input placeholder 'https://...'), Admin (email, password, confirm password). Password fields validate match. 'Initialize NEXUS' CTA button (gold background, #050507 text, flex-shrink-0) saves all values to localStorage AND calls backend admin config setter via lib/api.ts. On success, navigates to AdminLoginScreen. Layout: flex flex-col fixed inset-0, form flex-1 overflow-y-auto."
         }
       ]
     },
     {
       "id": "REQ-12",
-      "summary": "Connect Pro dashboard screens to canister for profile updates, service management, booking requests, and wallet data",
+      "summary": "Create production environment configuration file",
       "acceptanceCriteria": [
-        "BusinessScreen save triggers updatePro() canister call",
-        "Service add/remove triggers addService()/removeService() canister calls",
-        "RadarPro fetches live booking requests from getRadarDemandes()",
-        "WalletPro balance reflects getWalletSolde() result",
-        "DashboardScreen stats populated from canister data",
-        "No mock data imports remain in these components"
+        "`.env.production` file exists at project root",
+        "All 5 env vars are present",
+        "No real secrets are committed — placeholder values used"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/BusinessScreen.tsx",
-          "operation": "modify",
-          "description": "Remove mock data imports. Use useUpdatePro mutation hook from useQueries.ts. On save button click, call updatePro() with current form data. Use useAddService and useRemoveService hooks for service management. Display loading state during mutations. Show success/error feedback after operations complete. Invalidate relevant queries on success."
-        },
-        {
-          "path": "frontend/src/components/RadarPro.tsx",
-          "operation": "modify",
-          "description": "Remove mock data imports. Use useRadarDemandes query hook from useQueries.ts to fetch live booking requests. Use useAcceptBooking and useDeclineBooking mutation hooks for accept/decline actions. Filter requests by pending/confirmed/history tabs using booking status from canister. Invalidate booking queries after accept/decline mutations succeed."
-        },
-        {
-          "path": "frontend/src/components/WalletPro.tsx",
-          "operation": "modify",
-          "description": "Remove hardcoded wallet balance. Use useWalletSolde query hook from useQueries.ts to fetch real balance from canister. Fetch transaction history from canister using appropriate query. Display loading state while fetching data. Show empty state if no transactions exist."
-        },
-        {
-          "path": "frontend/src/components/DashboardScreen.tsx",
-          "operation": "modify",
-          "description": "Remove mock data for stats. Use useMyBookings and useWalletSolde hooks from useQueries.ts to populate dashboard stats (reservation count, revenue from bookings, profile views from canister metrics if available, acceptance rate calculated from booking status). Display loading state while fetching. Update stats grid to use real data."
+          "path": ".env.production",
+          "operation": "create",
+          "description": "Create .env.production file at project root with template environment variables: VITE_PAYREXX_INSTANCE=nexus, VITE_PAYREXX_SECRET=your_secret_here, VITE_WORKER_URL=https://nexus-sms.workers.dev, VITE_ICP_CANISTER_ID=your_canister_id_here, VITE_ICP_HOST=https://ic0.app. All placeholder values clearly marked for replacement. Include comment header explaining setup instructions."
         }
       ]
     },
     {
       "id": "REQ-13",
-      "summary": "Connect Client-facing screens to canister for browsing pros, creating bookings, and managing reservations",
+      "summary": "Enforce layout rules and remove all emojis across frontend",
       "acceptanceCriteria": [
-        "Explorer renders pros returned by getActivePros() canister query",
-        "Flash section shows getFlashPros() results",
-        "BookingFlow final step creates booking on-chain and returns a booking ID",
-        "ClientDashboard shows only the authenticated user's real bookings",
-        "Cancel action calls cancelBooking() and refreshes the booking list"
+        "No `100vh` string found in any `.tsx` or `.css` file",
+        "No `position: fixed` on any tab bar component",
+        "No emoji characters (unicode or literal) in any source file",
+        "All gold/amber background elements have `color: #050507`",
+        "Google Fonts Inter is loaded (already in index.html) and applied via CSS variable"
       ],
       "file_operations": [
         {
+          "path": "frontend/src/index.css",
+          "operation": "modify",
+          "description": "Update global CSS to enforce layout rules: ensure no 100vh values, add layout utilities for flex flex-col fixed inset-0 pattern, flex-1 overflow-y-auto for scroll zones, flex-shrink-0 for tab bars and CTAs. Verify scrollbar hiding rules. Confirm gold background pairs with #050507 text color. Remove any emoji characters. Ensure Inter font variable is applied globally via :root."
+        },
+        {
           "path": "frontend/src/components/Explorer.tsx",
           "operation": "modify",
-          "description": "Remove demoData imports. Use useActivePros and useFlashPros query hooks from useQueries.ts to fetch pros from canister. Display loading state while fetching. Apply search and category filters client-side on fetched data. Render pros in flash and regular sections based on query results. Handle empty states gracefully."
+          "description": "Refactor Explorer layout to use flex flex-col fixed inset-0 on root container, flex-1 overflow-y-auto on scrollable pro list, flex-shrink-0 on TabBarClient. Remove any 100vh, position:fixed on tabs. Remove any emoji characters. Ensure gold accents use #050507 text."
+        },
+        {
+          "path": "frontend/src/components/ProLayout.tsx",
+          "operation": "modify",
+          "description": "Refactor ProLayout to use flex flex-col fixed inset-0 on root container, flex-1 on content area, flex-shrink-0 on TabBarPro. Remove any 100vh, position:fixed on tabs. Remove any emoji characters. Ensure subscription modal overlays are properly positioned."
         },
         {
           "path": "frontend/src/components/BookingFlow.tsx",
           "operation": "modify",
-          "description": "Remove mock booking creation. Use useCreateBooking mutation hook from useQueries.ts. On final confirmation step, call createBooking() with selected service, date, time, and client details. Handle mutation loading state. On success, store returned booking ID and navigate to live status screen. On error, display error message without blocking UI."
+          "description": "Refactor all booking step screens to use flex flex-col fixed inset-0 layout, flex-1 overflow-y-auto on content, flex-shrink-0 on CTA buttons. Remove any 100vh. Remove any emoji characters. Ensure gold CTAs use #050507 text. Reference workspace path frontend/public/assets/generated/<filename>.dim_WIDTHxHEIGHT.png for any generated images used in booking confirmation."
         },
-        {
-          "path": "frontend/src/components/ClientDashboard.tsx",
-          "operation": "modify",
-          "description": "Remove mock bookings. Use useMyBookings query hook from useQueries.ts to fetch authenticated user's bookings. Use useCancelBooking mutation hook for cancel action. Filter bookings by status (pending/confirmed) for display tabs. Invalidate booking queries after cancel succeeds. Show empty state when no bookings exist with navigation prompt to explorer."
-        }
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "summary": "Create Admin Panel screen with pro validation, transaction ledger, and revenue metrics",
-      "acceptanceCriteria": [
-        "Admin panel accessible via navigateTo('admin') from AppContext",
-        "Pros table shows all pros with validation badge and a 'Validate' button",
-        "Validate button calls adminValidatePro() and refreshes the list",
-        "Transactions table renders full transaction ledger from adminGetAllTransactions()",
-        "Metrics section shows totals from adminGetMetrics()",
-        "All text uses --t1 color on --void background with --gold accents",
-        "No emoji anywhere in the component",
-        "Max-width 430px constraint respected"
-      ],
-      "file_operations": [
         {
           "path": "frontend/src/components/AdminPanel.tsx",
-          "operation": "create",
-          "description": "Create admin panel screen using exact design tokens (--void: #050507, --gold: #F2D06B, --flash: #00D97A, --alert: #FF3D5A, --t1: #F4F4F8, font Inter). Use useAdminAllPros, useAdminTransactions, useAdminMetrics, and useAdminValidatePro hooks from useQueries.ts. Render four sections: (1) Header with NEXUS admin branding in gold, (2) Pros list table showing all pros with validation status badge (green check if validated, red X if not) and 'Validate' button that calls adminValidatePro(), (3) Transactions table with columns for date, type, amount, status, (4) Metrics dashboard showing total platform fees, active pros count, total bookings, registered users count as cards. All sections use dark premium styling with gold accents. No emoji. Max-width 430px. Handle loading and error states."
+          "operation": "modify",
+          "description": "Refactor AdminPanel layout to use flex flex-col fixed inset-0, flex-1 overflow-y-auto on content, flex-shrink-0 on TabBarAdmin. Remove any 100vh, position:fixed on tabs. Remove any emoji characters."
         },
         {
-          "path": "frontend/src/components/ScreenRouter.tsx",
+          "path": "frontend/src/components/icons/Icons.tsx",
           "operation": "modify",
-          "description": "Add 'admin' route that lazy-loads AdminPanel component. Import AdminPanel using React.lazy and add to screen map alongside existing routes. Maintain existing lazy loading pattern with Suspense fallback."
-        }
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "summary": "Implement in-app notification system with polling, badge counter, and slide-in panel",
-      "acceptanceCriteria": [
-        "Bell icon visible in GlobalHeader with red badge showing unread count",
-        "Badge disappears when unread count is 0",
-        "Clicking bell opens slide-in panel from right side",
-        "Panel lists notifications with human-readable type labels and formatted timestamps",
-        "All 5 notification types render with distinct labels",
-        "Mark all read button clears badge and updates all items",
-        "Individual dismiss removes item from list",
-        "Notifications poll from canister every 15 seconds"
-      ],
-      "file_operations": [
-        {
-          "path": "frontend/src/lib/notifications.ts",
-          "operation": "create",
-          "description": "Create notification management utilities. Export polling function that calls getMyNotifications() from api.ts every 15 seconds using setInterval or React Query refetchInterval. Store unread count in local state. Export addLocalNotification() for optimistic updates. Map all 5 notification types (nouvelle_demande, paiement_confirme, fonds_liberes, avis_recu, booking_confirme) to human-readable French labels. Export markNotificationRead() and markAllNotificationsRead() wrappers that call canister methods and update local cache."
+          "description": "Review and remove any emoji characters from Icons.tsx. All icons must be pure SVG path-based components. Ensure 30+ icon components exist with consistent naming and props (size, color)."
         },
         {
-          "path": "frontend/src/components/GlobalHeader.tsx",
+          "path": "frontend/src/components/ui/TabBarClient.tsx",
           "operation": "modify",
-          "description": "Import notification utilities from lib/notifications.ts. Display bell icon with red badge showing unread count from notification store. Hide badge when count is 0. On bell click, open NotificationCenter slide-in panel. Use existing --alert color for badge background."
+          "description": "Ensure TabBarClient uses flex-shrink-0 and never position:fixed. Remove any emoji characters. Active tab highlighted in gold with #050507 text."
         },
         {
-          "path": "frontend/src/components/NotificationCenter.tsx",
+          "path": "frontend/src/components/ui/TabBarPro.tsx",
           "operation": "modify",
-          "description": "Update to render slide-in panel from right side (transform: translateX(100%) to translateX(0)). Fetch notifications from lib/notifications.ts. Display full notification list with human-readable type labels (nouvelle_demande: 'Nouvelle demande', paiement_confirme: 'Paiement confirmé', fonds_liberes: 'Fonds libérés', avis_recu: 'Avis reçu', booking_confirme: 'Réservation confirmée'), formatted timestamps using Intl.DateTimeFormat. Add 'Mark all read' button that calls markAllNotificationsRead(). Add per-item dismiss button. Style with --void background, --t1 text, --gold accents. Max-width 430px."
-        }
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "summary": "Add React Query hooks for all canister endpoints with proper cache management and mutations",
-      "acceptanceCriteria": [
-        "All query hooks use correct cache keys and refetch intervals where appropriate",
-        "All mutation hooks invalidate relevant query cache on success",
-        "Hooks handle loading and error states",
-        "No direct mock data references in useQueries.ts"
-      ],
-      "file_operations": [
+          "description": "Ensure TabBarPro uses flex-shrink-0 and never position:fixed. Remove any emoji characters. Active tab highlighted in gold with #050507 text."
+        },
         {
-          "path": "frontend/src/hooks/useQueries.ts",
+          "path": "frontend/src/components/ui/TabBarAdmin.tsx",
           "operation": "modify",
-          "description": "Add React Query hooks for new endpoints: useActivePros() using useQuery with 'activePros' cache key, useFlashPros() with 'flashPros' key, useMyBookings() with 'myBookings' key and authenticated actor, useRadarDemandes() with 'radarDemandes' key for pro bookings, useWalletSolde() with 'walletBalance' key and refetchInterval: 30000, useMyNotifications() with 'myNotifications' key and refetchInterval: 15000, useAdminAllPros() with 'adminPros' key, useAdminTransactions() with 'adminTransactions' key, useAdminMetrics() with 'adminMetrics' key. Add mutation hooks: useCreateBooking() that invalidates 'myBookings' on success, useAcceptBooking() and useDeclineBooking() that invalidate 'radarDemandes' and 'myBookings', useCancelBooking() that invalidates 'myBookings', useUpdatePro() that invalidates 'currentProProfile', useAddService() that invalidates 'myServices', useActivateSubscription() that invalidates 'currentProProfile', useAdminValidatePro() that invalidates 'adminPros'. All hooks use actor from useActor hook. Handle loading and error states properly. Remove any remaining mock data references."
+          "description": "Ensure TabBarAdmin uses flex-shrink-0 and never position:fixed. Remove any emoji characters. Active tab highlighted in gold with #050507 text."
         }
       ]
     }

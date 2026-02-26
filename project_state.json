@@ -1,83 +1,81 @@
 {
   "schemaVersion": "1.0.0",
   "projectStateVersion": 3,
-  "summary": "NEXUS — Marketplace beauté/bien-être 100% on-chain sur Internet Computer Protocol (ICP). Backend Motoko avec canisters natifs, auth Internet Identity, escrow 48h par heartbeat, bookings, wallet pro, admin panel. Frontend React existant (13 écrans, palette sombre premium) à connecter au backend ICP. Zéro Supabase, zéro Vercel, tout on-chain.",
+  "summary": "NEXUS v8.0 — Plateforme beauté suisse production. React 18 TypeScript + Motoko ICP mainnet. Auth via Internet Identity. Paiements TWINT exclusif via Payrexx. SMS OTP via Cloudflare Worker (Twilio). Architecture multi-fichiers complète. Zéro Stripe, zéro emoji, zéro mode demo en production.",
   "architectural_notes": [
-    "ICP natif uniquement — zéro Supabase, zéro Vercel/Netlify. Frontend sur asset canister, backend Motoko.",
-    "Auth: Internet Identity (passkeys natifs). Principal ICP = identité unique. Zéro email/password.",
-    "5 canisters: nexus_frontend (assets), nexus_backend (main Motoko), logique séparée pour payments, notifications, escrow.",
-    "Heartbeat ICP pour escrow 48h: libération automatique des fonds pro après prestation.",
-    "HTTP outcalls Motoko pour Payrexx (paiement CHF/TWINT) et Twilio (SMS) — stubs commentés en dev, activer en prod.",
-    "Photos uploadées directement sur asset canister ICP — URLs permanentes on-chain. Pas de S3.",
-    "Navigation: useState uniquement, zéro React Router. Max-width 430px, layout flex column.",
-    "Palette: --void:#050507, --gold:#F2D06B, --flash:#00D97A, --alert:#FF3D5A, --t1:#F4F4F8. Font Inter uniquement.",
-    "Commission NEXUS: 1 CHF fixe par booking. montantPro = montant - 1.0.",
-    "Déploiement: dfx deploy --network ic. URL finale: https://[canister-id].ic0.app pointée vers nexus.ch."
+    "Stack: React 18 TypeScript strict + Motoko ICP mainnet + Internet Identity (passkeys) + Payrexx TWINT + Twilio via Cloudflare Worker",
+    "Navigation: useState uniquement — routing conditionnel, zéro react-router",
+    "Layout: position fixed inset 0, flex column, scroll zone flex-1 overflow-y auto, CTA flex-shrink 0, tab bar flex-shrink 0 jamais fixed",
+    "Paiements: TWINT via Payrexx exclusivement — frontend fetch createGateway, window.location.href vers paymentUrl, zéro Stripe/Revolut",
+    "OTP: Cloudflare Worker sécurisé (VITE_WORKER_URL) — credentials Twilio jamais exposés côté frontend",
+    "Canister Motoko: stubs HTTP outcalls Payrexx documentés en commentaires, prêts à décommenter quand ExperimentalInternetComputer disponible en mainnet",
+    "Design: Inter uniquement, palette CSS vars (--void, --gold, --flash, --alert, --blue), fond gold → texte #050507 absolu, zéro emoji → SVG components",
+    "SetupScreen au premier démarrage si variables env vides — sauvegarde localStorage + canister admin config"
   ],
   "known_issues": [],
   "isFixRequest": false,
   "existing_features": [
     {
-      "id": "feature-update-frontend-src-context-appcontext-tsx-to-replace-all-mock-data-imports-from-mockdata-ts-and-demodata-ts-with-calls-to-api-ts-functions-replace-local-usestate-based-booking-pro-wallet-state-with-react-query-queries-from-usequeries-ts-replace-fake-settimeout-timers-with-real-canister-polling-the-escrow-countdown-must-reflect-the-actual-booking-timestamp-stored-on-chain",
-      "title": "Update frontend/src/context/AppContext.tsx to replace all mock data imports from mockData.ts and demoData.ts with calls to api.ts functions. Replace local useState-based booking/pro/wallet state with React Query queries (from useQueries.ts). Replace fake setTimeout timers with real canister polling. The escrow countdown must reflect the actual booking timestamp stored on-chain.",
+      "id": "feature-create-frontend-src-lib-payrexx-ts-with-the-exact-implementation-provided-createsubscriptionurl-proid-email-phone-and-createbookingurl-bookingid-montant-servicename-email-functions-that-call-the-payrexx-api-directly-from-the-frontend-using-vite-payrexx-instance-and-vite-payrexx-secret-env-vars-always-passing-psp-0-twint-returning-the-gateway-link-url-no-stripe-no-revolut-references-anywhere",
+      "title": "Create `frontend/src/lib/payrexx.ts` with the exact implementation provided: `createSubscriptionUrl(proId, email, phone)` and `createBookingUrl(bookingId, montant, serviceName, email)` functions that call the Payrexx API directly from the frontend using `VITE_PAYREXX_INSTANCE` and `VITE_PAYREXX_SECRET` env vars, always passing `psp[0]=twint`, returning the gateway link URL. No Stripe, no Revolut references anywhere.",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-create-frontend-src-lib-twilio-ts-with-sendotp-phone-and-verifyotp-phone-code-functions-that-proxy-through-vite-worker-url-send-otp-and-verify-otp-endpoints-credentials-are-never-exposed-on-the-frontend-verifyotp-returns-data-valid-true",
+      "title": "Create `frontend/src/lib/twilio.ts` with `sendOTP(phone)` and `verifyOTP(phone, code)` functions that proxy through `VITE_WORKER_URL` (`/send-otp` and `/verify-otp` endpoints). Credentials are never exposed on the frontend. `verifyOTP` returns `data.valid === true`.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-refactor-the-entire-frontend-into-the-exact-multi-file-architecture-specified-deliver-every-file-listed-src-app-tsx-usestate-routing-toastcontainer-notifspanel-src-state-useappstate-ts-global-state-go-showtoast-update-src-lib-actor-ts-icp-internet-identity-createactor-login-logout-src-lib-api-ts-all-canister-functions-src-lib-notifications-ts-getnotifications-markread-src-styles-globals-css-css-vars-palette-keyframe-animations-mobile-reset-scrollbar-hidden-and-src-components-icons-index-tsx-30-svg-icon-components-zero-emojis",
+      "title": "Refactor the entire frontend into the exact multi-file architecture specified. Deliver every file listed: `src/App.tsx` (useState routing, ToastContainer, NotifsPanel), `src/state/useAppState.ts` (global state, `go()`, `showToast()`, `update()`), `src/lib/actor.ts` (ICP Internet Identity, createActor, login, logout), `src/lib/api.ts` (all canister functions), `src/lib/notifications.ts` (getNotifications, markRead), `src/styles/globals.css` (CSS vars palette, keyframe animations, mobile reset, scrollbar hidden), and `src/components/icons/index.tsx` (30+ SVG icon components, zero emojis).",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-deliver-all-auth-screens-src-screens-auth-loginscreen-tsx-internet-identity-login-real-icp-mainnet-src-screens-auth-rolescreen-tsx-client-professional-admin-role-selection-src-screens-auth-otpscreen-tsx-6-digit-sms-otp-input-verified-via-lib-twilio-ts-cloudflare-worker-all-screens-must-have-back-navigation-and-no-emoji",
+      "title": "Deliver all auth screens: `src/screens/auth/LoginScreen.tsx` (Internet Identity login, real ICP mainnet), `src/screens/auth/RoleScreen.tsx` (client / professional / admin role selection), `src/screens/auth/OTPScreen.tsx` (6-digit SMS OTP input verified via `lib/twilio.ts` Cloudflare Worker). All screens must have back navigation and no emoji.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-deliver-all-client-screens-explorerscreen-tsx-ficheproscreen-tsx-booking1screen-tsx-through-booking5screen-tsx-5-step-booking-flow-livestatusscreen-tsx-reservationsscreen-tsx-alertesscreen-tsx-clientprofilscreen-tsx-all-screens-use-go-from-useappstate-for-navigation-booking-confirmation-must-call-createbookingurl-from-lib-payrexx-ts-and-redirect-via-window-location-href-to-the-payrexx-twint-gateway-no-settimeout-fake-payment-flows",
+      "title": "Deliver all client screens: `ExplorerScreen.tsx`, `FicheProScreen.tsx`, `Booking1Screen.tsx` through `Booking5Screen.tsx` (5-step booking flow), `LiveStatusScreen.tsx`, `ReservationsScreen.tsx`, `AlertesScreen.tsx`, `ClientProfilScreen.tsx`. All screens use `go()` from `useAppState` for navigation. Booking confirmation must call `createBookingUrl` from `lib/payrexx.ts` and redirect via `window.location.href` to the Payrexx TWINT gateway. No setTimeout fake payment flows.",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-deliver-all-pro-screens-prodashboardscreen-tsx-proradarscreen-tsx-prowalletscreen-tsx-probusinessscreen-tsx-5-tabs-profile-services-tarifs-payment-gallery-subscriptionmodal-tsx-calls-createsubscriptionurl-from-lib-payrexx-ts-redirects-to-payrexx-twint-successscreen-tsx-no-stripe-no-emoji",
+      "title": "Deliver all pro screens: `ProDashboardScreen.tsx`, `ProRadarScreen.tsx`, `ProWalletScreen.tsx`, `ProBusinessScreen.tsx` (5 tabs: profile, services, tarifs, payment, gallery), `SubscriptionModal.tsx` (calls `createSubscriptionUrl` from `lib/payrexx.ts`, redirects to Payrexx TWINT), `SuccessScreen.tsx`. No Stripe, no emoji.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-deliver-all-admin-screens-adminloginscreen-tsx-admindashboardscreen-tsx-adminprosscreen-tsx-adminbookingsscreen-tsx-adminrevenusscreen-tsx-admin-login-must-use-credentials-stored-in-localstorage-set-during-first-run-setupscreen-no-emoji",
+      "title": "Deliver all admin screens: `AdminLoginScreen.tsx`, `AdminDashboardScreen.tsx`, `AdminProsScreen.tsx`, `AdminBookingsScreen.tsx`, `AdminRevenusScreen.tsx`. Admin login must use credentials stored in localStorage (set during first-run SetupScreen). No emoji.",
       "reqIds": [
         "REQ-9"
       ],
       "version": 1
     },
     {
-      "id": "feature-update-frontend-src-components-login-tsx-to-replace-the-continuer-en-mode-demo-button-with-real-internet-identity-authentication-on-button-press-trigger-the-ii-login-flow-from-authcontext-on-successful-authentication-check-if-the-user-has-a-proprofile-or-userprofile-on-chain-and-route-them-to-the-appropriate-dashboard-the-demo-mode-button-must-be-removed-entirely",
-      "title": "Update frontend/src/components/Login.tsx to replace the 'Continuer en mode demo' button with real Internet Identity authentication. On button press, trigger the II login flow from AuthContext. On successful authentication, check if the user has a ProProfile or UserProfile on-chain and route them to the appropriate dashboard. The demo mode button must be removed entirely.",
+      "id": "feature-implement-setupscreen-first-run-configuration-screen-display-it-before-adminloginscreen-if-any-of-vite-payrexx-instance-vite-payrexx-secret-or-vite-worker-url-are-empty-or-if-no-admin-credentials-exist-in-localstorage-the-screen-must-have-title-nexus-initial-configuration-inter-800-28px-payrexx-section-instance-input-placeholder-nexus-secret-api-input-type-password-twilio-section-worker-url-input-placeholder-https-admin-section-email-password-confirm-password-initialize-nexus-cta-button-with-gold-background-and-050507-text-saves-all-values-to-localstorage-and-to-the-canister-admin-config-via-lib-api-ts",
+      "title": "Implement `SetupScreen` (first-run configuration screen). Display it before `AdminLoginScreen` if any of `VITE_PAYREXX_INSTANCE`, `VITE_PAYREXX_SECRET`, or `VITE_WORKER_URL` are empty OR if no admin credentials exist in localStorage. The screen must have: title 'NEXUS Initial Configuration' (Inter 800 28px), Payrexx section (Instance input placeholder 'nexus', Secret API input type=password), Twilio section (Worker URL input placeholder 'https://...'), Admin section (email, password, confirm password). 'Initialize NEXUS' CTA button with gold background and `#050507` text saves all values to localStorage and to the canister admin config via `lib/api.ts`.",
       "reqIds": [
         "REQ-10"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-frontend-src-components-prologin-tsx-to-use-the-real-internet-identity-authentication-flow-from-authcontext-login-logout-isauthenticated-principal-after-successful-ii-authentication-call-the-canister-to-check-if-a-proprofile-exists-for-the-principal-and-navigate-to-nexusos-if-no-profile-exists-navigate-to-onboarding-builder-flow",
-      "title": "Update frontend/src/components/ProLogin.tsx to use the real Internet Identity authentication flow from AuthContext (login/logout, isAuthenticated, principal). After successful II authentication, call the canister to check if a ProProfile exists for the principal and navigate to 'nexusOS'. If no profile exists, navigate to onboarding/builder flow.",
-      "reqIds": [
-        "REQ-11"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-connect-the-pro-dashboard-screens-to-the-canister-update-businessscreen-tsx-to-call-updatepro-on-save-and-addservice-removeservice-for-service-management-update-radarpro-tsx-to-fetch-from-getradardemandes-and-call-acceptbooking-declinebooking-update-walletpro-tsx-to-fetch-balance-from-getwalletsolde-and-real-transaction-history-from-the-canister-update-dashboardscreen-tsx-stats-to-use-canister-query-data-replace-all-hardcoded-mock-data-in-these-components-with-live-canister-queries-via-api-ts",
-      "title": "Connect the Pro dashboard screens to the canister. Update BusinessScreen.tsx to call updatePro() on save and addService()/removeService() for service management. Update RadarPro.tsx to fetch from getRadarDemandes() and call acceptBooking()/declineBooking(). Update WalletPro.tsx to fetch balance from getWalletSolde() and real transaction history from the canister. Update DashboardScreen.tsx stats to use canister query data. Replace all hardcoded/mock data in these components with live canister queries via api.ts.",
-      "reqIds": [
-        "REQ-12"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-connect-the-client-facing-screens-to-the-canister-update-explorer-tsx-to-fetch-pros-from-getactivepros-and-getflashpros-update-bookingflow-tsx-to-call-createbooking-on-final-confirmation-step-update-clientdashboard-tsx-to-fetch-bookings-from-getmybookings-and-call-cancelbooking-on-cancel-action-replace-all-demodata-mockdata-usage-in-these-components",
-      "title": "Connect the Client-facing screens to the canister. Update Explorer.tsx to fetch pros from getActivePros() and getFlashPros(). Update BookingFlow.tsx to call createBooking() on final confirmation step. Update ClientDashboard.tsx to fetch bookings from getMyBookings() and call cancelBooking() on cancel action. Replace all demoData/mockData usage in these components.",
-      "reqIds": [
-        "REQ-13"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-a-new-admin-panel-screen-at-route-key-admin-navigated-to-via-usestate-based-navigation-no-react-router-the-panel-must-use-the-exact-same-dark-premium-palette-void-050507-gold-f2d06b-flash-00d97a-alert-ff3d5a-t1-f4f4f8-font-inter-implement-four-sections-1-pros-list-with-validation-status-and-adminvalidatepro-action-button-2-full-transactions-table-3-revenue-metrics-dashboard-total-fees-active-pros-total-bookings-registered-users-4-header-with-nexus-admin-branding-register-this-screen-in-screenrouter-tsx",
-      "title": "Create a new Admin Panel screen at route key 'admin' (navigated to via useState-based navigation, no React Router). The panel must use the exact same dark premium palette (--void: #050507, --gold: #F2D06B, --flash: #00D97A, --alert: #FF3D5A, --t1: #F4F4F8, font: Inter). Implement four sections: (1) Pros list with validation status and adminValidatePro() action button, (2) Full transactions table, (3) Revenue metrics dashboard (total fees, active pros, total bookings, registered users), (4) Header with NEXUS admin branding. Register this screen in ScreenRouter.tsx.",
-      "reqIds": [
-        "REQ-14"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-create-frontend-src-lib-notifications-ts-exporting-notification-management-utilities-polling-getmynotifications-every-15-seconds-storing-unread-count-and-exposing-addlocalnotification-for-optimistic-updates-update-globalheader-tsx-to-display-the-bell-icon-with-a-red-badge-showing-the-unread-count-from-this-store-update-notificationcenter-tsx-to-render-the-slide-in-panel-from-the-right-with-the-full-notification-list-timestamps-notification-type-labels-and-per-item-dismiss-and-mark-read-actions-wire-all-5-notification-types-nouvelle-demande-paiement-confirme-fonds-liberes-avis-recu-booking-confirme-to-their-display-labels",
-      "title": "Create frontend/src/lib/notifications.ts exporting notification management utilities: polling getMyNotifications() every 15 seconds, storing unread count, and exposing addLocalNotification() for optimistic updates. Update GlobalHeader.tsx to display the bell icon with a red badge showing the unread count from this store. Update NotificationCenter.tsx to render the slide-in panel from the right with the full notification list, timestamps, notification type labels, and per-item dismiss and mark-read actions. Wire all 5 notification types (nouvelle_demande, paiement_confirme, fonds_liberes, avis_recu, booking_confirme) to their display labels.",
-      "reqIds": [
-        "REQ-15"
-      ],
-      "version": 1
-    },
-    {
-      "id": "feature-update-frontend-src-hooks-usequeries-ts-to-add-react-query-hooks-for-all-new-canister-endpoints-useactivepros-useflashpros-usemybookings-useradardemandes-usewalletsolde-usemynotifications-useadminallpros-useadmintransactions-useadminmetrics-add-mutation-hooks-usecreatebooking-useacceptbooking-usedeclinebooking-usecancelbooking-useupdatepro-useaddservice-useactivatesubscription-useadminvalidatepro-all-hooks-must-use-the-actor-from-actor-ts",
-      "title": "Update frontend/src/hooks/useQueries.ts to add React Query hooks for all new canister endpoints: useActivePros(), useFlashPros(), useMyBookings(), useRadarDemandes(), useWalletSolde(), useMyNotifications(), useAdminAllPros(), useAdminTransactions(), useAdminMetrics(). Add mutation hooks: useCreateBooking(), useAcceptBooking(), useDeclineBooking(), useCancelBooking(), useUpdatePro(), useAddService(), useActivateSubscription(), useAdminValidatePro(). All hooks must use the actor from actor.ts.",
-      "reqIds": [
-        "REQ-16"
       ],
       "version": 1
     }
@@ -85,95 +83,101 @@
   "new_feature_requests": [
     {
       "id": "AR-1",
-      "summary": "Backend Motoko complet: main.mo + Types.mo avec heartbeat escrow 48h, stubs Twilio/Payrexx commentés prêts à activer",
+      "summary": "Auth screens: LoginScreen (Internet Identity), RoleScreen (client/pro/admin), OTPScreen (6-digit SMS via Cloudflare Worker)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-2",
-      "summary": "Connexion frontend existant au canister ICP: actor.ts + api.ts, remplacer mockData par vrais appels canister pour Pro, Client et Admin",
+      "summary": "Client screens: Explorer, FichePro, Booking flow 5 steps, LiveStatus, Reservations, Alertes, ClientProfil",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-3",
-      "summary": "Auth Internet Identity réelle: remplacer 'Continuer en mode demo' par authentification II native ICP",
+      "summary": "Pro screens: ProDashboard, ProRadar, ProWallet, ProBusiness (5 tabs: profil/services/tarifs/paiement/galerie), SubscriptionModal, SuccessScreen",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-4",
-      "summary": "Notifications in-app: cloche + badge rouge + panel slide-in + 5 types (nouvelle_demande, paiement_confirme, fonds_liberes, avis_recu, booking_confirme)",
+      "summary": "Admin screens: AdminLogin, AdminDashboard, AdminPros, AdminBookings, AdminRevenus + SetupScreen (first-run config)",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-5",
-      "summary": "Admin Panel /admin: adminGetAllPros(), adminValidatePro(), tableau transactions, métriques revenus NEXUS — palette sombre premium",
+      "summary": "SVG icon system (src/components/icons/index.tsx) replacing all emojis — 30+ icons with stroke currentColor",
       "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-6",
-      "summary": "Create backend/main.mo as a complete single Motoko actor implementing all NEXUS data types and state: UserProfile, ProProfile (with subscription status, wallet balance, validation status), Service, Booking (with escrow state), Notification, Transaction. Include stable storage maps for all entities. Implement a heartbeat that automatically releases escrow funds 48 hours after booking confirmation by transitioning booking state from #escrow to #released and crediting the pro wallet.",
-      "reqIds": [
-        "REQ-1"
-      ],
+      "summary": "UI component library: BtnPrimary, BtnSecondary, Input, Label, Card, Toast, Header, TabBarClient, TabBarPro, TabBarAdmin, BottomSheet, ProgressCircle, Shimmer",
+      "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-7",
-      "summary": "In backend/main.mo, implement all Pro-facing canister update and query functions: updatePro(profile), addService(service), removeService(id), getMyServices(), activateSubscription(), getRadarDemandes() returning pending booking requests for the caller's pro profile, getWalletSolde() returning current wallet balance, acceptBooking(bookingId), declineBooking(bookingId), uploadGalleryPhoto(data), getMyGallery().",
-      "reqIds": [
-        "REQ-2"
-      ],
+      "summary": "lib/payrexx.ts: createSubscriptionUrl + createBookingUrl via Payrexx TWINT API (frontend fetch, credentials from env)",
+      "reqIds": [],
       "status": "pending"
     },
     {
       "id": "AR-8",
-      "summary": "In backend/main.mo, implement all Client-facing canister functions: getActivePros() returning all validated and active pro profiles, getFlashPros() returning pros with flash availability enabled, createBooking(proId, serviceId, date, location, clientDetails) creating a booking in #pending state with escrow initialized, getMyBookings() returning caller's bookings, cancelBooking(bookingId). Include a stub function createPayrexxGateway(bookingId) that is commented out with a /* PAYREXX_STUB */ block ready for HTTP outcall activation.",
+      "summary": "lib/twilio.ts: sendOTP + verifyOTP via Cloudflare Worker (VITE_WORKER_URL)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "Motoko backend (main.mo + Types.mo): full canister with auth, pro profile, services, explorer, bookings, wallet, notifications, avis, admin functions + heartbeat escrow 48h",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Global state (useAppState.ts), globals.css (CSS vars palette + animations + mobile reset), dfx.json ICP mainnet config, .env.production template",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Add documented Payrexx HTTP outcall stub in `backend/main.mo` as a block comment titled `PAYREXX_INTEGRATION`, showing the full commented-out `callPayrexx` function using `IC.http_request` for future ICP mainnet HTTP outcalls activation. The stub must be preserved verbatim and never deleted.",
       "reqIds": [
         "REQ-3"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-9",
-      "summary": "In backend/main.mo, implement Admin-only canister functions: adminGetAllPros() returning all pro profiles regardless of validation status, adminValidatePro(proId) setting isValidated=true on the target pro, adminGetAllTransactions() returning the full transaction ledger, adminGetMetrics() returning aggregate revenue metrics (total platform fees, total bookings, total active pros, total registered users). Guard all admin functions with a caller principal check against a hardcoded admin principal list.",
-      "reqIds": [
-        "REQ-4"
-      ],
-      "status": "pending"
-    },
-    {
-      "id": "AR-10",
-      "summary": "In backend/main.mo, implement the in-app notification system: addNotification(userId, type, message) storing notifications per principal, getMyNotifications() returning the caller's notification list with timestamps, markNotificationRead(notifId), markAllNotificationsRead(). Notification types must be: #nouvelle_demande, #paiement_confirme, #fonds_liberes, #avis_recu, #booking_confirme. Automatically call addNotification at the appropriate points (booking creation, escrow release, etc.).",
+      "id": "AR-15",
+      "summary": "Deliver all UI component files under `src/components/ui/`: `BtnPrimary.tsx`, `BtnSecondary.tsx`, `Input.tsx`, `Label.tsx`, `Card.tsx`, `Toast.tsx`, `Header.tsx`, `TabBarClient.tsx`, `TabBarPro.tsx`, `TabBarAdmin.tsx`, `BottomSheet.tsx`, `ProgressCircle.tsx`, `Shimmer.tsx`. Each component must be fully functional with proper TypeScript props, onClick/onChange handlers, and no emojis.",
       "reqIds": [
         "REQ-5"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-11",
-      "summary": "In backend/main.mo, add commented-out Twilio SMS stub blocks at every point where an SMS would logically be sent (booking confirmed, funds released, new request received). Each stub must follow this exact format: /* TWILIO_STUB — sendSMS(to: Text, body: Text) — Uncomment in production — Replace TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN with real credentials — Estimated activation time: 5 minutes */. The surrounding functional code must work without the stub.",
+      "id": "AR-21",
+      "summary": "Create `backend/main.mo` (full Motoko actor) and `backend/Types.mo` implementing: user auth (Internet Identity principal), pro profiles (status, location, category, services, gallery, avis), explorer query (active pros + flash pros), 5-step booking lifecycle (pending → confirmed → in_progress → completed → cancelled), wallet (CHF balance, transfer with 30s cooldown), notifications, admin functions (validate pro, list all bookings, revenue stats), 48h escrow heartbeat, and admin config storage (SetupScreen values). Include the commented-out `PAYREXX_INTEGRATION` stub as specified.",
       "reqIds": [
-        "REQ-6"
+        "REQ-11"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-12",
-      "summary": "Create frontend/src/lib/actor.ts that initializes the ICP backend actor using @dfinity/agent and the generated canister IDL. Export a getActor(identity?) function that returns an authenticated actor when an identity is provided and an anonymous actor otherwise. Cache the actor instance. This file replaces all direct canister calls currently scattered in mock imports.",
+      "id": "AR-22",
+      "summary": "Create `.env.production` file at the project root with the template: `VITE_PAYREXX_INSTANCE=nexus`, `VITE_PAYREXX_SECRET=your_secret`, `VITE_WORKER_URL=https://nexus-sms.workers.dev`, `VITE_ICP_CANISTER_ID=your_canister_id`, `VITE_ICP_HOST=https://ic0.app`. Placeholder values must be clearly marked as requiring replacement.",
       "reqIds": [
-        "REQ-7"
+        "REQ-12"
       ],
       "status": "pending"
     },
     {
-      "id": "AR-13",
-      "summary": "Create frontend/src/lib/api.ts exporting typed async wrapper functions for every canister method: getPros(), getFlashPros(), createBooking(), getMyBookings(), cancelBooking(), updatePro(), addService(), getMyServices(), activateSubscription(), getRadarDemandes(), getWalletSolde(), acceptBooking(), declineBooking(), uploadGalleryPhoto(), getMyGallery(), adminGetAllPros(), adminValidatePro(), adminGetAllTransactions(), adminGetMetrics(), createPayrexxGateway(). Each function must handle errors gracefully and return typed results matching the Motoko type definitions.",
+      "id": "AR-23",
+      "summary": "Enforce absolute layout rules across ALL screens: `flex flex-col fixed inset-0` on root container, scrollable content zone uses `flex-1 overflow-y-auto`, CTA buttons use `flex-shrink-0` anchored at bottom, tab bars use `flex-shrink-0` (never `position: fixed`). Remove all `100vh` CSS. Font is Inter exclusively. Palette CSS variables defined in `globals.css`. Gold background always pairs with `color: #050507`. Zero emojis anywhere in source code.",
       "reqIds": [
-        "REQ-8"
+        "REQ-13"
       ],
       "status": "pending"
     }

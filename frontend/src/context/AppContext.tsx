@@ -1,5 +1,14 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
-import type { AppNotification } from '../hooks/useQueries';
+
+// ── AppNotification type (defined locally to avoid circular import) ────────────
+
+export interface AppNotification {
+  id: string;
+  type: 'nouvelle_demande' | 'paiement_confirme' | 'fonds_liberes' | 'avis_recu' | 'booking_confirme';
+  bookingId?: string;
+  timestamp: number;
+  read: boolean;
+}
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -196,10 +205,13 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
 
   const unreadCount = inAppNotifications.filter((n) => !n.read).length;
 
-  const navigateTo = useCallback((screen: AppScreen) => {
-    setHistory((prev) => [...prev, currentScreen]);
-    setCurrentScreen(screen);
-  }, [currentScreen]);
+  const navigateTo = useCallback(
+    (screen: AppScreen) => {
+      setHistory((prev) => [...prev, currentScreen]);
+      setCurrentScreen(screen);
+    },
+    [currentScreen]
+  );
 
   const goBack = useCallback(() => {
     setHistory((prev) => {
@@ -216,17 +228,23 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
     setCurrentScreen('landing');
   }, [currentScreen]);
 
-  const navigateToProProfile = useCallback((pro: DemoPro) => {
-    setSelectedPro(pro);
-    setHistory((prev) => [...prev, currentScreen]);
-    setCurrentScreen('proFiche');
-  }, [currentScreen]);
+  const navigateToProProfile = useCallback(
+    (pro: DemoPro) => {
+      setSelectedPro(pro);
+      setHistory((prev) => [...prev, currentScreen]);
+      setCurrentScreen('proFiche');
+    },
+    [currentScreen]
+  );
 
-  const navigateToBookingFlow = useCallback((pro?: DemoPro) => {
-    if (pro) setSelectedPro(pro);
-    setHistory((prev) => [...prev, currentScreen]);
-    setCurrentScreen('bookingFlow');
-  }, [currentScreen]);
+  const navigateToBookingFlow = useCallback(
+    (pro?: DemoPro) => {
+      if (pro) setSelectedPro(pro);
+      setHistory((prev) => [...prev, currentScreen]);
+      setCurrentScreen('bookingFlow');
+    },
+    [currentScreen]
+  );
 
   const addNotification = useCallback((notif: Notification) => {
     setNotifications((prev) => [notif, ...prev]);
@@ -236,7 +254,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
   }, []);
 
-  const removeNotification = useCallback((id: string) => {
+  const removeNotification = useCallback((_id: string) => {
     // Legacy: notifications don't have ids in new type, no-op
   }, []);
 
@@ -249,9 +267,7 @@ export function AppContextProvider({ children }: { children: React.ReactNode }) 
   }, [currentScreen]);
 
   const markNotifRead = useCallback((id: string) => {
-    setInAppNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
-    );
+    setInAppNotifications((prev) => prev.map((n) => (n.id === id ? { ...n, read: true } : n)));
   }, []);
 
   const markAllNotifsRead = useCallback(() => {

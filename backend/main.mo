@@ -449,4 +449,61 @@ actor {
       totalRegisteredUsers = userProfiles.size();
     };
   };
+
+  // PAYREXX_INTEGRATION: Future HTTP Outcall Stub (Preserve for Mainnet Launch)
+  //
+  // The callPayrexx function skeleton below is a documented stub for planned
+  // Payrexx integration using HTTP outcalls, once available in production.
+  // This must remain in the codebase and never be deleted.
+  //
+  // CURRENTLY INACTIVE - DO NOT MODIFY
+  //
+  // import IC "mo:core/IC";
+  // import Blob "mo:core/Blob";
+  // import Principal "mo:core/Principal";
+  // import Runtime "mo:core/Runtime";
+  //
+  // type PaymentRequest = {
+  //   amount : Nat;
+  //   currency : Text;
+  //   description : Text;
+  //   userPrincipal : Principal;
+  // };
+  //
+  // public shared ({ caller }) func callPayrexx(payment : PaymentRequest) : async Text {
+  //   if (payment.amount <= 0) {
+  //     Runtime.trap("Invalid payment amount");
+  //   };
+  //
+  //   let payload = Blob.fromArray(payment.description.toUtf8());
+  //
+  //   let headers = [
+  //     { name = "Content-Type"; value = "application/json" },
+  //     { name = "Accept"; value = "application/json" },
+  //   ];
+  //
+  //   let request = {
+  //     url = "https://api.payrexx.com/v1.0/transaction";
+  //     max_response_bytes = ?(2_000_000 : Nat64);
+  //     method = #post;
+  //     headers;
+  //     body = ?payload;
+  //     transform = null;
+  //   };
+  //
+  //   let result = await IC.http_request(request);
+  //
+  //   switch (result.status) {
+  //     case (200) { #ok("Payment successful") };
+  //     case (400) { #err("Invalid request") };
+  //     case (401) { #err("Unauthorized - check Payrexx credentials") };
+  //     case (402) { #err("Payment required or declined") };
+  //     case (500) { #err("Payrexx service error") };
+  //     case (505) { #err("HTTP version not supported - contact support") };
+  //     case (503) { #err("Payrexx service temporarily unavailable") };
+  //     case (307) { #err("Temporary redirect - try again") };
+  //     case (_) { #err("Unexpected error: " # Nat.toText(result.status)) };
+  //   };
+  // };
+
 };

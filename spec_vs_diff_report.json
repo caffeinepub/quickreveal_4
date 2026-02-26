@@ -1,179 +1,145 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-26T00:45:28.728Z",
-  "summary": "The diff implements a significant portion of the NEXUS backend and frontend requirements, including backend/main.mo, several frontend components, and hooks. However, there are notable gaps: the backend appears to use a different architecture than specified (using Stripe instead of Payrexx stubs, missing several NEXUS-specific types like escrow state, missing heartbeat for 48h escrow release, missing proper Twilio stub format), several frontend files are missing or incomplete (frontend/src/lib/actor.ts, frontend/src/lib/api.ts, frontend/src/lib/notifications.ts), and several components still use mock/demo data. The AdminPanel uses useAdminAllBookings instead of useAdminAllTransactions. NotificationCenter.tsx does not implement a slide-in panel from the right.",
+  "generatedAt": "2026-02-26T02:39:44.418Z",
+  "summary": "The diff implements many of the required features but is missing several critical deliverables. Key gaps include: the complete multi-file architecture files (App.tsx, actor.ts, api.ts, globals.css), all 13 UI component files under src/components/ui/, all client booking screens (Booking1-5, FicheProScreen, LiveStatusScreen), pro screens (ProWalletScreen, ProBusinessScreen), all admin screens as separate files, the backend Types.mo, the .env.production file, and the PAYREXX_INTEGRATION stub in backend/main.mo. The backend/main.mo was modified but contains Stripe references which violate constraints. SetupScreen does not write to canister via lib/api.ts.",
   "missing_requirements": [
     {
-      "id": "REQ-1",
-      "requirement": "Heartbeat that automatically releases escrow funds 48 hours after booking confirmation; escrow state (#escrow/#released) on Booking type; Transaction type; all required entity types",
-      "reason": "The backend/main.mo diff shows BookingStatus as #pending/#confirmed/#cancelled with no #escrow or #released variants, no heartbeat function visible, no Transaction type, and no escrow wallet credit logic.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-2",
-      "requirement": "Pro-facing functions: updatePro(), addService(), removeService(), getMyServices(), activateSubscription(), getRadarDemandes(), getWalletSolde(), acceptBooking(), declineBooking(), uploadGalleryPhoto(), getMyGallery()",
-      "reason": "The backend/main.mo diff shows only getCallerUserProfile, saveCallerUserProfile, getUserProfile, getProProfile, createOrUpdateProProfile and Stripe-related functions. None of the required Pro-facing NEXUS functions are visible.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
       "id": "REQ-3",
-      "requirement": "Client-facing functions: getActivePros(), getFlashPros(), createBooking(), getMyBookings(), cancelBooking(), and PAYREXX_STUB commented block",
-      "reason": "The backend/main.mo diff does not show these functions. Frontend calls them but the backend implementation is not visible.",
+      "requirement": "Add documented Payrexx HTTP outcall stub in backend/main.mo as a block comment titled PAYREXX_INTEGRATION with IC.http_request call stub",
+      "reason": "The backend/main.mo diff shows Stripe imports and usage but no PAYREXX_INTEGRATION comment block is visible in the truncated diff. The file retains Stripe references instead of the Payrexx stub.",
       "evidence": [
         "backend/main.mo"
       ]
     },
     {
       "id": "REQ-4",
-      "requirement": "Admin-only canister functions: adminGetAllPros(), adminValidatePro(), adminGetAllTransactions(), adminGetMetrics() guarded by admin principal whitelist",
-      "reason": "The backend/main.mo diff does not show these NEXUS-specific admin functions. Only generic AccessControl.isAdmin is referenced.",
+      "requirement": "Deliver App.tsx (useState routing, ToastContainer, NotifsPanel), actor.ts (ICP Internet Identity), api.ts (all canister functions), globals.css (CSS vars palette, keyframes, scrollbar hidden)",
+      "reason": "None of these files (src/App.tsx, src/lib/actor.ts, src/lib/api.ts, src/styles/globals.css) appear as added or modified in the diff with the specified architecture.",
       "evidence": [
-        "backend/main.mo"
+        "frontend/src/App.tsx"
       ]
     },
     {
       "id": "REQ-5",
-      "requirement": "In-app notification system in backend with addNotification(), getMyNotifications(), markNotificationRead(), markAllNotificationsRead(), and 5 specific notification type variants",
-      "reason": "The backend/main.mo diff shows no Notification type or notification functions. The frontend uses AppNotification from useQueries.ts but the backend notification system is absent.",
-      "evidence": [
-        "backend/main.mo"
-      ]
-    },
-    {
-      "id": "REQ-6",
-      "requirement": "Twilio SMS stub blocks in exact format at booking confirmation, escrow release, and new request events",
-      "reason": "No TWILIO_STUB comment blocks are visible in the backend/main.mo diff.",
-      "evidence": [
-        "backend/main.mo"
-      ]
+      "requirement": "Deliver all 13 UI component files under src/components/ui/: BtnPrimary.tsx, BtnSecondary.tsx, Input.tsx, Label.tsx, Card.tsx, Toast.tsx, Header.tsx, TabBarClient.tsx, TabBarPro.tsx, TabBarAdmin.tsx, BottomSheet.tsx, ProgressCircle.tsx, Shimmer.tsx",
+      "reason": "None of the 13 required UI component files appear in the diff as added files. The diff summary shows 19 added files but none are under src/components/ui/.",
+      "evidence": []
     },
     {
       "id": "REQ-7",
-      "requirement": "Create frontend/src/lib/actor.ts with getActor(identity?) function, caching, and anonymous/authenticated actor support",
-      "reason": "No frontend/src/lib/actor.ts file appears in the diff. Hooks use useActor from hooks/useActor.ts instead.",
+      "requirement": "Deliver all client screens: FicheProScreen.tsx, Booking1Screen.tsx through Booking5Screen.tsx (5-step booking flow), LiveStatusScreen.tsx",
+      "reason": "FicheProScreen, Booking1Screen, Booking2Screen, Booking3Screen, Booking4Screen, Booking5Screen, and LiveStatusScreen are not present in the list of added files in the diff.",
       "evidence": []
     },
     {
       "id": "REQ-8",
-      "requirement": "Create frontend/src/lib/api.ts with typed async wrappers for all canister methods",
-      "reason": "No frontend/src/lib/api.ts file appears in the diff at all.",
+      "requirement": "Deliver ProWalletScreen.tsx and ProBusinessScreen.tsx (5 tabs: profile, services, tarifs, payment, gallery)",
+      "reason": "ProWalletScreen.tsx and ProBusinessScreen.tsx are not listed among the added files in the diff.",
       "evidence": []
     },
     {
       "id": "REQ-9",
-      "requirement": "Update AppContext.tsx to remove all mock/demoData imports, use React Query for booking/pro/wallet state, replace fake setTimeout timers, derive escrow countdown from on-chain timestamp",
-      "reason": "AppContext.tsx still contains DemoPro, DemoService types and local useState for bookings, walletBalance, etc. The escrow countdown is not derived from canister data.",
+      "requirement": "Deliver all 5 admin screens as separate files: AdminProsScreen.tsx, AdminBookingsScreen.tsx, AdminRevenusScreen.tsx in addition to AdminLoginScreen and AdminDashboardScreen",
+      "reason": "AdminLoginScreen.tsx and AdminDashboardScreen.tsx are present, but AdminProsScreen.tsx, AdminBookingsScreen.tsx, and AdminRevenusScreen.tsx are not listed among the added files.",
       "evidence": [
-        "frontend/src/context/AppContext.tsx"
+        "frontend/src/screens/admin/AdminLoginScreen.tsx",
+        "frontend/src/screens/admin/AdminDashboardScreen.tsx"
       ]
     },
     {
       "id": "REQ-10",
-      "requirement": "Remove demo button; trigger II login on main CTA; route based on ProProfile vs UserProfile check; show loading state",
-      "reason": "Login.tsx checks only getCallerUserProfile() and routes to nexusOS if any profile exists, rather than distinguishing ProProfile vs UserProfile to determine pro vs client dashboard routing.",
+      "requirement": "SetupScreen must write values to canister via lib/api.ts on submit",
+      "reason": "The SetupScreen.tsx implementation only saves to localStorage and does not call lib/api.ts to write admin config to the canister.",
       "evidence": [
-        "frontend/src/components/Login.tsx"
+        "frontend/src/screens/SetupScreen.tsx"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "requirement": "SetupScreen title must be 'NEXUS Initial Configuration' with Inter 800 28px",
+      "reason": "The SetupScreen shows 'Configuration initiale' as the title text and uses 22px font size, not the specified 'NEXUS Initial Configuration' at 28px.",
+      "evidence": [
+        "frontend/src/screens/SetupScreen.tsx"
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "requirement": "Create backend/Types.mo exporting all shared types (UserProfile, ProProfile, Booking, Notification, AdminConfig, etc.)",
+      "reason": "backend/Types.mo does not appear as an added or modified file in the diff.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-11",
+      "requirement": "backend/main.mo must have no Stripe references and must implement wallet, notifications, admin functions, 48h escrow heartbeat, and admin config storage",
+      "reason": "The modified backend/main.mo still contains Stripe imports and Stripe configuration functions (isStripeConfigured, setStripeConfiguration), violating the no-Stripe constraint.",
+      "evidence": [
+        "backend/main.mo"
       ]
     },
     {
       "id": "REQ-12",
-      "requirement": "Update BusinessScreen.tsx to call updatePro() on save and addService()/removeService() for service management",
-      "reason": "No BusinessScreen.tsx appears in the diff. This file is not modified.",
+      "requirement": "Create .env.production file at project root with all 5 env vars",
+      "reason": ".env.production does not appear in the list of added files in the diff.",
       "evidence": []
     },
     {
       "id": "REQ-13",
-      "requirement": "Update BookingFlow.tsx to call createBooking() on final confirmation; update ClientDashboard.tsx to fetch from getMyBookings() and call cancelBooking()",
-      "reason": "BookingFlow.tsx still uses local state and setCurrentBooking with Date.now().toString() as id - no createBooking() canister call is made. ClientDashboard.tsx is not in the diff.",
+      "requirement": "No Stripe or Revolut references in any file",
+      "reason": "backend/main.mo still imports and uses Stripe module (import Stripe, stripeConfig, isStripeConfigured, setStripeConfiguration).",
       "evidence": [
-        "frontend/src/components/BookingFlow.tsx"
-      ]
-    },
-    {
-      "id": "REQ-14",
-      "requirement": "Admin panel with full transactions table using adminGetAllTransactions()",
-      "reason": "AdminPanel.tsx uses useAdminAllBookings() for a bookings tab instead of useAdminAllTransactions() for a transactions table as required.",
-      "evidence": [
-        "frontend/src/components/AdminPanel.tsx"
-      ]
-    },
-    {
-      "id": "REQ-15",
-      "requirement": "Create frontend/src/lib/notifications.ts with 15-second polling, unread count store, addLocalNotification(). Update NotificationCenter.tsx with slide-in panel from right, per-item dismiss, type labels, formatted timestamps.",
-      "reason": "No frontend/src/lib/notifications.ts is created. NotificationCenter.tsx uses old notifications array from AppContext and does not implement per-item dismiss or a slide-in animation from the right.",
-      "evidence": [
-        "frontend/src/components/NotificationCenter.tsx",
-        "frontend/src/components/GlobalHeader.tsx"
-      ]
-    },
-    {
-      "id": "REQ-16",
-      "requirement": "Add all required query and mutation hooks to useQueries.ts including useActivePros, useFlashPros, useMyBookings, useAdminTransactions, useAdminMetrics, useCreateBooking, useAcceptBooking, useDeclineBooking, useCancelBooking, useActivateSubscription, useAdminValidatePro",
-      "reason": "The truncated useQueries.ts diff shows existing hooks being refactored but several required hooks cannot be confirmed. useAdminAllBookings is used in AdminPanel instead of the required useAdminTransactions.",
-      "evidence": [
-        "frontend/src/hooks/useQueries.ts",
-        "frontend/src/components/AdminPanel.tsx"
+        "backend/main.mo"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "Stripe payment integration (StripeConfiguration, setStripeConfiguration, isStripeConfigured) added to backend",
-      "reason": "The build request specifies Payrexx as a commented stub only and Twilio as a commented stub. Stripe is not mentioned anywhere in the requirements. The backend imports and implements a full Stripe module.",
+      "description": "AdminDashboardScreen combines all 4 admin tabs (dashboard, pros, bookings, revenus) into a single component with internal tab state instead of 4 separate screen files",
+      "reason": "The spec requires separate files AdminDashboardScreen.tsx, AdminProsScreen.tsx, AdminBookingsScreen.tsx, AdminRevenusScreen.tsx. The diff delivers them merged into one component.",
       "evidence": [
-        "backend/main.mo"
+        "frontend/src/screens/admin/AdminDashboardScreen.tsx"
       ]
     },
     {
-      "description": "ExplorerV2.tsx continues to import DEMO_PROS from demoData",
-      "reason": "REQ-13 requires replacing all demoData usage. ExplorerV2.tsx still imports DEMO_PROS from demoData, which is a hallucinated retention of mock data that should have been removed.",
+      "description": "notifications.ts uses localStorage exclusively for notifications storage instead of canister calls",
+      "reason": "The spec requires lib/notifications.ts with getNotifications and markRead backed by canister data. The implementation uses only localStorage.",
       "evidence": [
-        "frontend/src/components/ExplorerV2.tsx"
+        "frontend/src/lib/notifications.ts"
       ]
     },
     {
-      "description": "useAdminAllBookings hook introduced in AdminPanel instead of useAdminAllTransactions",
-      "reason": "The requirement specifies a transactions table using adminGetAllTransactions(). A bookings-based admin hook was implemented instead, which was not requested.",
+      "description": "AppContext.tsx retains legacy demo fields like DemoPro, DemoService, simulated wallet, and demo-compatible structures not requested",
+      "reason": "The build request explicitly prohibits demo mode and simulated data. AppContext retains DemoPro, DemoService, and legacy demo-compatible structures.",
       "evidence": [
-        "frontend/src/components/AdminPanel.tsx"
-      ]
-    },
-    {
-      "description": "ProSubscriptionModal.tsx uses setTimeout mock instead of real activateSubscription() canister call",
-      "reason": "REQ-2 requires activateSubscription() to set subscription status on the canister. ProSubscriptionModal uses a fake setTimeout and local state only, not the canister.",
-      "evidence": [
-        "frontend/src/components/ProSubscriptionModal.tsx"
+        "frontend/src/context/AppContext.tsx"
       ]
     }
   ],
-  "confidence": 0.62,
+  "confidence": 0.72,
   "changed_files": [
     "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/AdminPanel.tsx",
-    "frontend/src/components/BookingFlow.tsx",
-    "frontend/src/components/DashboardScreen.tsx",
-    "frontend/src/components/Explorer.tsx",
-    "frontend/src/components/ExplorerV2.tsx",
-    "frontend/src/components/GlobalHeader.tsx",
-    "frontend/src/components/Login.tsx",
-    "frontend/src/components/NotificationCenter.tsx",
-    "frontend/src/components/OTPVerificationV2.tsx",
-    "frontend/src/components/ProLogin.tsx",
-    "frontend/src/components/ProProfile.tsx",
-    "frontend/src/components/ProSubscriptionModal.tsx",
-    "frontend/src/components/RadarPro.tsx",
-    "frontend/src/components/RoleSelectionV2.tsx",
-    "frontend/src/components/ScreenRouter.tsx",
-    "frontend/src/components/SubscriptionScreen.tsx",
-    "frontend/src/components/WalletPro.tsx",
+    "frontend/src/components/icons/index.tsx",
     "frontend/src/context/AppContext.tsx",
     "frontend/src/hooks/useQueries.ts",
+    "frontend/src/lib/notifications.ts",
+    "frontend/src/lib/payrexx.ts",
+    "frontend/src/lib/twilio.ts",
+    "frontend/src/screens/SetupScreen.tsx",
+    "frontend/src/screens/admin/AdminDashboardScreen.tsx",
+    "frontend/src/screens/admin/AdminLoginScreen.tsx",
+    "frontend/src/screens/auth/LoginScreen.tsx",
+    "frontend/src/screens/auth/OTPScreen.tsx",
+    "frontend/src/screens/auth/RoleScreen.tsx",
+    "frontend/src/screens/client/AlertesScreen.tsx",
+    "frontend/src/screens/client/ClientProfilScreen.tsx",
+    "frontend/src/screens/client/ExplorerScreen.tsx",
+    "frontend/src/screens/client/ReservationsScreen.tsx",
+    "frontend/src/screens/pro/ProDashboardScreen.tsx",
+    "frontend/src/screens/pro/ProRadarScreen.tsx",
+    "frontend/src/screens/pro/SubscriptionModal.tsx",
+    "frontend/src/screens/pro/SuccessScreen.tsx",
+    "frontend/src/state/useAppState.ts",
     "project_state.json"
   ]
 }

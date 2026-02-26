@@ -1,4 +1,6 @@
 import React from 'react';
+import { useMyBookings, useWalletSolde, useGetProProfile } from '../hooks/useQueries';
+import { useInternetIdentity } from '../hooks/useInternetIdentity';
 import { useProContext } from '../context/ProContext';
 
 interface DashboardScreenProps {
@@ -6,180 +8,273 @@ interface DashboardScreenProps {
   onActivate?: () => void;
 }
 
-export default function DashboardScreen({ proActif: proActifProp, onActivate }: DashboardScreenProps) {
-  // Try to read from context; fall back to prop
-  let proActif = proActifProp ?? false;
-  let proData = {
-    prenom: 'Alexandre',
-    ville: 'Lausanne',
-    categorie: 'barber',
-    iban: '',
-    photos: [null, null, null, null] as (string | null)[],
-    services: [] as { nom: string; prix: number; duree: number; badge: string | null }[],
-    flashActif: false,
-    slogan: '',
-    bio: '',
-  };
+export default function DashboardScreen({ proActif, onActivate }: DashboardScreenProps) {
+  const { identity } = useInternetIdentity();
+  const proCtx = useProContext();
 
-  try {
-    const ctx = useProContext();
-    // prop takes precedence over context for proActif (ProLayout owns this state)
-    if (proActifProp === undefined) {
-      proActif = ctx.proActif;
-    }
-    proData = ctx.proData;
-  } catch {
-    // fallback — context not available
-  }
+  const { data: bookings = [], isLoading: bookingsLoading } = useMyBookings();
+  const { data: solde = 0, isLoading: soldeLoading } = useWalletSolde();
+  const { data: proProfile } = useGetProProfile(identity?.getPrincipal().toString());
+
+  const isActive = proActif ?? proCtx.proActif ?? false;
+
+  const confirmedBookings = bookings.filter((b) => b.status === 'confirmed');
+  const pendingBookings = bookings.filter((b) => b.status === 'pending');
+  const totalRevenue = confirmedBookings.reduce((sum, b) => sum + Number(b.totalPrice), 0);
+  const acceptanceRate =
+    bookings.length > 0
+      ? Math.round((confirmedBookings.length / bookings.length) * 100)
+      : 0;
 
   const stats = [
-    { label: 'Prestations', value: proActif ? '12' : '0' },
-    { label: 'Ce mois', value: proActif ? '240 CHF' : '0 CHF' },
-    { label: 'Note', value: proActif ? '4.9' : '-' },
-    { label: 'Avis', value: proActif ? '8' : '0' },
+    {
+      label: 'Reservations',
+      value: bookingsLoading ? '...' : confirmedBookings.length.toString(),
+      sub: `${pendingBookings.length} en attente`,
+      color: 'var(--gold)',
+    },
+    {
+      label: 'Revenus',
+      value: soldeLoading ? '...' : `${totalRevenue} CHF`,
+      sub: 'Total confirme',
+      color: 'var(--flash)',
+    },
+    {
+      label: 'Taux acceptation',
+      value: bookingsLoading ? '...' : `${acceptanceRate}%`,
+      sub: `${bookings.length} demandes`,
+      color: '#4A9EFF',
+    },
+    {
+      label: 'Profil',
+      value: proProfile
+        ? proProfile.profileStatus === 'published'
+          ? 'Publie'
+          : 'Brouillon'
+        : '...',
+      sub: proProfile?.isVerified ? 'Verifie' : 'Non verifie',
+      color: proProfile?.isVerified ? 'var(--flash)' : 'var(--alert)',
+    },
   ];
 
   return (
-    <div style={{
-      minHeight: '100%',
-      background: 'var(--void)',
-      padding: '24px 20px 100px',
-      fontFamily: 'Inter, sans-serif',
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: '100%',
+        fontFamily: 'Inter, sans-serif',
+        background: 'var(--void)',
+      }}
+    >
       {/* Header */}
-      <div style={{ marginBottom: 28 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
-          <span style={{ fontSize: 13, color: 'var(--t3)', fontWeight: 400 }}>
-            Bonjour,
-          </span>
-          {proActif && (
-            <div style={{
-              background: 'rgba(242,208,107,0.12)',
-              border: '1px solid rgba(242,208,107,0.3)',
-              borderRadius: 20,
-              padding: '4px 10px',
-            }}>
-              <span style={{ fontSize: 11, fontWeight: 700, color: '#F2D06B', letterSpacing: '0.05em' }}>
-                ESSAI GRATUIT J1/7
-              </span>
-            </div>
-          )}
-        </div>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: 'var(--t1)', margin: 0 }}>
-          {proData.prenom}
-        </h1>
-        <p style={{ fontSize: 13, color: 'var(--t3)', margin: '4px 0 0' }}>
-          {proData.categorie} — {proData.ville}
-        </p>
-      </div>
-
-      {/* Status Banner */}
-      {!proActif ? (
-        <div style={{
-          background: 'rgba(242,208,107,0.08)',
-          border: '1px solid rgba(242,208,107,0.2)',
-          borderRadius: 16,
-          padding: '16px 18px',
-          marginBottom: 24,
-        }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#F2D06B', margin: '0 0 4px' }}>
-            Profil non active
-          </p>
-          <p style={{ fontSize: 12, color: 'var(--t3)', margin: '0 0 12px' }}>
-            Completez votre profil dans Mon Business pour commencer a recevoir des clients.
-          </p>
-          {onActivate && (
-            <button
-              onClick={onActivate}
-              style={{
-                background: '#F2D06B',
-                color: '#050507',
-                fontFamily: 'Inter',
-                fontWeight: 700,
-                fontSize: 13,
-                border: 'none',
-                borderRadius: 10,
-                padding: '8px 16px',
-                cursor: 'pointer',
-              }}
-            >
-              Activer mon profil
-            </button>
-          )}
-        </div>
-      ) : (
-        <div style={{
-          background: 'rgba(0,217,122,0.08)',
-          border: '1px solid rgba(0,217,122,0.2)',
-          borderRadius: 16,
-          padding: '16px 18px',
-          marginBottom: 24,
-        }}>
-          <p style={{ fontSize: 13, fontWeight: 600, color: '#00D97A', margin: '0 0 4px' }}>
-            Profil actif
-          </p>
-          <p style={{ fontSize: 12, color: 'var(--t3)', margin: 0 }}>
-            Votre profil est visible par les clients. Essai gratuit en cours — 7 jours.
-          </p>
-        </div>
-      )}
-
-      {/* Stats Grid */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: 12,
-        marginBottom: 28,
-      }}>
-        {stats.map((stat) => (
-          <div key={stat.label} style={{
-            background: 'var(--d1)',
-            borderRadius: 16,
-            padding: '18px 16px',
-            border: '1px solid rgba(255,255,255,0.04)',
-          }}>
-            <div style={{ fontSize: 22, fontWeight: 800, color: 'var(--t1)', marginBottom: 4 }}>
-              {stat.value}
-            </div>
-            <div style={{ fontSize: 12, color: 'var(--t3)', fontWeight: 400 }}>
-              {stat.label}
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Quick Actions */}
-      <div style={{ marginBottom: 20 }}>
-        <h2 style={{ fontSize: 14, fontWeight: 700, color: 'var(--t2)', marginBottom: 12, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-          Actions rapides
-        </h2>
-        {[
-          { label: 'Voir mon profil public', desc: 'Apercu client de votre fiche' },
-          { label: 'Modifier mes services', desc: 'Prix, durees, descriptions' },
-          { label: 'Gerer mes disponibilites', desc: 'Horaires et jours de travail' },
-        ].map((action) => (
-          <div key={action.label} style={{
-            background: 'var(--d1)',
-            borderRadius: 14,
-            padding: '14px 16px',
-            marginBottom: 8,
-            border: '1px solid rgba(255,255,255,0.04)',
+      <div style={{ padding: '20px 20px 0', flexShrink: 0 }}>
+        <div
+          style={{
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            cursor: 'pointer',
-          }}>
-            <div>
-              <div style={{ fontSize: 13, fontWeight: 600, color: 'var(--t1)', marginBottom: 2 }}>
-                {action.label}
+            marginBottom: 4,
+          }}
+        >
+          <h1
+            style={{
+              margin: 0,
+              fontSize: 22,
+              fontWeight: 800,
+              color: 'var(--t1)',
+              letterSpacing: '-0.5px',
+            }}
+          >
+            Dashboard
+          </h1>
+        </div>
+        <p style={{ margin: '0 0 20px', fontSize: 13, color: 'rgba(244,244,248,0.4)' }}>
+          Vue d ensemble de votre activite
+        </p>
+      </div>
+
+      {/* Content */}
+      <div style={{ flex: 1, overflowY: 'auto', padding: '0 20px 32px' }}>
+        {/* Inactive banner */}
+        {!isActive && (
+          <div
+            style={{
+              padding: '16px',
+              background: 'rgba(255,61,90,0.08)',
+              border: '1px solid rgba(255,61,90,0.2)',
+              borderRadius: 12,
+              marginBottom: 20,
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 10,
+            }}
+          >
+            <div style={{ fontSize: 13, color: 'var(--alert)', fontWeight: 600 }}>
+              Profil inactif
+            </div>
+            <div style={{ fontSize: 12, color: 'rgba(244,244,248,0.5)' }}>
+              Activez votre profil pour recevoir des demandes de reservation.
+            </div>
+            {onActivate && (
+              <button
+                onClick={onActivate}
+                style={{
+                  padding: '10px',
+                  borderRadius: 10,
+                  border: 'none',
+                  background: 'linear-gradient(135deg, #F2D06B, #E8B84B)',
+                  color: '#050507',
+                  fontSize: 13,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  fontFamily: 'Inter, sans-serif',
+                }}
+              >
+                Activer mon profil
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Stats grid */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: 10,
+            marginBottom: 24,
+          }}
+        >
+          {stats.map((stat) => (
+            <div
+              key={stat.label}
+              style={{
+                background: 'rgba(244,244,248,0.03)',
+                border: '1px solid rgba(244,244,248,0.07)',
+                borderRadius: 12,
+                padding: '16px 14px',
+              }}
+            >
+              <div
+                style={{
+                  fontSize: 11,
+                  color: 'rgba(244,244,248,0.4)',
+                  marginBottom: 6,
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.06em',
+                }}
+              >
+                {stat.label}
               </div>
-              <div style={{ fontSize: 11, color: 'var(--t3)' }}>
-                {action.desc}
+              <div
+                style={{
+                  fontSize: 22,
+                  fontWeight: 800,
+                  color: stat.color,
+                  letterSpacing: '-0.5px',
+                }}
+              >
+                {stat.value}
+              </div>
+              <div style={{ fontSize: 11, color: 'rgba(244,244,248,0.3)', marginTop: 4 }}>
+                {stat.sub}
               </div>
             </div>
-            <span style={{ color: 'var(--t3)', fontSize: 18 }}>›</span>
+          ))}
+        </div>
+
+        {/* Recent bookings */}
+        <div
+          style={{
+            fontSize: 13,
+            fontWeight: 600,
+            color: 'rgba(244,244,248,0.5)',
+            marginBottom: 12,
+            textTransform: 'uppercase',
+            letterSpacing: '0.06em',
+          }}
+        >
+          Reservations recentes
+        </div>
+
+        {bookingsLoading ? (
+          <div
+            style={{
+              color: 'rgba(244,244,248,0.3)',
+              fontSize: 13,
+              textAlign: 'center',
+              padding: '24px 0',
+            }}
+          >
+            Chargement...
           </div>
-        ))}
+        ) : bookings.length === 0 ? (
+          <div
+            style={{
+              color: 'rgba(244,244,248,0.3)',
+              fontSize: 13,
+              textAlign: 'center',
+              padding: '24px 0',
+            }}
+          >
+            Aucune reservation pour le moment
+          </div>
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            {bookings.slice(0, 5).map((booking) => {
+              const statusColors: Record<string, string> = {
+                pending: 'var(--gold)',
+                confirmed: 'var(--flash)',
+                cancelled: 'var(--alert)',
+              };
+              const statusLabels: Record<string, string> = {
+                pending: 'En attente',
+                confirmed: 'Confirme',
+                cancelled: 'Annule',
+              };
+              return (
+                <div
+                  key={booking.id}
+                  style={{
+                    background: 'rgba(244,244,248,0.03)',
+                    border: '1px solid rgba(244,244,248,0.07)',
+                    borderRadius: 10,
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
+                  <div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: 'var(--t1)' }}>
+                      #{booking.id.slice(0, 10)}
+                    </div>
+                    <div style={{ fontSize: 11, color: 'rgba(244,244,248,0.4)', marginTop: 2 }}>
+                      {booking.date}
+                    </div>
+                  </div>
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: 'var(--gold)' }}>
+                      {Number(booking.totalPrice)} CHF
+                    </div>
+                    <div
+                      style={{
+                        fontSize: 10,
+                        color:
+                          statusColors[booking.status as string] ??
+                          'rgba(244,244,248,0.4)',
+                        marginTop: 2,
+                      }}
+                    >
+                      {statusLabels[booking.status as string] ?? String(booking.status)}
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

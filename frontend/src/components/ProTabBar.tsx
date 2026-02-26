@@ -1,12 +1,14 @@
 import React from 'react';
 import { IconRadar, IconWallet, IconDashboard, IconBusiness } from './icons/Icons';
 
+type ProTab = 'radar' | 'wallet' | 'dashboard' | 'business';
+
 interface ProTabBarProps {
-  active: string;
-  onChange: (tab: string) => void;
+  active: ProTab;
+  onChange: (tab: ProTab) => void;
 }
 
-const tabs = [
+const tabs: { id: ProTab; label: string; Icon: React.FC<{ size?: number; color?: string; className?: string }> }[] = [
   { id: 'radar', label: 'Radar', Icon: IconRadar },
   { id: 'wallet', label: 'Wallet', Icon: IconWallet },
   { id: 'dashboard', label: 'Dashboard', Icon: IconDashboard },
@@ -15,43 +17,47 @@ const tabs = [
 
 export default function ProTabBar({ active, onChange }: ProTabBarProps) {
   return (
-    <div style={{
-      display: 'flex',
-      background: 'var(--d1)',
-      borderTop: '1px solid rgba(255,255,255,0.06)',
-      paddingBottom: 'env(safe-area-inset-bottom, 0px)',
-    }}>
-      {tabs.map(({ id, label, Icon }) => {
-        const isActive = active === id;
+    <div
+      style={{
+        display: 'flex',
+        flexDirection: 'row',
+        width: '100%',
+        position: 'relative',
+        flexShrink: 0,
+      }}
+    >
+      {tabs.map((tab) => {
+        const isActive = active === tab.id;
         return (
           <button
-            key={id}
-            onClick={() => onChange(id)}
+            key={tab.id}
+            onClick={() => onChange(tab.id)}
             style={{
               flex: 1,
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
               justifyContent: 'center',
-              padding: '10px 0 8px',
-              background: 'none',
+              paddingTop: 12,
+              paddingBottom: 12,
+              background: 'transparent',
               border: 'none',
               cursor: 'pointer',
               gap: 4,
+              color: isActive ? '#F2D06B' : 'rgba(255,255,255,0.4)',
+              transition: 'color 0.2s',
             }}
           >
-            <Icon
-              size={22}
-              color={isActive ? '#F2D06B' : '#54546C'}
-            />
-            <span style={{
-              fontFamily: 'Inter, sans-serif',
-              fontSize: 10,
-              fontWeight: isActive ? 600 : 400,
-              color: isActive ? '#F2D06B' : '#54546C',
-              letterSpacing: '0.02em',
-            }}>
-              {label}
+            <tab.Icon size={22} color={isActive ? '#F2D06B' : 'rgba(255,255,255,0.4)'} />
+            <span
+              style={{
+                fontSize: 10,
+                fontWeight: isActive ? 700 : 400,
+                fontFamily: 'Inter, sans-serif',
+                letterSpacing: '0.02em',
+              }}
+            >
+              {tab.label}
             </span>
           </button>
         );

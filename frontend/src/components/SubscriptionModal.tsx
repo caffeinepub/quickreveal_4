@@ -11,196 +11,191 @@ export default function SubscriptionModal({ isOpen, onClose, onSubscribe }: Subs
 
   if (!isOpen) return null;
 
-  const handleStart = () => {
-    if (loading) return;
+  const handleSubscribe = async () => {
     setLoading(true);
-    // Simulate 800ms then trigger success flow — no API calls
-    setTimeout(() => {
-      onClose();
-      onSubscribe();
-    }, 800);
+    await new Promise((r) => setTimeout(r, 800));
+    setLoading(false);
+    onSubscribe();
   };
 
   const benefits = [
-    'Profil visible par des milliers de clients autour de vous',
-    'Reservations instantanees 24h/24',
-    'Paiements garantis NEXUS PAY',
-    'Notifications temps reel',
-    'Zero commission les 7 premiers jours',
+    { icon: '⚡', text: 'Profil visible dans l\'Explorer' },
+    { icon: '📅', text: 'Réservations en ligne illimitées' },
+    { icon: '💳', text: 'Paiements automatiques sécurisés' },
+    { icon: '📊', text: 'Statistiques et analytics' },
+    { icon: '🔔', text: 'Notifications clients en temps réel' },
   ];
 
   return (
     <div
+      onClick={onClose}
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(5,5,7,0.95)',
-        zIndex: 1000,
+        background: 'rgba(5,5,7,0.85)',
+        zIndex: 9000,
         display: 'flex',
         alignItems: 'flex-end',
       }}
-      onClick={onClose}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          background: '#0D0D13',
-          borderRadius: '28px 28px 0 0',
-          border: '1px solid rgba(242,208,107,0.12)',
-          borderBottom: 'none',
-          padding: '32px 24px 48px',
-          animation: 'nexusSlideUp 300ms ease-out',
-        }}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Title row */}
-        <div style={{
+          maxHeight: 'calc(100vh - 64px - env(safe-area-inset-bottom, 0px))',
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: 8,
+          flexDirection: 'column',
+          background: '#0D0D13',
+          borderRadius: '24px 24px 0 0',
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: 'none',
+        }}
+      >
+        {/* Drag handle */}
+        <div style={{
+          width: 36,
+          height: 4,
+          background: '#2E2E3E',
+          borderRadius: 2,
+          margin: '12px auto',
+          flexShrink: 0,
+        }} />
+
+        {/* Fixed title */}
+        <div style={{
+          padding: '0 24px 16px',
+          flexShrink: 0,
+          borderBottom: '1px solid rgba(255,255,255,0.04)',
         }}>
-          <div>
+          <p style={{
+            fontFamily: 'Inter',
+            fontWeight: 800,
+            fontSize: 20,
+            color: '#F4F4F8',
+            margin: 0,
+          }}>
+            Passer à Pro
+          </p>
+          <p style={{
+            fontFamily: 'Inter',
+            fontSize: 13,
+            color: '#9898B4',
+            margin: '4px 0 0',
+          }}>
+            Activez votre compte professionnel
+          </p>
+        </div>
+
+        {/* Scrollable content */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch' as any,
+          padding: '20px 24px',
+        }}>
+          {/* Pricing */}
+          <div style={{
+            background: 'rgba(242,208,107,0.06)',
+            border: '1px solid rgba(242,208,107,0.2)',
+            borderRadius: 16,
+            padding: '20px',
+            textAlign: 'center',
+            marginBottom: 20,
+          }}>
             <p style={{
               fontFamily: 'Inter',
               fontWeight: 800,
-              fontSize: 24,
-              color: '#F4F4F8',
-              letterSpacing: '-0.03em',
+              fontSize: 36,
+              color: '#F2D06B',
               margin: 0,
             }}>
-              LANCER MON SERVICE
+              199 CHF
             </p>
             <p style={{
               fontFamily: 'Inter',
-              fontWeight: 400,
-              fontSize: 14,
-              color: '#F2D06B',
-              marginTop: 4,
-              marginBottom: 0,
+              fontSize: 13,
+              color: '#9898B4',
+              margin: '4px 0 0',
             }}>
-              7 jours gratuits · Sans engagement
+              par an · soit 16.60 CHF/mois
             </p>
+            <div style={{
+              display: 'inline-block',
+              background: 'rgba(242,208,107,0.15)',
+              border: '1px solid rgba(242,208,107,0.3)',
+              borderRadius: 20,
+              padding: '4px 12px',
+              marginTop: 10,
+            }}>
+              <span style={{ fontFamily: 'Inter', fontSize: 12, color: '#F2D06B', fontWeight: 600 }}>
+                🎁 7 jours d'essai gratuit
+              </span>
+            </div>
           </div>
+
+          {/* Benefits */}
+          <div>
+            {benefits.map((b, i) => (
+              <div key={i} style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: 12,
+                padding: '10px 0',
+                borderBottom: i < benefits.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+              }}>
+                <span style={{ fontSize: 20 }}>{b.icon}</span>
+                <span style={{ fontFamily: 'Inter', fontSize: 14, color: '#F4F4F8' }}>{b.text}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Action buttons — always visible */}
+        <div style={{
+          flexShrink: 0,
+          padding: '12px 24px 16px',
+          borderTop: '1px solid rgba(255,255,255,0.04)',
+          display: 'flex',
+          gap: 12,
+          background: '#0D0D13',
+        }}>
           <button
             onClick={onClose}
             style={{
-              background: 'none',
-              border: 'none',
-              color: '#54546C',
+              flex: 1,
+              height: 50,
+              background: '#121219',
+              border: '1px solid #1C1C26',
+              borderRadius: 12,
+              color: '#9898B4',
+              fontFamily: 'Inter',
+              fontWeight: 600,
+              fontSize: 14,
               cursor: 'pointer',
-              fontSize: 20,
-              padding: 4,
-              lineHeight: 1,
             }}
           >
-            ×
+            Annuler
+          </button>
+          <button
+            onClick={handleSubscribe}
+            disabled={loading}
+            style={{
+              flex: 2,
+              height: 50,
+              background: loading ? '#2E2E3E' : '#F2D06B',
+              border: 'none',
+              borderRadius: 12,
+              color: loading ? '#9898B4' : '#050507',
+              fontFamily: 'Inter',
+              fontWeight: 700,
+              fontSize: 14,
+              cursor: loading ? 'not-allowed' : 'pointer',
+            }}
+          >
+            {loading ? 'Activation...' : 'Commencer l\'essai gratuit'}
           </button>
         </div>
-
-        {/* Benefits */}
-        <div style={{ marginTop: 24, marginBottom: 28 }}>
-          {benefits.map((item, i) => (
-            <div key={i} style={{
-              display: 'flex',
-              alignItems: 'flex-start',
-              gap: 14,
-              marginBottom: 18,
-            }}>
-              <div style={{
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                background: 'rgba(242,208,107,0.1)',
-                border: '1px solid rgba(242,208,107,0.2)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0,
-                marginTop: 1,
-              }}>
-                <svg width="12" height="12" viewBox="0 0 24 24" stroke="#F2D06B" strokeWidth="2.5" fill="none">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              <span style={{
-                fontFamily: 'Inter',
-                fontWeight: 400,
-                fontSize: 15,
-                color: '#9898B4',
-                lineHeight: 1.5,
-              }}>
-                {item}
-              </span>
-            </div>
-          ))}
-        </div>
-
-        {/* Main CTA button */}
-        <button
-          onClick={handleStart}
-          disabled={loading}
-          style={{
-            width: '100%',
-            height: 58,
-            borderRadius: 16,
-            border: 'none',
-            cursor: loading ? 'not-allowed' : 'pointer',
-            background: loading ? '#1C1C26' : '#F2D06B',
-            color: loading ? '#54546C' : '#050507',
-            fontFamily: 'Inter',
-            fontWeight: 700,
-            fontSize: 16,
-            letterSpacing: '0.02em',
-            transition: 'all 200ms',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            gap: 8,
-          }}
-        >
-          {loading ? (
-            <>
-              <div style={{
-                width: 18,
-                height: 18,
-                border: '2px solid #54546C',
-                borderTopColor: '#9898B4',
-                borderRadius: '50%',
-                animation: 'nexusModalSpin 1s linear infinite',
-              }} />
-              Activation...
-            </>
-          ) : (
-            'Commencer 7 jours gratuits'
-          )}
-        </button>
-
-        <p
-          style={{
-            fontFamily: 'Inter',
-            fontWeight: 400,
-            fontSize: 13,
-            color: '#54546C',
-            textAlign: 'center',
-            marginTop: 14,
-            cursor: 'pointer',
-          }}
-          onClick={onClose}
-        >
-          Pas maintenant
-        </p>
       </div>
-
-      <style>{`
-        @keyframes nexusSlideUp {
-          from { transform: translateY(100%); }
-          to { transform: translateY(0); }
-        }
-        @keyframes nexusModalSpin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   );
 }

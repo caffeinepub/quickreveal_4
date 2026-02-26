@@ -1,36 +1,39 @@
-import React from 'react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { AppContextProvider } from './context/AppContext';
 import { AuthContextProvider } from './context/AuthContext';
+import { AppContextProvider } from './context/AppContext';
 import ScreenRouter from './components/ScreenRouter';
+import { Toaster } from 'sonner';
 
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      retry: 1,
-      refetchOnWindowFocus: false,
-    },
-  },
-});
+const queryClient = new QueryClient();
 
 export default function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthContextProvider>
         <AppContextProvider>
-          <div
-            id="app-container"
-            style={{
-              maxWidth: 430,
+          {/* Full-screen root wrapper */}
+          <div style={{
+            position: 'fixed',
+            inset: 0,
+            width: '100%',
+            height: '100%',
+            maxWidth: 'none',
+            background: '#050507',
+            overflow: 'hidden',
+          }}>
+            {/* Inner content constrained to 430px */}
+            <div style={{
+              maxWidth: '430px',
               margin: '0 auto',
-              minHeight: '100vh',
+              width: '100%',
+              height: '100%',
               position: 'relative',
-              background: 'var(--void)',
               overflow: 'hidden',
-            }}
-          >
-            <ScreenRouter />
+            }}>
+              <ScreenRouter />
+            </div>
           </div>
+          <Toaster position="top-center" richColors />
         </AppContextProvider>
       </AuthContextProvider>
     </QueryClientProvider>

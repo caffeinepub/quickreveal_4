@@ -1,83 +1,50 @@
 import Map "mo:core/Map";
 import List "mo:core/List";
+import Nat "mo:core/Nat";
 import Text "mo:core/Text";
+import Iter "mo:core/Iter";
 import Time "mo:core/Time";
+import Array "mo:core/Array";
+import Set "mo:core/Set";
 import Principal "mo:core/Principal";
 import Runtime "mo:core/Runtime";
-import Iter "mo:core/Iter";
-import Set "mo:core/Set";
-import Nat "mo:core/Nat";
-import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
+import AccessControl "authorization/access-control";
 import OutCall "http-outcalls/outcall";
 import MixinStorage "blob-storage/Mixin";
 import Storage "blob-storage/Storage";
 import Stripe "stripe/stripe";
 
 actor {
-  // -----------------------------------------------------------------------
-  // Payrexx Integration (disabled)
-  // -----------------------------------------------------------------------
-
-  /* PAYREXX INTEGRATION (DISABLED)
-   * To enable, follow these steps:
-   *   1. Generate a 64-character random key in your Payrexx account.
-   *   2. Store that secret key only in the backend (NEVER expose it in React).
-   *   3. Implement HTTP Outcalls from ICP to Payrexx API using Motoko.
-   *   4. Use HMAC-SHA256 for server-side signing in Motoko.
-   *   5. actor.createPayment(params) → Motoko signs request → calls Payrexx Gateway API → returns { paymentUrl: Text }
-   *   6. React redirects user via primjs window.location.href to paymentUrl.
-   *   7. DO NOT expose secret key anywhere in React JS code.
-   *   8. Payments will auto-enable upon permission from EthereumSwitzerland.
-   */
-
-  /* MOTOKO HEARTBEAT (PLANNED)
-   * Hourly ICP heartbeat execution (max 13s per execution):
-   *   1. Query bookings with statut='paye' AND liberationAt <= now() AND libere=false
-   *   2. Process each booking:
-   *      - montantPro = montant - 1.0 CHF platform fee
-   *      - Payrexx Payout to pro.iban
-   *      - Set libere=true and libereAt=now()
-   *      - Trigger SMS to pro and client
-   */
-
-  // Mixins
   include MixinStorage();
 
-  // Access control system
-  let accessControlState = AccessControl.initState();
-  include MixinAuthorization(accessControlState);
-
-  // Enums
-  public type AppUserRole = {
+  type AppUserRole = {
     #client;
     #professional;
   };
 
-  public type ProfileStatus = {
+  type ProfileStatus = {
     #draft;
     #published;
   };
 
-  public type TrialStatus = {
+  type TrialStatus = {
     #notStarted;
     #active : Nat; // days remaining
     #expired;
   };
 
-  public type BookingStatus = {
+  type BookingStatus = {
     #pending;
     #confirmed;
     #cancelled;
   };
 
-  // User profile type required by the frontend
   public type UserProfile = {
     name : Text;
     appRole : ?AppUserRole;
   };
 
-  // Types
   public type Language = {
     language : Text;
     proficiency : Text;
@@ -141,19 +108,16 @@ actor {
     totalPrice : Nat;
   };
 
-  // Maps
+  let accessControlState = AccessControl.initState();
+  include MixinAuthorization(accessControlState);
+
   let userProfiles = Map.empty<Principal, UserProfile>();
   let proProfiles = Map.empty<Principal, ProProfile>();
   let bookings = Map.empty<Text, Booking>();
 
-  // Stripe configuration
   var stripeConfig : ?Stripe.StripeConfiguration = null;
 
-  // -----------------------------------------------------------------------
-  // User Profile Management (required by frontend)
-  // -----------------------------------------------------------------------
-
-  /// Returns the caller's own user profile.
+  // User Profile Functions
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can get their profile");
@@ -161,7 +125,6 @@ actor {
     userProfiles.get(caller);
   };
 
-  /// Saves the caller's own user profile.
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only authenticated users can save their profile");
@@ -169,7 +132,6 @@ actor {
     userProfiles.add(caller, profile);
   };
 
-  /// Fetches another user's profile. Caller can view their own; admins can view any.
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
     if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Can only view your own profile");
@@ -177,54 +139,11 @@ actor {
     userProfiles.get(user);
   };
 
-  // -----------------------------------------------------------------------
-  // Helper: app-level role checks
-  // -----------------------------------------------------------------------
-
-  /// Returns the app-level role of the caller from their stored user profile.
-  private func getCallerAppRole(caller : Principal) : ?AppUserRole {
-    switch (userProfiles.get(caller)) {
-      case (null) { null };
-      case (?profile) { profile.appRole };
-    };
-  };
-
-  /// Asserts the caller is an authenticated user with the #professional app role.
-  private func requireProfessional(caller : Principal) {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Must be authenticated");
-    };
-    switch (getCallerAppRole(caller)) {
-      case (?#professional) {};
-      case (_) {
-        Runtime.trap("Unauthorized: Only professionals can perform this action");
-      };
-    };
-  };
-
-  /// Asserts the caller is an authenticated user with the #client app role.
-  private func requireClient(caller : Principal) {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Must be authenticated");
-    };
-    switch (getCallerAppRole(caller)) {
-      case (?#client) {};
-      case (_) {
-        Runtime.trap("Unauthorized: Only clients can perform this action");
-      };
-    };
-  };
-
-  // -----------------------------------------------------------------------
   // Stripe
-  // -----------------------------------------------------------------------
-
-  /// Checks if Stripe is configured.
   public query func isStripeConfigured() : async Bool {
     stripeConfig != null;
   };
 
-  /// Sets Stripe configuration (admin only).
   public shared ({ caller }) func setStripeConfiguration(config : Stripe.StripeConfiguration) : async () {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can perform this action");
@@ -232,7 +151,6 @@ actor {
     stripeConfig := ?config;
   };
 
-  /// Retrieves current configuration (private).
   func getStripeConfiguration() : Stripe.StripeConfiguration {
     switch (stripeConfig) {
       case (null) { Runtime.trap("Stripe needs to be first configured") };
@@ -240,8 +158,6 @@ actor {
     };
   };
 
-  /// Gets Stripe session status. Only authenticated users may query session status
-  /// to prevent unauthenticated callers from probing sessions or triggering outcalls.
   public shared ({ caller }) func getStripeSessionStatus(sessionId : Text) : async Stripe.StripeSessionStatus {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Must be authenticated to check session status");
@@ -249,7 +165,6 @@ actor {
     await Stripe.getSessionStatus(getStripeConfiguration(), sessionId, transform);
   };
 
-  /// Creates Stripe checkout session (authenticated users only).
   public shared ({ caller }) func createCheckoutSession(items : [Stripe.ShoppingItem], successUrl : Text, cancelUrl : Text) : async Text {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Must be authenticated to create a checkout session");
@@ -257,24 +172,19 @@ actor {
     await Stripe.createCheckoutSession(getStripeConfiguration(), caller, items, successUrl, cancelUrl, transform);
   };
 
-  /// Transform query (used internally by ICP HTTP outcalls infrastructure).
   public query func transform(input : OutCall.TransformationInput) : async OutCall.TransformationOutput {
     OutCall.transform(input);
   };
 
-  // -----------------------------------------------------------------------
   // Pro Profile Management
-  // -----------------------------------------------------------------------
-
   public shared ({ caller }) func createOrUpdateProProfile(profile : ProProfile) : async () {
-    requireProfessional(caller);
-
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can create or update a pro profile");
+    };
     if (profile.radius < 1 or profile.radius > 50) {
       Runtime.trap("Invalid radius value. Must be between 1 and 50 km");
     };
-
     validateBioLength(profile.bio);
-
     proProfiles.add(caller, {
       profile with
       id = caller;
@@ -284,7 +194,7 @@ actor {
     });
   };
 
-  private func calculateTrialStatus(existingTrial : ?Time.Time) : ?Time.Time {
+  func calculateTrialStatus(existingTrial : ?Time.Time) : ?Time.Time {
     let currentTime = Time.now();
     switch (existingTrial) {
       case (null) { ?currentTime };
@@ -295,7 +205,7 @@ actor {
     };
   };
 
-  private func validateBioLength(bio : Text) {
+  func validateBioLength(bio : Text) {
     let bioLength = bio.toArray().size();
     if (bioLength == 0) {
       Runtime.trap("Bio cannot be empty");
@@ -304,13 +214,10 @@ actor {
     };
   };
 
-  /// Returns a pro profile. Published profiles are publicly visible; draft profiles
-  /// are only visible to the owner or an admin.
   public query ({ caller }) func getProProfile(proId : Principal) : async ProProfile {
     switch (proProfiles.get(proId)) {
       case (null) { Runtime.trap("Profile not found") };
       case (?profile) {
-        // Draft profiles are private: only the owner or an admin may view them
         if (profile.profileStatus == #draft) {
           if (caller != proId and not AccessControl.isAdmin(accessControlState, caller)) {
             Runtime.trap("Unauthorized: This profile is not yet published");
@@ -322,8 +229,9 @@ actor {
   };
 
   public shared ({ caller }) func publishProfile() : async () {
-    requireProfessional(caller);
-
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can publish their profile");
+    };
     let profile = switch (proProfiles.get(caller)) {
       case (null) { Runtime.trap("Profile not found") };
       case (?profile) { profile };
@@ -338,19 +246,20 @@ actor {
   };
 
   public shared ({ caller }) func updateServices(_services : [Service]) : async () {
-    requireProfessional(caller);
-
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can update services");
+    };
     let profile = switch (proProfiles.get(caller)) {
       case (null) { Runtime.trap("Profile not found") };
       case (?profile) { profile };
     };
-
     proProfiles.add(caller, profile);
   };
 
   public shared ({ caller }) func updateWeeklyAvailability(availability : WeeklyAvailability) : async () {
-    requireProfessional(caller);
-
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can update availability");
+    };
     let profile = switch (proProfiles.get(caller)) {
       case (null) { Runtime.trap("Profile not found") };
       case (?profile) { profile };
@@ -361,8 +270,9 @@ actor {
   };
 
   public shared ({ caller }) func updateGallery(mainPhoto : ?Storage.ExternalBlob, galleryPhotos : [Storage.ExternalBlob]) : async () {
-    requireProfessional(caller);
-
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can update their gallery");
+    };
     let profile = switch (proProfiles.get(caller)) {
       case (null) { Runtime.trap("Profile not found") };
       case (?profile) { profile };
@@ -376,14 +286,9 @@ actor {
     proProfiles.add(caller, newProfile);
   };
 
-  // -----------------------------------------------------------------------
-  // Explorer Filtering (public — no auth required)
-  // -----------------------------------------------------------------------
-
   public query func filterProsByLocation(centerLat : Float, centerLong : Float, radius : Nat, category : ?Text) : async [ProProfile] {
     proProfiles.values().toArray().filter(
       func(profile) {
-        // Only return published profiles in the explorer
         if (profile.profileStatus != #published) { return false };
         let withinDistance = calculateDistance(centerLat, centerLong, 0.0, 0.0) <= radius;
         let matchesCategory = switch (category) {
@@ -396,16 +301,13 @@ actor {
   };
 
   func calculateDistance(_lat1 : Float, _long1 : Float, _lat2 : Float, _long2 : Float) : Nat {
-    10; // Dummy value for testing
+    10;
   };
 
-  // -----------------------------------------------------------------------
-  // Booking Management
-  // -----------------------------------------------------------------------
-
   public shared ({ caller }) func createBookingRequest(proId : Principal, serviceId : Text, date : Text, timeSlot : Text, address : Text) : async Text {
-    requireClient(caller);
-
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can create a booking");
+    };
     let proProfile = switch (proProfiles.get(proId)) {
       case (null) { Runtime.trap("Professional not found") };
       case (?pro) { pro };
@@ -415,9 +317,7 @@ actor {
       Runtime.trap("Professional's trial period has expired");
     };
 
-    // Placeholder service lookup — real implementation would query a services map
     let service : Service = { id = serviceId; name = "Service"; duration = 30; price = 100; beforeAfterPhotos = []; badges = [] };
-
     let totalPrice = service.price;
     let bookingId = "booking-" # caller.toText() # "-" # Int.toText(Time.now());
 
@@ -438,14 +338,14 @@ actor {
   };
 
   public shared ({ caller }) func updateBookingStatus(bookingId : Text, status : BookingStatus) : async () {
-    requireProfessional(caller);
-
+    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
+      Runtime.trap("Unauthorized: Only authenticated users can update booking status");
+    };
     let booking = switch (bookings.get(bookingId)) {
       case (null) { Runtime.trap("Booking not found") };
       case (?booking) { booking };
     };
 
-    // Only the professional assigned to this booking may update its status
     if (booking.proId != caller) {
       Runtime.trap("Unauthorized: Only the assigned professional can update this booking");
     };
@@ -454,7 +354,6 @@ actor {
     bookings.add(bookingId, newBooking);
   };
 
-  /// Returns bookings for a given user. Caller must be the user themselves or an admin.
   public query ({ caller }) func getBookingsByUser(userId : Principal, _status : ?BookingStatus) : async [Booking] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Must be authenticated to view bookings");
@@ -471,7 +370,6 @@ actor {
     );
   };
 
-  /// Returns bookings for a given professional. Caller must be that professional or an admin.
   public query ({ caller }) func getBookingsByProfessional(proId : Principal) : async [Booking] {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Must be authenticated to view bookings");
@@ -488,7 +386,6 @@ actor {
     );
   };
 
-  /// Returns a single booking. Only the client, the assigned professional, or an admin may view it.
   public query ({ caller }) func getBooking(bookingId : Text) : async ?Booking {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Must be authenticated to view a booking");
@@ -506,6 +403,50 @@ actor {
         };
         ?booking;
       };
+    };
+  };
+
+  // Admin-only functions
+  public query ({ caller }) func adminGetAllPros() : async [ProProfile] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    proProfiles.values().toArray();
+  };
+
+  public shared ({ caller }) func adminValidatePro(proId : Principal) : async () {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    let profile = switch (proProfiles.get(proId)) {
+      case (null) { Runtime.trap("Pro profile not found") };
+      case (?p) { p };
+    };
+    proProfiles.add(proId, { profile with isVerified = true });
+  };
+
+  public query ({ caller }) func adminGetAllBookings() : async [Booking] {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    bookings.values().toArray();
+  };
+
+  public query ({ caller }) func adminGetMetrics() : async {
+    totalBookings : Nat;
+    totalActivePros : Nat;
+    totalRegisteredUsers : Nat;
+  } {
+    if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
+      Runtime.trap("Unauthorized: Only admins can perform this action");
+    };
+    let allBookings = bookings.values().toArray();
+    let allPros = proProfiles.values().toArray();
+    let activePros = allPros.filter(func(p) { p.profileStatus == #published and p.isVerified });
+    {
+      totalBookings = allBookings.size();
+      totalActivePros = activePros.size();
+      totalRegisteredUsers = userProfiles.size();
     };
   };
 };

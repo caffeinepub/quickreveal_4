@@ -1,55 +1,226 @@
 {
   "kind": "implementation_plan",
   "version": "1.0",
-  "title": "Add ProApp.tsx — Standalone Pro Space with useState Navigation",
+  "title": "NEXUS — Frontend Canister Connection + Admin Panel + In-App Notifications",
   "requirements": [
     {
-      "id": "REQ-1",
-      "summary": "Create a fully self-contained ProApp.tsx component with useState-based navigation covering Dashboard, Radar, Wallet, Business, Subscription Modal, and Success screens",
+      "id": "REQ-7",
+      "summary": "Create actor initialization module that returns authenticated or anonymous ICP backend actor instances with caching",
       "acceptanceCriteria": [
-        "ProApp.tsx exists as a new file and exports a default React component named ProApp",
-        "All navigation within ProApp uses useState with no React Router or external routing library",
-        "The component renders Dashboard, Radar, Wallet, and Business tabs",
-        "A Subscription Modal screen and a Subscription Success animation screen are included",
-        "No existing files outside ProApp.tsx are broken or modified by this addition"
+        "actor.ts exports getActor() with optional identity parameter",
+        "Authenticated actor uses caller's Internet Identity principal",
+        "Anonymous actor used for public queries (getActivePros, getFlashPros)",
+        "Actor instance is cached and not recreated on every call"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ProApp.tsx",
+          "path": "frontend/src/lib/actor.ts",
           "operation": "create",
-          "description": "Create a new self-contained React component that implements the entire pro space experience with useState-driven screen navigation. Include inline or locally-imported sub-components for Dashboard (greeting, stats, activation banner), Radar (incoming/confirmed bookings with timers and actions), Wallet (balance, escrow, transactions), Business (identity/payment/services/gallery tabs with photo upload), Subscription Modal (email entry with trial activation), and Subscription Success (progress bar with confetti animation). Define a color constants object C containing t4: '#2E2E3E' for discrete UI elements. Use a tab bar at the bottom to switch between main screens. Export ProApp as default. Reference backend methods from the useActor hook and leverage existing utility functions (e.g., demoData, haversine, imageCompression). Ensure all visual elements follow the NEXUS design system (gold accents, void backgrounds, smooth animations). Do not introduce React Router or URL-based navigation."
+          "description": "Create actor initialization module that exports getActor(identity?) function. Use @dfinity/agent to create HttpAgent and Actor instances. When identity is provided, create authenticated actor with that identity. When no identity, create anonymous actor. Cache actor instances to avoid recreation. Import canister ID and IDL from generated declarations."
         }
       ]
     },
     {
-      "id": "REQ-2",
-      "summary": "Define color constant C.t4 = '#2E2E3E' in ProApp.tsx and apply it to IconCamera and all discrete UI elements",
+      "id": "REQ-8",
+      "summary": "Create typed API wrapper functions for all canister methods with error handling and result type mapping",
       "acceptanceCriteria": [
-        "The C object inside ProApp.tsx contains the key t4 with value '#2E2E3E'",
-        "IconCamera SVG uses C.t4 as its fill/stroke color",
-        "All visually discrete elements (inactive icons, dividers, placeholder text) reference C.t4"
+        "Every canister function has a corresponding typed wrapper in api.ts",
+        "All wrappers handle Result types (ok/err variants) from Motoko",
+        "TypeScript types match the Motoko actor interface",
+        "No mock data imports remain in api.ts"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/ProApp.tsx",
-          "operation": "modify",
-          "description": "Ensure the C color constants object at the top of ProApp.tsx includes t4: '#2E2E3E'. Apply C.t4 to the fill/stroke of any IconCamera SVG elements, and consistently use C.t4 for all very subtle/discrete UI elements such as placeholder text colors, divider borders, inactive icon strokes, secondary background tints, and other low-contrast elements throughout all pro-space screens (Dashboard, Radar, Wallet, Business, Subscription Modal)."
+          "path": "frontend/src/lib/api.ts",
+          "operation": "create",
+          "description": "Create typed async wrapper functions for all canister methods: getPros() wrapping getActivePros(), getFlashPros(), createBooking() wrapping createBookingRequest(), getMyBookings() wrapping getBookingsByUser(), cancelBooking() wrapping updateBookingStatus(), updatePro() wrapping createOrUpdateProProfile(), addService() wrapping updateServices(), getMyServices() reading from ProProfile services array, activateSubscription() wrapping publishProfile(), getRadarDemandes() wrapping getBookingsByProfessional(), getWalletSolde() reading from wallet state, acceptBooking() and declineBooking() wrapping updateBookingStatus(), uploadGalleryPhoto() and getMyGallery() wrapping updateGallery(), adminGetAllPros(), adminValidatePro(), adminGetAllBookings() wrapping adminGetAllBookings(), adminGetMetrics(), createPayrexxGateway() as stub. Import getActor from actor.ts. Handle errors gracefully with try-catch. Return typed results matching backend.d.ts interface."
         }
       ]
     },
     {
-      "id": "REQ-3",
-      "summary": "Wire ProApp into RoleSelection/RoleSelectionV2 to render <ProApp /> when user selects 'Professionnel' role",
+      "id": "REQ-9",
+      "summary": "Replace mock data imports in AppContext with real canister queries via React Query",
       "acceptanceCriteria": [
-        "Selecting 'Professionnel' on the role selection screen renders <ProApp /> instead of any previously broken pro component",
-        "The client navigation flow is completely unaffected",
-        "No black screen or crash occurs after selecting the professional role"
+        "No imports from mockData.ts or demoData.ts remain in AppContext",
+        "Booking list is fetched from getMyBookings() canister query",
+        "Wallet balance is fetched from getWalletSolde() canister query",
+        "Escrow timer is derived from booking createdAt timestamp from canister"
       ],
       "file_operations": [
         {
-          "path": "frontend/src/components/RoleSelectionV2.tsx",
+          "path": "frontend/src/context/AppContext.tsx",
           "operation": "modify",
-          "description": "Import ProApp from './ProApp'. In the handler for the 'Professionnel' role selection (currently navigating to 'proOnboarding' or setting role to 'professional'), replace the existing navigation or role-setting logic with rendering <ProApp /> directly in place of the role selection screen. Ensure the client role selection path remains unchanged. This wiring replaces the old broken pro space component with the new self-contained ProApp, preventing any black screen or navigation errors."
+          "description": "Remove all imports from mockData.ts and demoData.ts. Replace local useState-based booking state with React Query queries from useQueries.ts hooks (useMyBookings, useWalletSolde). Remove fake setTimeout timers. Calculate escrow countdown using actual booking timestamp from canister data. Replace hardcoded wallet balance with real balance from getWalletSolde(). Ensure booking status updates trigger query invalidation."
+        }
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "summary": "Replace demo mode button with Internet Identity authentication in Login screen",
+      "acceptanceCriteria": [
+        "'Continuer en mode demo' button is removed",
+        "Internet Identity login flow is triggered on the main CTA",
+        "Successful auth routes to pro dashboard if ProProfile exists for principal, else to role selection",
+        "Loading state shown during II authentication"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Login.tsx",
+          "operation": "modify",
+          "description": "Remove 'Continuer en mode demo' button entirely. Update main CTA button to trigger Internet Identity login from AuthContext (call login() from useInternetIdentity). Show loading state during authentication. After successful auth, query canister to check if ProProfile exists for the authenticated principal. If ProProfile exists, navigate to 'nexusOS'. If no ProProfile exists, navigate to 'roleSelection'. Handle authentication errors with user-friendly error messages in the existing dark premium style."
+        }
+      ]
+    },
+    {
+      "id": "REQ-11",
+      "summary": "Connect ProLogin to Internet Identity authentication and check for existing ProProfile",
+      "acceptanceCriteria": [
+        "II authentication is triggered on CTA press",
+        "Principal is used to look up existing ProProfile on canister",
+        "Routes to nexusOS if profile found, to builder if not",
+        "Auth errors display an error message in the existing dark premium style"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/ProLogin.tsx",
+          "operation": "modify",
+          "description": "Use AuthContext (login, isAuthenticated, principal) to trigger Internet Identity authentication flow. After successful II login, call getProProfile(principal) from api.ts to check if ProProfile exists. If profile exists, navigate to 'nexusOS'. If no profile exists, navigate to 'builder' for onboarding. Display loading state during authentication and profile lookup. Handle auth errors with error message styled using --void, --t1, and --alert colors."
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Connect Pro dashboard screens to canister for profile updates, service management, booking requests, and wallet data",
+      "acceptanceCriteria": [
+        "BusinessScreen save triggers updatePro() canister call",
+        "Service add/remove triggers addService()/removeService() canister calls",
+        "RadarPro fetches live booking requests from getRadarDemandes()",
+        "WalletPro balance reflects getWalletSolde() result",
+        "DashboardScreen stats populated from canister data",
+        "No mock data imports remain in these components"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/BusinessScreen.tsx",
+          "operation": "modify",
+          "description": "Remove mock data imports. Use useUpdatePro mutation hook from useQueries.ts. On save button click, call updatePro() with current form data. Use useAddService and useRemoveService hooks for service management. Display loading state during mutations. Show success/error feedback after operations complete. Invalidate relevant queries on success."
+        },
+        {
+          "path": "frontend/src/components/RadarPro.tsx",
+          "operation": "modify",
+          "description": "Remove mock data imports. Use useRadarDemandes query hook from useQueries.ts to fetch live booking requests. Use useAcceptBooking and useDeclineBooking mutation hooks for accept/decline actions. Filter requests by pending/confirmed/history tabs using booking status from canister. Invalidate booking queries after accept/decline mutations succeed."
+        },
+        {
+          "path": "frontend/src/components/WalletPro.tsx",
+          "operation": "modify",
+          "description": "Remove hardcoded wallet balance. Use useWalletSolde query hook from useQueries.ts to fetch real balance from canister. Fetch transaction history from canister using appropriate query. Display loading state while fetching data. Show empty state if no transactions exist."
+        },
+        {
+          "path": "frontend/src/components/DashboardScreen.tsx",
+          "operation": "modify",
+          "description": "Remove mock data for stats. Use useMyBookings and useWalletSolde hooks from useQueries.ts to populate dashboard stats (reservation count, revenue from bookings, profile views from canister metrics if available, acceptance rate calculated from booking status). Display loading state while fetching. Update stats grid to use real data."
+        }
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "summary": "Connect Client-facing screens to canister for browsing pros, creating bookings, and managing reservations",
+      "acceptanceCriteria": [
+        "Explorer renders pros returned by getActivePros() canister query",
+        "Flash section shows getFlashPros() results",
+        "BookingFlow final step creates booking on-chain and returns a booking ID",
+        "ClientDashboard shows only the authenticated user's real bookings",
+        "Cancel action calls cancelBooking() and refreshes the booking list"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/Explorer.tsx",
+          "operation": "modify",
+          "description": "Remove demoData imports. Use useActivePros and useFlashPros query hooks from useQueries.ts to fetch pros from canister. Display loading state while fetching. Apply search and category filters client-side on fetched data. Render pros in flash and regular sections based on query results. Handle empty states gracefully."
+        },
+        {
+          "path": "frontend/src/components/BookingFlow.tsx",
+          "operation": "modify",
+          "description": "Remove mock booking creation. Use useCreateBooking mutation hook from useQueries.ts. On final confirmation step, call createBooking() with selected service, date, time, and client details. Handle mutation loading state. On success, store returned booking ID and navigate to live status screen. On error, display error message without blocking UI."
+        },
+        {
+          "path": "frontend/src/components/ClientDashboard.tsx",
+          "operation": "modify",
+          "description": "Remove mock bookings. Use useMyBookings query hook from useQueries.ts to fetch authenticated user's bookings. Use useCancelBooking mutation hook for cancel action. Filter bookings by status (pending/confirmed) for display tabs. Invalidate booking queries after cancel succeeds. Show empty state when no bookings exist with navigation prompt to explorer."
+        }
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "summary": "Create Admin Panel screen with pro validation, transaction ledger, and revenue metrics",
+      "acceptanceCriteria": [
+        "Admin panel accessible via navigateTo('admin') from AppContext",
+        "Pros table shows all pros with validation badge and a 'Validate' button",
+        "Validate button calls adminValidatePro() and refreshes the list",
+        "Transactions table renders full transaction ledger from adminGetAllTransactions()",
+        "Metrics section shows totals from adminGetMetrics()",
+        "All text uses --t1 color on --void background with --gold accents",
+        "No emoji anywhere in the component",
+        "Max-width 430px constraint respected"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/AdminPanel.tsx",
+          "operation": "create",
+          "description": "Create admin panel screen using exact design tokens (--void: #050507, --gold: #F2D06B, --flash: #00D97A, --alert: #FF3D5A, --t1: #F4F4F8, font Inter). Use useAdminAllPros, useAdminTransactions, useAdminMetrics, and useAdminValidatePro hooks from useQueries.ts. Render four sections: (1) Header with NEXUS admin branding in gold, (2) Pros list table showing all pros with validation status badge (green check if validated, red X if not) and 'Validate' button that calls adminValidatePro(), (3) Transactions table with columns for date, type, amount, status, (4) Metrics dashboard showing total platform fees, active pros count, total bookings, registered users count as cards. All sections use dark premium styling with gold accents. No emoji. Max-width 430px. Handle loading and error states."
+        },
+        {
+          "path": "frontend/src/components/ScreenRouter.tsx",
+          "operation": "modify",
+          "description": "Add 'admin' route that lazy-loads AdminPanel component. Import AdminPanel using React.lazy and add to screen map alongside existing routes. Maintain existing lazy loading pattern with Suspense fallback."
+        }
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "summary": "Implement in-app notification system with polling, badge counter, and slide-in panel",
+      "acceptanceCriteria": [
+        "Bell icon visible in GlobalHeader with red badge showing unread count",
+        "Badge disappears when unread count is 0",
+        "Clicking bell opens slide-in panel from right side",
+        "Panel lists notifications with human-readable type labels and formatted timestamps",
+        "All 5 notification types render with distinct labels",
+        "Mark all read button clears badge and updates all items",
+        "Individual dismiss removes item from list",
+        "Notifications poll from canister every 15 seconds"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/notifications.ts",
+          "operation": "create",
+          "description": "Create notification management utilities. Export polling function that calls getMyNotifications() from api.ts every 15 seconds using setInterval or React Query refetchInterval. Store unread count in local state. Export addLocalNotification() for optimistic updates. Map all 5 notification types (nouvelle_demande, paiement_confirme, fonds_liberes, avis_recu, booking_confirme) to human-readable French labels. Export markNotificationRead() and markAllNotificationsRead() wrappers that call canister methods and update local cache."
+        },
+        {
+          "path": "frontend/src/components/GlobalHeader.tsx",
+          "operation": "modify",
+          "description": "Import notification utilities from lib/notifications.ts. Display bell icon with red badge showing unread count from notification store. Hide badge when count is 0. On bell click, open NotificationCenter slide-in panel. Use existing --alert color for badge background."
+        },
+        {
+          "path": "frontend/src/components/NotificationCenter.tsx",
+          "operation": "modify",
+          "description": "Update to render slide-in panel from right side (transform: translateX(100%) to translateX(0)). Fetch notifications from lib/notifications.ts. Display full notification list with human-readable type labels (nouvelle_demande: 'Nouvelle demande', paiement_confirme: 'Paiement confirmé', fonds_liberes: 'Fonds libérés', avis_recu: 'Avis reçu', booking_confirme: 'Réservation confirmée'), formatted timestamps using Intl.DateTimeFormat. Add 'Mark all read' button that calls markAllNotificationsRead(). Add per-item dismiss button. Style with --void background, --t1 text, --gold accents. Max-width 430px."
+        }
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "summary": "Add React Query hooks for all canister endpoints with proper cache management and mutations",
+      "acceptanceCriteria": [
+        "All query hooks use correct cache keys and refetch intervals where appropriate",
+        "All mutation hooks invalidate relevant query cache on success",
+        "Hooks handle loading and error states",
+        "No direct mock data references in useQueries.ts"
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/hooks/useQueries.ts",
+          "operation": "modify",
+          "description": "Add React Query hooks for new endpoints: useActivePros() using useQuery with 'activePros' cache key, useFlashPros() with 'flashPros' key, useMyBookings() with 'myBookings' key and authenticated actor, useRadarDemandes() with 'radarDemandes' key for pro bookings, useWalletSolde() with 'walletBalance' key and refetchInterval: 30000, useMyNotifications() with 'myNotifications' key and refetchInterval: 15000, useAdminAllPros() with 'adminPros' key, useAdminTransactions() with 'adminTransactions' key, useAdminMetrics() with 'adminMetrics' key. Add mutation hooks: useCreateBooking() that invalidates 'myBookings' on success, useAcceptBooking() and useDeclineBooking() that invalidate 'radarDemandes' and 'myBookings', useCancelBooking() that invalidates 'myBookings', useUpdatePro() that invalidates 'currentProProfile', useAddService() that invalidates 'myServices', useActivateSubscription() that invalidates 'currentProProfile', useAdminValidatePro() that invalidates 'adminPros'. All hooks use actor from useActor hook. Handle loading and error states properly. Remove any remaining mock data references."
         }
       ]
     }

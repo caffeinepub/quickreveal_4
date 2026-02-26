@@ -1,58 +1,207 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T20:31:18.935Z",
+  "generatedAt": "2026-02-26T00:45:28.732Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 3,
-    "implemented": 3,
+    "total": 16,
+    "implemented": 8,
     "items": [
       {
         "id": "REQ-1",
-        "summary": "Create a new file `frontend/src/components/ProApp.tsx` as a fully self-contained React component (no React Router, no external navigation libs). It must include all pro-space screens and sub-components inline or imported locally: Dashboard, Radar, Wallet, Business, Subscription Modal, and Subscription Success animation. Navigation between these screens must be driven exclusively by `useState`. The component must export `ProApp` as a default export.",
+        "summary": "Create backend/main.mo as a complete single Motoko actor implementing all NEXUS data types and state: UserProfile, ProProfile (with subscription status, wallet balance, validation status), Service, Booking (with escrow state), Notification, Transaction. Include stable storage maps for all entities. Implement a heartbeat that automatically releases escrow funds 48 hours after booking confirmation by transitioning booking state from #escrow to #released and crediting the pro wallet.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-10",
+        "summary": "Update frontend/src/components/Login.tsx to replace the 'Continuer en mode demo' button with real Internet Identity authentication. On button press, trigger the II login flow from AuthContext. On successful authentication, check if the user has a ProProfile or UserProfile on-chain and route them to the appropriate dashboard. The demo mode button must be removed entirely.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/ProApp.tsx"
+          "frontend/src/components/Login.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/ProApp.tsx"
+          "frontend/src/components/Login.tsx"
+        ]
+      },
+      {
+        "id": "REQ-11",
+        "summary": "Update frontend/src/components/ProLogin.tsx to use the real Internet Identity authentication flow from AuthContext (login/logout, isAuthenticated, principal). After successful II authentication, call the canister to check if a ProProfile exists for the principal and navigate to 'nexusOS'. If no profile exists, navigate to onboarding/builder flow.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/ProLogin.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/ProLogin.tsx"
+        ]
+      },
+      {
+        "id": "REQ-12",
+        "summary": "Connect the Pro dashboard screens to the canister. Update BusinessScreen.tsx to call updatePro() on save and addService()/removeService() for service management. Update RadarPro.tsx to fetch from getRadarDemandes() and call acceptBooking()/declineBooking(). Update WalletPro.tsx to fetch balance from getWalletSolde() and real transaction history from the canister. Update DashboardScreen.tsx stats to use canister query data. Replace all hardcoded/mock data in these components with live canister queries via api.ts.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/BusinessScreen.tsx",
+          "frontend/src/components/RadarPro.tsx",
+          "frontend/src/components/WalletPro.tsx",
+          "frontend/src/components/DashboardScreen.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/RadarPro.tsx",
+          "frontend/src/components/WalletPro.tsx",
+          "frontend/src/components/DashboardScreen.tsx"
+        ]
+      },
+      {
+        "id": "REQ-13",
+        "summary": "Connect the Client-facing screens to the canister. Update Explorer.tsx to fetch pros from getActivePros() and getFlashPros(). Update BookingFlow.tsx to call createBooking() on final confirmation step. Update ClientDashboard.tsx to fetch bookings from getMyBookings() and call cancelBooking() on cancel action. Replace all demoData/mockData usage in these components.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/components/BookingFlow.tsx",
+          "frontend/src/components/ClientDashboard.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/Explorer.tsx",
+          "frontend/src/components/BookingFlow.tsx"
+        ]
+      },
+      {
+        "id": "REQ-14",
+        "summary": "Create a new Admin Panel screen at route key 'admin' (navigated to via useState-based navigation, no React Router). The panel must use the exact same dark premium palette (--void: #050507, --gold: #F2D06B, --flash: #00D97A, --alert: #FF3D5A, --t1: #F4F4F8, font: Inter). Implement four sections: (1) Pros list with validation status and adminValidatePro() action button, (2) Full transactions table, (3) Revenue metrics dashboard (total fees, active pros, total bookings, registered users), (4) Header with NEXUS admin branding. Register this screen in ScreenRouter.tsx.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/AdminPanel.tsx",
+          "frontend/src/components/ScreenRouter.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/AdminPanel.tsx",
+          "frontend/src/components/ScreenRouter.tsx"
+        ]
+      },
+      {
+        "id": "REQ-15",
+        "summary": "Create frontend/src/lib/notifications.ts exporting notification management utilities: polling getMyNotifications() every 15 seconds, storing unread count, and exposing addLocalNotification() for optimistic updates. Update GlobalHeader.tsx to display the bell icon with a red badge showing the unread count from this store. Update NotificationCenter.tsx to render the slide-in panel from the right with the full notification list, timestamps, notification type labels, and per-item dismiss and mark-read actions. Wire all 5 notification types (nouvelle_demande, paiement_confirme, fonds_liberes, avis_recu, booking_confirme) to their display labels.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/lib/notifications.ts",
+          "frontend/src/components/GlobalHeader.tsx",
+          "frontend/src/components/NotificationCenter.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/GlobalHeader.tsx",
+          "frontend/src/components/NotificationCenter.tsx"
+        ]
+      },
+      {
+        "id": "REQ-16",
+        "summary": "Update frontend/src/hooks/useQueries.ts to add React Query hooks for all new canister endpoints: useActivePros(), useFlashPros(), useMyBookings(), useRadarDemandes(), useWalletSolde(), useMyNotifications(), useAdminAllPros(), useAdminTransactions(), useAdminMetrics(). Add mutation hooks: useCreateBooking(), useAcceptBooking(), useDeclineBooking(), useCancelBooking(), useUpdatePro(), useAddService(), useActivateSubscription(), useAdminValidatePro(). All hooks must use the actor from actor.ts.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/hooks/useQueries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/hooks/useQueries.ts"
         ]
       },
       {
         "id": "REQ-2",
-        "summary": "In `frontend/src/components/ProApp.tsx`, define a color constants object `C` that includes the value `t4: '#2E2E3E'`. Use `C.t4` for the `IconCamera` fill color and for all other very subtle/discrete UI elements (placeholder text, dividers, inactive icon strokes, secondary backgrounds, etc.).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/ProApp.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/ProApp.tsx"
-        ]
+        "summary": "In backend/main.mo, implement all Pro-facing canister update and query functions: updatePro(profile), addService(service), removeService(id), getMyServices(), activateSubscription(), getRadarDemandes() returning pending booking requests for the caller's pro profile, getWalletSolde() returning current wallet balance, acceptBooking(bookingId), declineBooking(bookingId), uploadGalleryPhoto(data), getMyGallery().",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
       },
       {
         "id": "REQ-3",
-        "summary": "In `frontend/src/components/RoleSelection.tsx` (or `RoleSelectionV2.tsx`, whichever is currently active in ScreenRouter), replace the navigation target for the 'Professionnel' role selection with a render of `<ProApp />`. The old broken pro space component must no longer be rendered when the user selects 'Professionnel'. Import ProApp from `./ProApp` and render it in place of the previous pro route/component.",
+        "summary": "In backend/main.mo, implement all Client-facing canister functions: getActivePros() returning all validated and active pro profiles, getFlashPros() returning pros with flash availability enabled, createBooking(proId, serviceId, date, location, clientDetails) creating a booking in #pending state with escrow initialized, getMyBookings() returning caller's bookings, cancelBooking(bookingId). Include a stub function createPayrexxGateway(bookingId) that is commented out with a /* PAYREXX_STUB */ block ready for HTTP outcall activation.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-4",
+        "summary": "In backend/main.mo, implement Admin-only canister functions: adminGetAllPros() returning all pro profiles regardless of validation status, adminValidatePro(proId) setting isValidated=true on the target pro, adminGetAllTransactions() returning the full transaction ledger, adminGetMetrics() returning aggregate revenue metrics (total platform fees, total bookings, total active pros, total registered users). Guard all admin functions with a caller principal check against a hardcoded admin principal list.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-5",
+        "summary": "In backend/main.mo, implement the in-app notification system: addNotification(userId, type, message) storing notifications per principal, getMyNotifications() returning the caller's notification list with timestamps, markNotificationRead(notifId), markAllNotificationsRead(). Notification types must be: #nouvelle_demande, #paiement_confirme, #fonds_liberes, #avis_recu, #booking_confirme. Automatically call addNotification at the appropriate points (booking creation, escrow release, etc.).",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-6",
+        "summary": "In backend/main.mo, add commented-out Twilio SMS stub blocks at every point where an SMS would logically be sent (booking confirmed, funds released, new request received). Each stub must follow this exact format: /* TWILIO_STUB — sendSMS(to: Text, body: Text) — Uncomment in production — Replace TWILIO_ACCOUNT_SID and TWILIO_AUTH_TOKEN with real credentials — Estimated activation time: 5 minutes */. The surrounding functional code must work without the stub.",
+        "status": "unknown",
+        "plannedFiles": [],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-7",
+        "summary": "Create frontend/src/lib/actor.ts that initializes the ICP backend actor using @dfinity/agent and the generated canister IDL. Export a getActor(identity?) function that returns an authenticated actor when an identity is provided and an anonymous actor otherwise. Cache the actor instance. This file replaces all direct canister calls currently scattered in mock imports.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/lib/actor.ts"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-8",
+        "summary": "Create frontend/src/lib/api.ts exporting typed async wrapper functions for every canister method: getPros(), getFlashPros(), createBooking(), getMyBookings(), cancelBooking(), updatePro(), addService(), getMyServices(), activateSubscription(), getRadarDemandes(), getWalletSolde(), acceptBooking(), declineBooking(), uploadGalleryPhoto(), getMyGallery(), adminGetAllPros(), adminValidatePro(), adminGetAllTransactions(), adminGetMetrics(), createPayrexxGateway(). Each function must handle errors gracefully and return typed results matching the Motoko type definitions.",
+        "status": "missing",
+        "plannedFiles": [
+          "frontend/src/lib/api.ts"
+        ],
+        "matchedFiles": []
+      },
+      {
+        "id": "REQ-9",
+        "summary": "Update frontend/src/context/AppContext.tsx to replace all mock data imports from mockData.ts and demoData.ts with calls to api.ts functions. Replace local useState-based booking/pro/wallet state with React Query queries (from useQueries.ts). Replace fake setTimeout timers with real canister polling. The escrow countdown must reflect the actual booking timestamp stored on-chain.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/RoleSelectionV2.tsx"
+          "frontend/src/context/AppContext.tsx"
         ],
         "matchedFiles": [
-          "frontend/src/components/RoleSelectionV2.tsx"
+          "frontend/src/context/AppContext.tsx"
         ]
       }
     ]
   },
   "changedFiles": [
+    "backend/main.mo",
     "build-request.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
-    "frontend/src/components/ProApp.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/AdminPanel.tsx",
+    "frontend/src/components/BookingFlow.tsx",
+    "frontend/src/components/DashboardScreen.tsx",
+    "frontend/src/components/Explorer.tsx",
+    "frontend/src/components/ExplorerV2.tsx",
+    "frontend/src/components/GlobalHeader.tsx",
+    "frontend/src/components/Login.tsx",
+    "frontend/src/components/NotificationCenter.tsx",
+    "frontend/src/components/OTPVerificationV2.tsx",
+    "frontend/src/components/ProLogin.tsx",
+    "frontend/src/components/ProProfile.tsx",
+    "frontend/src/components/ProSubscriptionModal.tsx",
+    "frontend/src/components/RadarPro.tsx",
     "frontend/src/components/RoleSelectionV2.tsx",
     "frontend/src/components/ScreenRouter.tsx",
+    "frontend/src/components/SubscriptionScreen.tsx",
+    "frontend/src/components/WalletPro.tsx",
+    "frontend/src/context/AppContext.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/hooks/useQueries.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

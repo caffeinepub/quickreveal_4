@@ -3,12 +3,17 @@ import { useAppContext } from '../context/AppContext';
 import { IconArrowLeft, IconSpinner } from './icons/Icons';
 
 export default function OTPVerificationV2() {
-  const { setCurrentScreen, showSMSToast } = useAppContext();
+  const { navigateTo } = useAppContext();
   const [digits, setDigits] = useState(['', '', '', '']);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const inputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)];
+  const inputRefs = [
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+    useRef<HTMLInputElement>(null),
+  ];
 
   useEffect(() => {
     inputRefs[0].current?.focus();
@@ -52,8 +57,7 @@ export default function OTPVerificationV2() {
       setLoading(true);
       setSuccess(true);
       setTimeout(() => {
-        showSMSToast('Verification reussie', '+41 79 000 00 00');
-        setCurrentScreen('explorerV2');
+        navigateTo('explorerV2');
       }, 800);
     } else {
       setError(true);
@@ -73,22 +77,65 @@ export default function OTPVerificationV2() {
       }}
     >
       <button
-        onClick={() => setCurrentScreen('roleSelection')}
-        style={{ background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', color: 'var(--t3)', fontFamily: 'Inter, sans-serif', fontSize: '14px', marginBottom: '40px', padding: 0 }}
+        onClick={() => navigateTo('roleSelection')}
+        style={{
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          color: 'var(--t3)',
+          fontFamily: 'Inter, sans-serif',
+          fontSize: '14px',
+          marginBottom: '40px',
+          padding: 0,
+        }}
       >
         <IconArrowLeft size={18} color="var(--t3)" />
         Retour
       </button>
 
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-        <div style={{ width: '64px', height: '64px', borderRadius: '18px', background: 'rgba(242,208,107,0.1)', border: '1px solid rgba(242,208,107,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: '24px' }}>
+        <div
+          style={{
+            width: '64px',
+            height: '64px',
+            borderRadius: '18px',
+            background: 'rgba(242,208,107,0.1)',
+            border: '1px solid rgba(242,208,107,0.2)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            marginBottom: '24px',
+          }}
+        >
           <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '24px', color: 'var(--gold)' }}>SMS</span>
         </div>
 
-        <h1 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '26px', color: 'var(--t1)', textAlign: 'center', marginBottom: '8px', letterSpacing: '-0.03em' }}>
+        <h1
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 800,
+            fontSize: '26px',
+            color: 'var(--t1)',
+            textAlign: 'center',
+            marginBottom: '8px',
+            letterSpacing: '-0.03em',
+          }}
+        >
           Verification
         </h1>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', color: 'var(--t3)', textAlign: 'center', marginBottom: '40px' }}>
+        <p
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 400,
+            fontSize: '14px',
+            color: 'var(--t3)',
+            textAlign: 'center',
+            marginBottom: '40px',
+          }}
+        >
           Code envoye au +41 79 *** ** 00
         </p>
 
@@ -124,7 +171,15 @@ export default function OTPVerificationV2() {
         </div>
 
         {error && (
-          <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 500, fontSize: '13px', color: 'var(--alert)', marginBottom: '16px', animation: 'fadeIn 200ms ease-out' }}>
+          <p
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 500,
+              fontSize: '13px',
+              color: 'var(--alert)',
+              marginBottom: '16px',
+            }}
+          >
             Code incorrect. Essayez 1234 pour la demo.
           </p>
         )}
@@ -139,14 +194,32 @@ export default function OTPVerificationV2() {
         <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '13px', color: 'var(--t4)', marginTop: '32px' }}>
           Pas recu ?{' '}
           <button
-            onClick={() => showSMSToast('Code renvoye', '+41 79 000 00 00')}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--gold)', fontFamily: 'Inter, sans-serif', fontWeight: 600, fontSize: '13px', padding: 0 }}
+            onClick={() => {}}
+            style={{
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              color: 'var(--gold)',
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 600,
+              fontSize: '13px',
+              padding: 0,
+            }}
           >
             Renvoyer
           </button>
         </p>
 
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '11px', color: 'var(--t4)', marginTop: '16px', textAlign: 'center' }}>
+        <p
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 400,
+            fontSize: '11px',
+            color: 'var(--t4)',
+            marginTop: '16px',
+            textAlign: 'center',
+          }}
+        >
           Code demo : 1234
         </p>
       </div>

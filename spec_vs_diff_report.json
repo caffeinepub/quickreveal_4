@@ -1,33 +1,179 @@
 {
   "kind": "spec_vs_diff_report",
   "version": "1.0",
-  "generatedAt": "2026-02-25T20:31:18.931Z",
-  "summary": "The diff implements all three requirements: ProApp.tsx is created as a self-contained component with useState navigation, the C object with t4:'#2E2E3E' is defined, and RoleSelectionV2.tsx is updated to render <ProApp /> when 'Professionnel' is selected. However, the truncated ProApp.tsx makes it impossible to fully verify all AC items (e.g., IconCamera using C.t4, all discrete elements referencing C.t4, Subscription Success animation completeness). The ScreenRouter.tsx modification adds a ProApp import and uses it for several case routes — this was not requested and touches an existing file, though it does not break functionality.",
+  "generatedAt": "2026-02-26T00:45:28.728Z",
+  "summary": "The diff implements a significant portion of the NEXUS backend and frontend requirements, including backend/main.mo, several frontend components, and hooks. However, there are notable gaps: the backend appears to use a different architecture than specified (using Stripe instead of Payrexx stubs, missing several NEXUS-specific types like escrow state, missing heartbeat for 48h escrow release, missing proper Twilio stub format), several frontend files are missing or incomplete (frontend/src/lib/actor.ts, frontend/src/lib/api.ts, frontend/src/lib/notifications.ts), and several components still use mock/demo data. The AdminPanel uses useAdminAllBookings instead of useAdminAllTransactions. NotificationCenter.tsx does not implement a slide-in panel from the right.",
   "missing_requirements": [
     {
-      "id": "REQ-2",
-      "requirement": "IconCamera SVG uses C.t4 as its fill/stroke color; all visually discrete elements (inactive icons, dividers, placeholder text) reference C.t4",
-      "reason": "The ProApp.tsx file is truncated before the IconCamera SVG definition and the full icon/UI rendering code is cut off, so it cannot be confirmed that C.t4 is used for IconCamera fill/stroke and all discrete UI elements. The C object definition is present with t4:'#2E2E3E', but the actual usage cannot be verified from the truncated diff.",
+      "id": "REQ-1",
+      "requirement": "Heartbeat that automatically releases escrow funds 48 hours after booking confirmation; escrow state (#escrow/#released) on Booking type; Transaction type; all required entity types",
+      "reason": "The backend/main.mo diff shows BookingStatus as #pending/#confirmed/#cancelled with no #escrow or #released variants, no heartbeat function visible, no Transaction type, and no escrow wallet credit logic.",
       "evidence": [
-        "frontend/src/components/ProApp.tsx"
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-2",
+      "requirement": "Pro-facing functions: updatePro(), addService(), removeService(), getMyServices(), activateSubscription(), getRadarDemandes(), getWalletSolde(), acceptBooking(), declineBooking(), uploadGalleryPhoto(), getMyGallery()",
+      "reason": "The backend/main.mo diff shows only getCallerUserProfile, saveCallerUserProfile, getUserProfile, getProProfile, createOrUpdateProProfile and Stripe-related functions. None of the required Pro-facing NEXUS functions are visible.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-3",
+      "requirement": "Client-facing functions: getActivePros(), getFlashPros(), createBooking(), getMyBookings(), cancelBooking(), and PAYREXX_STUB commented block",
+      "reason": "The backend/main.mo diff does not show these functions. Frontend calls them but the backend implementation is not visible.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-4",
+      "requirement": "Admin-only canister functions: adminGetAllPros(), adminValidatePro(), adminGetAllTransactions(), adminGetMetrics() guarded by admin principal whitelist",
+      "reason": "The backend/main.mo diff does not show these NEXUS-specific admin functions. Only generic AccessControl.isAdmin is referenced.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-5",
+      "requirement": "In-app notification system in backend with addNotification(), getMyNotifications(), markNotificationRead(), markAllNotificationsRead(), and 5 specific notification type variants",
+      "reason": "The backend/main.mo diff shows no Notification type or notification functions. The frontend uses AppNotification from useQueries.ts but the backend notification system is absent.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-6",
+      "requirement": "Twilio SMS stub blocks in exact format at booking confirmation, escrow release, and new request events",
+      "reason": "No TWILIO_STUB comment blocks are visible in the backend/main.mo diff.",
+      "evidence": [
+        "backend/main.mo"
+      ]
+    },
+    {
+      "id": "REQ-7",
+      "requirement": "Create frontend/src/lib/actor.ts with getActor(identity?) function, caching, and anonymous/authenticated actor support",
+      "reason": "No frontend/src/lib/actor.ts file appears in the diff. Hooks use useActor from hooks/useActor.ts instead.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-8",
+      "requirement": "Create frontend/src/lib/api.ts with typed async wrappers for all canister methods",
+      "reason": "No frontend/src/lib/api.ts file appears in the diff at all.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-9",
+      "requirement": "Update AppContext.tsx to remove all mock/demoData imports, use React Query for booking/pro/wallet state, replace fake setTimeout timers, derive escrow countdown from on-chain timestamp",
+      "reason": "AppContext.tsx still contains DemoPro, DemoService types and local useState for bookings, walletBalance, etc. The escrow countdown is not derived from canister data.",
+      "evidence": [
+        "frontend/src/context/AppContext.tsx"
+      ]
+    },
+    {
+      "id": "REQ-10",
+      "requirement": "Remove demo button; trigger II login on main CTA; route based on ProProfile vs UserProfile check; show loading state",
+      "reason": "Login.tsx checks only getCallerUserProfile() and routes to nexusOS if any profile exists, rather than distinguishing ProProfile vs UserProfile to determine pro vs client dashboard routing.",
+      "evidence": [
+        "frontend/src/components/Login.tsx"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "requirement": "Update BusinessScreen.tsx to call updatePro() on save and addService()/removeService() for service management",
+      "reason": "No BusinessScreen.tsx appears in the diff. This file is not modified.",
+      "evidence": []
+    },
+    {
+      "id": "REQ-13",
+      "requirement": "Update BookingFlow.tsx to call createBooking() on final confirmation; update ClientDashboard.tsx to fetch from getMyBookings() and call cancelBooking()",
+      "reason": "BookingFlow.tsx still uses local state and setCurrentBooking with Date.now().toString() as id - no createBooking() canister call is made. ClientDashboard.tsx is not in the diff.",
+      "evidence": [
+        "frontend/src/components/BookingFlow.tsx"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "requirement": "Admin panel with full transactions table using adminGetAllTransactions()",
+      "reason": "AdminPanel.tsx uses useAdminAllBookings() for a bookings tab instead of useAdminAllTransactions() for a transactions table as required.",
+      "evidence": [
+        "frontend/src/components/AdminPanel.tsx"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "requirement": "Create frontend/src/lib/notifications.ts with 15-second polling, unread count store, addLocalNotification(). Update NotificationCenter.tsx with slide-in panel from right, per-item dismiss, type labels, formatted timestamps.",
+      "reason": "No frontend/src/lib/notifications.ts is created. NotificationCenter.tsx uses old notifications array from AppContext and does not implement per-item dismiss or a slide-in animation from the right.",
+      "evidence": [
+        "frontend/src/components/NotificationCenter.tsx",
+        "frontend/src/components/GlobalHeader.tsx"
+      ]
+    },
+    {
+      "id": "REQ-16",
+      "requirement": "Add all required query and mutation hooks to useQueries.ts including useActivePros, useFlashPros, useMyBookings, useAdminTransactions, useAdminMetrics, useCreateBooking, useAcceptBooking, useDeclineBooking, useCancelBooking, useActivateSubscription, useAdminValidatePro",
+      "reason": "The truncated useQueries.ts diff shows existing hooks being refactored but several required hooks cannot be confirmed. useAdminAllBookings is used in AdminPanel instead of the required useAdminTransactions.",
+      "evidence": [
+        "frontend/src/hooks/useQueries.ts",
+        "frontend/src/components/AdminPanel.tsx"
       ]
     }
   ],
   "hallucinated_features": [
     {
-      "description": "ScreenRouter.tsx was modified to import and use ProApp directly for multiple screen cases (proOnboarding, proSuccess, radarPro, walletPro)",
-      "reason": "The build request explicitly states 'Do not modify or rebuild the existing client navigation flow in App.tsx or ScreenRouter.tsx' as a hard constraint. ScreenRouter.tsx was modified to add a ProApp import and use it in several switch cases, which was not requested and violates the constraint.",
+      "description": "Stripe payment integration (StripeConfiguration, setStripeConfiguration, isStripeConfigured) added to backend",
+      "reason": "The build request specifies Payrexx as a commented stub only and Twilio as a commented stub. Stripe is not mentioned anywhere in the requirements. The backend imports and implements a full Stripe module.",
       "evidence": [
-        "frontend/src/components/ScreenRouter.tsx"
+        "backend/main.mo"
+      ]
+    },
+    {
+      "description": "ExplorerV2.tsx continues to import DEMO_PROS from demoData",
+      "reason": "REQ-13 requires replacing all demoData usage. ExplorerV2.tsx still imports DEMO_PROS from demoData, which is a hallucinated retention of mock data that should have been removed.",
+      "evidence": [
+        "frontend/src/components/ExplorerV2.tsx"
+      ]
+    },
+    {
+      "description": "useAdminAllBookings hook introduced in AdminPanel instead of useAdminAllTransactions",
+      "reason": "The requirement specifies a transactions table using adminGetAllTransactions(). A bookings-based admin hook was implemented instead, which was not requested.",
+      "evidence": [
+        "frontend/src/components/AdminPanel.tsx"
+      ]
+    },
+    {
+      "description": "ProSubscriptionModal.tsx uses setTimeout mock instead of real activateSubscription() canister call",
+      "reason": "REQ-2 requires activateSubscription() to set subscription status on the canister. ProSubscriptionModal uses a fake setTimeout and local state only, not the canister.",
+      "evidence": [
+        "frontend/src/components/ProSubscriptionModal.tsx"
       ]
     }
   ],
-  "confidence": 0.72,
+  "confidence": 0.62,
   "changed_files": [
+    "backend/main.mo",
     "frontend-file-summaries.txt",
-    "frontend/src/components/ProApp.tsx",
+    "frontend/src/components/AdminPanel.tsx",
+    "frontend/src/components/BookingFlow.tsx",
+    "frontend/src/components/DashboardScreen.tsx",
+    "frontend/src/components/Explorer.tsx",
+    "frontend/src/components/ExplorerV2.tsx",
+    "frontend/src/components/GlobalHeader.tsx",
+    "frontend/src/components/Login.tsx",
+    "frontend/src/components/NotificationCenter.tsx",
+    "frontend/src/components/OTPVerificationV2.tsx",
+    "frontend/src/components/ProLogin.tsx",
+    "frontend/src/components/ProProfile.tsx",
+    "frontend/src/components/ProSubscriptionModal.tsx",
+    "frontend/src/components/RadarPro.tsx",
     "frontend/src/components/RoleSelectionV2.tsx",
     "frontend/src/components/ScreenRouter.tsx",
+    "frontend/src/components/SubscriptionScreen.tsx",
+    "frontend/src/components/WalletPro.tsx",
+    "frontend/src/context/AppContext.tsx",
+    "frontend/src/hooks/useQueries.ts",
     "project_state.json"
   ]
 }

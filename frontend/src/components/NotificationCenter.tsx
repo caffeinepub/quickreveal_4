@@ -1,58 +1,81 @@
 import React from 'react';
-import { useAppContext, Notification } from '../context/AppContext';
-
-function getBody(notif: Notification): string {
-  return notif.message || notif.body || '';
-}
+import { useAppContext } from '../context/AppContext';
 
 export default function NotificationCenter() {
-  const { notifications, markAllRead, removeNotification, goBack } = useAppContext();
+  const {
+    notifications,
+    markAllRead,
+    setNotificationCenterOpen,
+  } = useAppContext();
+
+  const getBody = (notif: { message?: string; body?: string }) =>
+    notif.message ?? notif.body ?? '';
+
+  const unread = notifications.filter((n) => !n.read).length;
 
   return (
-    <div style={{ background: 'var(--void)', minHeight: '100vh', paddingBottom: '40px' }}>
-      {/* Header */}
-      <div style={{
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'var(--void)',
+        zIndex: 300,
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        padding: '20px 20px 16px',
-        borderBottom: '1px solid var(--edge1)',
-      }}>
-        <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '20px', color: 'var(--t1)' }}>
-          Notifications
+        flexDirection: 'column',
+        fontFamily: 'Inter, sans-serif',
+        maxWidth: 430,
+        margin: '0 auto',
+      }}
+    >
+      {/* Header */}
+      <div
+        style={{
+          padding: '20px 20px 16px',
+          borderBottom: '1px solid rgba(244,244,248,0.06)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          flexShrink: 0,
+        }}
+      >
+        <div>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: 'var(--t1)' }}>
+            Notifications
+          </h2>
+          {unread > 0 && (
+            <p style={{ margin: '2px 0 0', fontSize: 12, color: 'rgba(244,244,248,0.4)' }}>
+              {unread} non lues
+            </p>
+          )}
         </div>
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          {notifications.some(n => !n.read) && (
+        <div style={{ display: 'flex', gap: 8 }}>
+          {unread > 0 && (
             <button
               onClick={markAllRead}
               style={{
                 background: 'none',
-                border: 'none',
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 500,
-                fontSize: '13px',
+                border: '1px solid rgba(242,208,107,0.3)',
+                borderRadius: 8,
                 color: 'var(--gold)',
+                fontSize: 11,
+                fontWeight: 600,
+                padding: '4px 10px',
                 cursor: 'pointer',
+                fontFamily: 'Inter, sans-serif',
               }}
             >
               Tout lire
             </button>
           )}
           <button
-            onClick={goBack}
+            onClick={() => setNotificationCenterOpen(false)}
             style={{
-              background: 'var(--d3)',
-              border: '1px solid var(--edge1)',
-              borderRadius: '50%',
-              width: '36px',
-              height: '36px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
+              background: 'none',
+              border: 'none',
+              color: 'rgba(244,244,248,0.5)',
+              fontSize: 20,
               cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-              fontSize: '18px',
-              color: 'var(--t1)',
+              padding: 4,
             }}
           >
             x
@@ -61,90 +84,69 @@ export default function NotificationCenter() {
       </div>
 
       {/* List */}
-      <div style={{ padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-        {notifications.length === 0 && (
-          <div style={{
-            textAlign: 'center',
-            padding: '60px 20px',
-            fontFamily: 'Inter, sans-serif',
-            fontWeight: 400,
-            fontSize: '14px',
-            color: 'var(--t3)',
-          }}>
-            Aucune notification
-          </div>
-        )}
-        {notifications.map(notif => (
+      <div style={{ flex: 1, overflowY: 'auto', padding: '8px 0' }}>
+        {notifications.length === 0 ? (
           <div
-            key={notif.id}
             style={{
-              background: notif.read ? 'var(--d2)' : 'var(--d3)',
-              border: `1px solid ${notif.read ? 'var(--edge1)' : 'var(--edge2)'}`,
-              borderRadius: '14px',
-              padding: '14px 16px',
-              display: 'flex',
-              gap: '12px',
-              alignItems: 'flex-start',
-              position: 'relative',
+              padding: '48px 24px',
+              textAlign: 'center',
+              color: 'rgba(244,244,248,0.3)',
+              fontSize: 14,
             }}
           >
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: notif.read ? 500 : 700,
-                fontSize: '14px',
-                color: 'var(--t1)',
-              }}>
-                {notif.title}
-              </div>
-              <div style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 400,
-                fontSize: '13px',
-                color: 'var(--t2)',
-                marginTop: '4px',
-                lineHeight: '1.5',
-              }}>
-                {getBody(notif)}
-              </div>
-              <div style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 400,
-                fontSize: '11px',
-                color: 'var(--t4)',
-                marginTop: '6px',
-              }}>
-                {new Date(notif.createdAt).toLocaleDateString('fr-CH', { day: 'numeric', month: 'short' })}
-              </div>
-            </div>
-            <button
-              onClick={() => removeNotification(notif.id)}
+            Aucune notification
+          </div>
+        ) : (
+          notifications.map((notif, i) => (
+            <div
+              key={i}
               style={{
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--t4)',
-                fontSize: '18px',
-                padding: '0',
-                flexShrink: 0,
-                lineHeight: 1,
+                padding: '14px 20px',
+                borderBottom: '1px solid rgba(244,244,248,0.04)',
+                background: notif.read ? 'transparent' : 'rgba(242,208,107,0.04)',
+                display: 'flex',
+                gap: 12,
+                alignItems: 'flex-start',
               }}
             >
-              x
-            </button>
-            {!notif.read && (
-              <div style={{
-                position: 'absolute',
-                top: '14px',
-                right: '40px',
-                width: '6px',
-                height: '6px',
-                borderRadius: '50%',
-                background: 'var(--gold)',
-              }} />
-            )}
-          </div>
-        ))}
+              <div
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: '50%',
+                  background: notif.read ? 'rgba(244,244,248,0.15)' : 'var(--gold)',
+                  flexShrink: 0,
+                  marginTop: 5,
+                }}
+              />
+              <div style={{ flex: 1 }}>
+                <div
+                  style={{
+                    fontSize: 13,
+                    fontWeight: notif.read ? 400 : 600,
+                    color: 'var(--t1)',
+                    marginBottom: 2,
+                  }}
+                >
+                  {notif.type}
+                </div>
+                <div style={{ fontSize: 12, color: 'rgba(244,244,248,0.5)' }}>
+                  {getBody(notif)}
+                </div>
+                {notif.timestamp && (
+                  <div style={{ fontSize: 11, color: 'rgba(244,244,248,0.3)', marginTop: 2 }}>
+                    {new Intl.DateTimeFormat('fr-CH', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      day: '2-digit',
+                      month: '2-digit',
+                    }).format(new Date(notif.timestamp))}
+                  </div>
+                )}
+              </div>
+            </div>
+          ))
+        )}
       </div>
     </div>
   );

@@ -136,62 +136,32 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    adminGetAllBookings(): Promise<Array<Booking>>;
+    adminGetAllPros(): Promise<Array<ProProfile>>;
+    adminGetMetrics(): Promise<{
+        totalBookings: bigint;
+        totalRegisteredUsers: bigint;
+        totalActivePros: bigint;
+    }>;
+    adminValidatePro(proId: Principal): Promise<void>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     createBookingRequest(proId: Principal, serviceId: string, date: string, timeSlot: string, address: string): Promise<string>;
-    /**
-     * / Creates Stripe checkout session (authenticated users only).
-     */
     createCheckoutSession(items: Array<ShoppingItem>, successUrl: string, cancelUrl: string): Promise<string>;
     createOrUpdateProProfile(profile: ProProfile): Promise<void>;
     filterProsByLocation(centerLat: number, centerLong: number, radius: bigint, category: string | null): Promise<Array<ProProfile>>;
-    /**
-     * / Returns a single booking. Only the client, the assigned professional, or an admin may view it.
-     */
     getBooking(bookingId: string): Promise<Booking | null>;
-    /**
-     * / Returns bookings for a given professional. Caller must be that professional or an admin.
-     */
     getBookingsByProfessional(proId: Principal): Promise<Array<Booking>>;
-    /**
-     * / Returns bookings for a given user. Caller must be the user themselves or an admin.
-     */
     getBookingsByUser(userId: Principal, _status: BookingStatus | null): Promise<Array<Booking>>;
-    /**
-     * / Returns the caller's own user profile.
-     */
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    /**
-     * / Returns a pro profile. Published profiles are publicly visible; draft profiles
-     * / are only visible to the owner or an admin.
-     */
     getProProfile(proId: Principal): Promise<ProProfile>;
-    /**
-     * / Gets Stripe session status. Only authenticated users may query session status
-     * / to prevent unauthenticated callers from probing sessions or triggering outcalls.
-     */
     getStripeSessionStatus(sessionId: string): Promise<StripeSessionStatus>;
-    /**
-     * / Fetches another user's profile. Caller can view their own; admins can view any.
-     */
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
-    /**
-     * / Checks if Stripe is configured.
-     */
     isStripeConfigured(): Promise<boolean>;
     publishProfile(): Promise<void>;
-    /**
-     * / Saves the caller's own user profile.
-     */
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
-    /**
-     * / Sets Stripe configuration (admin only).
-     */
     setStripeConfiguration(config: StripeConfiguration): Promise<void>;
-    /**
-     * / Transform query (used internally by ICP HTTP outcalls infrastructure).
-     */
     transform(input: TransformationInput): Promise<TransformationOutput>;
     updateBookingStatus(bookingId: string, status: BookingStatus): Promise<void>;
     updateGallery(mainPhoto: ExternalBlob | null, galleryPhotos: Array<ExternalBlob>): Promise<void>;

@@ -4,13 +4,13 @@ import { IconUser, IconBusiness, IconArrowRight } from './icons/Icons';
 import ProApp from './ProApp';
 
 export default function RoleSelectionV2() {
-  const { setCurrentScreen, setAppRole } = useAppContext();
+  const { navigateTo, setAppRole } = useAppContext();
   const [pressed, setPressed] = useState<string | null>(null);
   const [showPro, setShowPro] = useState(false);
 
   const handleClient = () => {
     setAppRole('client');
-    setCurrentScreen('clientOtp');
+    navigateTo('otpVerificationV2');
   };
 
   const handlePro = () => {
@@ -18,7 +18,6 @@ export default function RoleSelectionV2() {
     setShowPro(true);
   };
 
-  // Render ProApp directly when pro is selected
   if (showPro) {
     return <ProApp />;
   }
@@ -37,15 +36,42 @@ export default function RoleSelectionV2() {
     >
       {/* Logo */}
       <div style={{ marginBottom: '8px', textAlign: 'center' }}>
-        <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 900, fontSize: '28px', color: 'var(--t1)', letterSpacing: '-0.04em' }}>
+        <span
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 900,
+            fontSize: '28px',
+            color: 'var(--t1)',
+            letterSpacing: '-0.04em',
+          }}
+        >
           NEXUS<span style={{ color: 'var(--gold)' }}>.</span>
         </span>
       </div>
 
-      <h1 style={{ fontFamily: 'Inter, sans-serif', fontWeight: 800, fontSize: '26px', color: 'var(--t1)', textAlign: 'center', marginBottom: '8px', letterSpacing: '-0.03em' }}>
+      <h1
+        style={{
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 800,
+          fontSize: '26px',
+          color: 'var(--t1)',
+          textAlign: 'center',
+          marginBottom: '8px',
+          letterSpacing: '-0.03em',
+        }}
+      >
         Bienvenue
       </h1>
-      <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '14px', color: 'var(--t3)', textAlign: 'center', marginBottom: '48px' }}>
+      <p
+        style={{
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 400,
+          fontSize: '14px',
+          color: 'var(--t3)',
+          textAlign: 'center',
+          marginBottom: '48px',
+        }}
+      >
         Choisissez votre profil
       </p>
 
@@ -72,12 +98,42 @@ export default function RoleSelectionV2() {
             textAlign: 'left',
           }}
         >
-          <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(91,127,255,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div
+            style={{
+              width: '52px',
+              height: '52px',
+              borderRadius: '14px',
+              background: 'rgba(91,127,255,0.12)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
             <IconUser size={24} color="var(--blue)" />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '17px', color: 'var(--t1)', marginBottom: '4px' }}>Client</div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '13px', color: 'var(--t3)' }}>Reservez des prestations a domicile</div>
+            <div
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 700,
+                fontSize: '17px',
+                color: 'var(--t1)',
+                marginBottom: '4px',
+              }}
+            >
+              Client
+            </div>
+            <div
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '13px',
+                color: 'var(--t3)',
+              }}
+            >
+              Reservez des prestations a domicile
+            </div>
           </div>
           <IconArrowRight size={18} color="var(--t4)" />
         </button>
@@ -104,12 +160,42 @@ export default function RoleSelectionV2() {
             textAlign: 'left',
           }}
         >
-          <div style={{ width: '52px', height: '52px', borderRadius: '14px', background: 'rgba(242,208,107,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div
+            style={{
+              width: '52px',
+              height: '52px',
+              borderRadius: '14px',
+              background: 'rgba(242,208,107,0.12)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
             <IconBusiness size={24} color="var(--gold)" />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, fontSize: '17px', color: 'var(--t1)', marginBottom: '4px' }}>Professionnel</div>
-            <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '13px', color: 'var(--t3)' }}>Gerez votre activite et vos clients</div>
+            <div
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 700,
+                fontSize: '17px',
+                color: 'var(--t1)',
+                marginBottom: '4px',
+              }}
+            >
+              Professionnel
+            </div>
+            <div
+              style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '13px',
+                color: 'var(--t3)',
+              }}
+            >
+              Gerez votre activite et vos clients
+            </div>
           </div>
           <IconArrowRight size={18} color="var(--t4)" />
         </button>

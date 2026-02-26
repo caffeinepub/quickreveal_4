@@ -1,175 +1,226 @@
 import React, { useState } from 'react';
 import { useAppContext } from '../context/AppContext';
 import { useInternetIdentity } from '../hooks/useInternetIdentity';
-import { IconLock, IconSpinner } from './icons/Icons';
+import { useActor } from '../hooks/useActor';
 
 export default function Login() {
-  const { setCurrentScreen } = useAppContext();
+  const { navigateTo } = useAppContext();
   const { login, loginStatus, identity } = useInternetIdentity();
-  const [isLoading, setIsLoading] = useState(false);
+  const { actor } = useActor();
+  const [error, setError] = useState('');
+
+  const isLoggingIn = loginStatus === 'logging-in';
 
   const handleLogin = async () => {
-    setIsLoading(true);
+    setError('');
     try {
-      if (identity) {
-        setCurrentScreen('roleSelection');
-        return;
-      }
       await login();
-      setCurrentScreen('roleSelection');
-    } catch (e) {
-      // fallback: navigate anyway for demo
-      setCurrentScreen('roleSelection');
-    } finally {
-      setIsLoading(false);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Erreur de connexion';
+      setError(msg);
     }
   };
 
-  const handleDemo = () => {
-    setCurrentScreen('roleSelection');
-  };
+  React.useEffect(() => {
+    if (identity && actor) {
+      actor.getCallerUserProfile().then((profile) => {
+        if (profile) {
+          navigateTo('nexusOS');
+        } else {
+          navigateTo('roleSelection');
+        }
+      }).catch(() => {
+        navigateTo('roleSelection');
+      });
+    }
+  }, [identity, actor, navigateTo]);
 
   return (
     <div
       style={{
-        minHeight: '100vh',
+        position: 'fixed',
+        inset: 0,
         background: 'var(--void)',
         display: 'flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        position: 'relative',
+        fontFamily: 'Inter, sans-serif',
         overflow: 'hidden',
-        padding: '40px 24px',
       }}
     >
       {/* Ambient orbs */}
       {[
-        { top: '-80px', left: '-60px', size: 280, color: 'rgba(242,208,107,0.06)', delay: '0s' },
-        { top: '30%', right: '-80px', size: 220, color: 'rgba(0,217,122,0.04)', delay: '-4s' },
-        { bottom: '20%', left: '-40px', size: 200, color: 'rgba(91,127,255,0.05)', delay: '-8s' },
-        { bottom: '-60px', right: '-40px', size: 260, color: 'rgba(242,208,107,0.04)', delay: '-2s' },
+        { top: '-20%', left: '-10%', size: 400, color: 'rgba(242,208,107,0.06)' },
+        { top: '60%', right: '-15%', size: 350, color: 'rgba(0,217,122,0.04)' },
+        { top: '30%', left: '60%', size: 250, color: 'rgba(242,208,107,0.04)' },
+        { bottom: '-10%', left: '20%', size: 300, color: 'rgba(255,61,90,0.03)' },
       ].map((orb, i) => (
         <div
           key={i}
           style={{
             position: 'absolute',
-            top: orb.top,
-            left: orb.left,
-            right: orb.right,
-            bottom: orb.bottom,
             width: orb.size,
             height: orb.size,
             borderRadius: '50%',
             background: orb.color,
-            filter: 'blur(60px)',
-            animation: `floatOrb 12s ease-in-out infinite`,
-            animationDelay: orb.delay,
+            filter: 'blur(80px)',
+            top: orb.top,
+            left: orb.left,
+            right: (orb as { right?: string }).right,
+            bottom: (orb as { bottom?: string }).bottom,
             pointerEvents: 'none',
           }}
         />
       ))}
 
-      <div style={{ position: 'relative', zIndex: 1, width: '100%', maxWidth: '360px', textAlign: 'center' }}>
+      <div
+        style={{
+          position: 'relative',
+          zIndex: 1,
+          width: '100%',
+          maxWidth: 430,
+          padding: '0 32px',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          gap: 0,
+        }}
+      >
         {/* Logo */}
-        <div style={{ marginBottom: '12px' }}>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 900, fontSize: '54px', color: 'var(--t1)', letterSpacing: '-0.04em', lineHeight: 1 }}>
+        <div style={{ marginBottom: 8 }}>
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 900,
+              fontSize: 54,
+              color: 'var(--t1)',
+              letterSpacing: '-2px',
+              lineHeight: 1,
+            }}
+          >
             NEXUS
           </span>
-          <span style={{ fontFamily: 'Inter, sans-serif', fontWeight: 900, fontSize: '60px', color: 'var(--gold)', lineHeight: 1 }}>.</span>
+          <span
+            style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 900,
+              fontSize: 60,
+              color: '#4A9EFF',
+              lineHeight: 1,
+            }}
+          >
+            .
+          </span>
         </div>
 
         {/* Tagline */}
-        <p style={{ fontFamily: 'Inter, sans-serif', fontStyle: 'italic', fontWeight: 300, fontSize: '15px', color: 'var(--t3)', marginBottom: '48px', letterSpacing: '0.02em' }}>
-          La beaute, a la demande
+        <p
+          style={{
+            fontFamily: 'Inter, sans-serif',
+            fontStyle: 'italic',
+            fontSize: 15,
+            color: 'rgba(244,244,248,0.5)',
+            marginBottom: 48,
+            textAlign: 'center',
+          }}
+        >
+          La beaute, a la demande.
         </p>
 
-        {/* Gold divider */}
-        <div style={{ width: '64px', height: '2px', background: 'linear-gradient(90deg, transparent, var(--gold), transparent)', margin: '0 auto 48px' }} />
+        {/* Gold line */}
+        <div
+          style={{
+            width: 64,
+            height: 2,
+            background: 'var(--gold)',
+            marginBottom: 48,
+            borderRadius: 1,
+          }}
+        />
+
+        {/* Error */}
+        {error && (
+          <div
+            style={{
+              width: '100%',
+              padding: '12px 16px',
+              background: 'rgba(255,61,90,0.12)',
+              border: '1px solid rgba(255,61,90,0.3)',
+              borderRadius: 12,
+              color: 'var(--alert)',
+              fontSize: 13,
+              marginBottom: 16,
+              textAlign: 'center',
+            }}
+          >
+            {error}
+          </div>
+        )}
 
         {/* CTA Button */}
         <button
           onClick={handleLogin}
-          disabled={isLoading || loginStatus === 'logging-in'}
+          disabled={isLoggingIn}
           style={{
             width: '100%',
-            height: '62px',
-            background: 'var(--gold)',
-            color: '#050507',
+            height: 62,
+            borderRadius: 16,
             border: 'none',
-            borderRadius: '16px',
+            background: isLoggingIn
+              ? 'rgba(242,208,107,0.5)'
+              : 'linear-gradient(135deg, #F2D06B 0%, #E8B84B 100%)',
+            color: '#050507',
             fontFamily: 'Inter, sans-serif',
-            fontWeight: 800,
-            fontSize: '15px',
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase',
-            cursor: isLoading ? 'not-allowed' : 'pointer',
+            fontWeight: 700,
+            fontSize: 16,
+            cursor: isLoggingIn ? 'not-allowed' : 'pointer',
+            boxShadow: isLoggingIn ? 'none' : '0 8px 32px rgba(242,208,107,0.3)',
+            transition: 'all 0.2s ease',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            gap: '10px',
-            boxShadow: '0 4px 24px rgba(242,208,107,0.25)',
-            opacity: isLoading ? 0.8 : 1,
-            transition: 'opacity 200ms',
-            marginBottom: '16px',
+            gap: 8,
           }}
         >
-          {isLoading ? (
-            <IconSpinner size={20} color="#050507" />
+          {isLoggingIn ? (
+            <>
+              <span
+                style={{
+                  width: 18,
+                  height: 18,
+                  border: '2px solid rgba(5,5,7,0.3)',
+                  borderTopColor: '#050507',
+                  borderRadius: '50%',
+                  display: 'inline-block',
+                  animation: 'spin 0.8s linear infinite',
+                }}
+              />
+              Connexion en cours...
+            </>
           ) : (
-            <IconLock size={18} color="#050507" />
+            'Se connecter avec Internet Identity'
           )}
-          {isLoading ? 'Connexion...' : 'Se connecter'}
-        </button>
-
-        {/* Demo button */}
-        <button
-          onClick={handleDemo}
-          style={{
-            width: '100%',
-            height: '52px',
-            background: 'transparent',
-            color: 'var(--t3)',
-            border: '1px solid var(--edge1)',
-            borderRadius: '14px',
-            fontFamily: 'Inter, sans-serif',
-            fontWeight: 500,
-            fontSize: '14px',
-            cursor: 'pointer',
-            transition: 'color 200ms, border-color 200ms',
-          }}
-          onMouseEnter={e => {
-            (e.target as HTMLButtonElement).style.color = 'var(--t2)';
-            (e.target as HTMLButtonElement).style.borderColor = 'var(--edge2)';
-          }}
-          onMouseLeave={e => {
-            (e.target as HTMLButtonElement).style.color = 'var(--t3)';
-            (e.target as HTMLButtonElement).style.borderColor = 'var(--edge1)';
-          }}
-        >
-          Continuer en mode demo
         </button>
 
         {/* Security line */}
-        <p style={{ fontFamily: 'Inter, sans-serif', fontWeight: 400, fontSize: '11px', color: 'var(--t4)', marginTop: '32px', lineHeight: 1.5 }}>
-          Connexion securisee via Internet Identity
+        <p
+          style={{
+            marginTop: 20,
+            fontSize: 12,
+            color: 'rgba(244,244,248,0.3)',
+            textAlign: 'center',
+          }}
+        >
+          Authentification securisee par Internet Computer
         </p>
       </div>
 
-      {/* Footer */}
-      <div style={{ position: 'absolute', bottom: '24px', left: 0, right: 0, textAlign: 'center' }}>
-        <p style={{ fontFamily: 'Inter, sans-serif', fontSize: '11px', color: 'var(--t4)' }}>
-          Built with love using{' '}
-          <a
-            href={`https://caffeine.ai/?utm_source=Caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname || 'nexus-app')}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{ color: 'var(--gold)', textDecoration: 'none' }}
-          >
-            caffeine.ai
-          </a>
-        </p>
-      </div>
+      <style>{`
+        @keyframes spin {
+          to { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

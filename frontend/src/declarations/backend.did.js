@@ -19,17 +19,21 @@ export const _CaffeineStorageRefillResult = IDL.Record({
   'success' : IDL.Opt(IDL.Bool),
   'topped_up_amount' : IDL.Opt(IDL.Nat),
 });
-export const UserRole = IDL.Variant({
-  'admin' : IDL.Null,
-  'user' : IDL.Null,
-  'guest' : IDL.Null,
+export const BookingStatus = IDL.Variant({
+  'cancelled' : IDL.Null,
+  'pending' : IDL.Null,
+  'confirmed' : IDL.Null,
 });
-export const ShoppingItem = IDL.Record({
-  'productName' : IDL.Text,
-  'currency' : IDL.Text,
-  'quantity' : IDL.Nat,
-  'priceInCents' : IDL.Nat,
-  'productDescription' : IDL.Text,
+export const Booking = IDL.Record({
+  'id' : IDL.Text,
+  'status' : BookingStatus,
+  'clientId' : IDL.Principal,
+  'date' : IDL.Text,
+  'address' : IDL.Text,
+  'serviceId' : IDL.Text,
+  'proId' : IDL.Principal,
+  'totalPrice' : IDL.Nat,
+  'timeSlot' : IDL.Text,
 });
 export const Language = IDL.Record({
   'language' : IDL.Text,
@@ -75,21 +79,17 @@ export const ProProfile = IDL.Record({
   'galleryPhotos' : IDL.Vec(ExternalBlob),
   'minBookingLeadTime' : IDL.Nat,
 });
-export const BookingStatus = IDL.Variant({
-  'cancelled' : IDL.Null,
-  'pending' : IDL.Null,
-  'confirmed' : IDL.Null,
+export const UserRole = IDL.Variant({
+  'admin' : IDL.Null,
+  'user' : IDL.Null,
+  'guest' : IDL.Null,
 });
-export const Booking = IDL.Record({
-  'id' : IDL.Text,
-  'status' : BookingStatus,
-  'clientId' : IDL.Principal,
-  'date' : IDL.Text,
-  'address' : IDL.Text,
-  'serviceId' : IDL.Text,
-  'proId' : IDL.Principal,
-  'totalPrice' : IDL.Nat,
-  'timeSlot' : IDL.Text,
+export const ShoppingItem = IDL.Record({
+  'productName' : IDL.Text,
+  'currency' : IDL.Text,
+  'quantity' : IDL.Nat,
+  'priceInCents' : IDL.Nat,
+  'productDescription' : IDL.Text,
 });
 export const AppUserRole = IDL.Variant({
   'client' : IDL.Null,
@@ -165,6 +165,20 @@ export const idlService = IDL.Service({
     ),
   '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'adminGetAllBookings' : IDL.Func([], [IDL.Vec(Booking)], ['query']),
+  'adminGetAllPros' : IDL.Func([], [IDL.Vec(ProProfile)], ['query']),
+  'adminGetMetrics' : IDL.Func(
+      [],
+      [
+        IDL.Record({
+          'totalBookings' : IDL.Nat,
+          'totalRegisteredUsers' : IDL.Nat,
+          'totalActivePros' : IDL.Nat,
+        }),
+      ],
+      ['query'],
+    ),
+  'adminValidatePro' : IDL.Func([IDL.Principal], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'createBookingRequest' : IDL.Func(
       [IDL.Principal, IDL.Text, IDL.Text, IDL.Text, IDL.Text],
@@ -236,17 +250,21 @@ export const idlFactory = ({ IDL }) => {
     'success' : IDL.Opt(IDL.Bool),
     'topped_up_amount' : IDL.Opt(IDL.Nat),
   });
-  const UserRole = IDL.Variant({
-    'admin' : IDL.Null,
-    'user' : IDL.Null,
-    'guest' : IDL.Null,
+  const BookingStatus = IDL.Variant({
+    'cancelled' : IDL.Null,
+    'pending' : IDL.Null,
+    'confirmed' : IDL.Null,
   });
-  const ShoppingItem = IDL.Record({
-    'productName' : IDL.Text,
-    'currency' : IDL.Text,
-    'quantity' : IDL.Nat,
-    'priceInCents' : IDL.Nat,
-    'productDescription' : IDL.Text,
+  const Booking = IDL.Record({
+    'id' : IDL.Text,
+    'status' : BookingStatus,
+    'clientId' : IDL.Principal,
+    'date' : IDL.Text,
+    'address' : IDL.Text,
+    'serviceId' : IDL.Text,
+    'proId' : IDL.Principal,
+    'totalPrice' : IDL.Nat,
+    'timeSlot' : IDL.Text,
   });
   const Language = IDL.Record({
     'language' : IDL.Text,
@@ -289,21 +307,17 @@ export const idlFactory = ({ IDL }) => {
     'galleryPhotos' : IDL.Vec(ExternalBlob),
     'minBookingLeadTime' : IDL.Nat,
   });
-  const BookingStatus = IDL.Variant({
-    'cancelled' : IDL.Null,
-    'pending' : IDL.Null,
-    'confirmed' : IDL.Null,
+  const UserRole = IDL.Variant({
+    'admin' : IDL.Null,
+    'user' : IDL.Null,
+    'guest' : IDL.Null,
   });
-  const Booking = IDL.Record({
-    'id' : IDL.Text,
-    'status' : BookingStatus,
-    'clientId' : IDL.Principal,
-    'date' : IDL.Text,
-    'address' : IDL.Text,
-    'serviceId' : IDL.Text,
-    'proId' : IDL.Principal,
-    'totalPrice' : IDL.Nat,
-    'timeSlot' : IDL.Text,
+  const ShoppingItem = IDL.Record({
+    'productName' : IDL.Text,
+    'currency' : IDL.Text,
+    'quantity' : IDL.Nat,
+    'priceInCents' : IDL.Nat,
+    'productDescription' : IDL.Text,
   });
   const AppUserRole = IDL.Variant({
     'client' : IDL.Null,
@@ -376,6 +390,20 @@ export const idlFactory = ({ IDL }) => {
       ),
     '_caffeineStorageUpdateGatewayPrincipals' : IDL.Func([], [], []),
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'adminGetAllBookings' : IDL.Func([], [IDL.Vec(Booking)], ['query']),
+    'adminGetAllPros' : IDL.Func([], [IDL.Vec(ProProfile)], ['query']),
+    'adminGetMetrics' : IDL.Func(
+        [],
+        [
+          IDL.Record({
+            'totalBookings' : IDL.Nat,
+            'totalRegisteredUsers' : IDL.Nat,
+            'totalActivePros' : IDL.Nat,
+          }),
+        ],
+        ['query'],
+      ),
+    'adminValidatePro' : IDL.Func([IDL.Principal], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'createBookingRequest' : IDL.Func(
         [IDL.Principal, IDL.Text, IDL.Text, IDL.Text, IDL.Text],

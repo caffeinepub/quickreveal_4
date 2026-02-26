@@ -2,10 +2,10 @@
   "kind": "feature_evidence_report",
   "features": [
     {
-      "featureId": "feature-create-a-new-file-frontend-src-components-proapp-tsx-as-a-fully-self-contained-react-component-no-react-router-no-external-navigation-libs-it-must-include-all-pro-space-screens-and-sub-components-inline-or-imported-locally-dashboard-radar-wallet-business-subscription-modal-and-subscription-success-animation-navigation-between-these-screens-must-be-driven-exclusively-by-usestate-the-component-must-export-proapp-as-a-default-export",
-      "featureTitle": "Create a new file `frontend/src/components/ProApp.tsx` as a fully self-contained React component (no React Router, no external navigation libs). It must include all pro-space screens and sub-components inline or imported locally: Dashboard, Radar, Wallet, Business, Subscription Modal, and Subscription Success animation. Navigation between these screens must be driven exclusively by `useState`. The component must export `ProApp` as a default export.",
+      "featureId": "feature-update-frontend-src-context-appcontext-tsx-to-replace-all-mock-data-imports-from-mockdata-ts-and-demodata-ts-with-calls-to-api-ts-functions-replace-local-usestate-based-booking-pro-wallet-state-with-react-query-queries-from-usequeries-ts-replace-fake-settimeout-timers-with-real-canister-polling-the-escrow-countdown-must-reflect-the-actual-booking-timestamp-stored-on-chain",
+      "featureTitle": "Update frontend/src/context/AppContext.tsx to replace all mock data imports from mockData.ts and demoData.ts with calls to api.ts functions. Replace local useState-based booking/pro/wallet state with React Query queries (from useQueries.ts). Replace fake setTimeout timers with real canister polling. The escrow countdown must reflect the actual booking timestamp stored on-chain.",
       "files": [
-        "frontend/src/components/ProApp.tsx"
+        "frontend/src/context/AppContext.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -20,15 +20,15 @@
         "camera@1.0.0"
       ],
       "testIds": [
-        "REQ-1"
+        "REQ-9"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-in-frontend-src-components-proapp-tsx-define-a-color-constants-object-c-that-includes-the-value-t4-2e2e3e-use-c-t4-for-the-iconcamera-fill-color-and-for-all-other-very-subtle-discrete-ui-elements-placeholder-text-dividers-inactive-icon-strokes-secondary-backgrounds-etc",
-      "featureTitle": "In `frontend/src/components/ProApp.tsx`, define a color constants object `C` that includes the value `t4: '#2E2E3E'`. Use `C.t4` for the `IconCamera` fill color and for all other very subtle/discrete UI elements (placeholder text, dividers, inactive icon strokes, secondary backgrounds, etc.).",
+      "featureId": "feature-update-frontend-src-components-login-tsx-to-replace-the-continuer-en-mode-demo-button-with-real-internet-identity-authentication-on-button-press-trigger-the-ii-login-flow-from-authcontext-on-successful-authentication-check-if-the-user-has-a-proprofile-or-userprofile-on-chain-and-route-them-to-the-appropriate-dashboard-the-demo-mode-button-must-be-removed-entirely",
+      "featureTitle": "Update frontend/src/components/Login.tsx to replace the 'Continuer en mode demo' button with real Internet Identity authentication. On button press, trigger the II login flow from AuthContext. On successful authentication, check if the user has a ProProfile or UserProfile on-chain and route them to the appropriate dashboard. The demo mode button must be removed entirely.",
       "files": [
-        "frontend/src/components/ProApp.tsx"
+        "frontend/src/components/Login.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -43,15 +43,15 @@
         "camera@1.0.0"
       ],
       "testIds": [
-        "REQ-2"
+        "REQ-10"
       ],
       "confidence": "high"
     },
     {
-      "featureId": "feature-in-frontend-src-components-roleselection-tsx-or-roleselectionv2-tsx-whichever-is-currently-active-in-screenrouter-replace-the-navigation-target-for-the-professionnel-role-selection-with-a-render-of-proapp-the-old-broken-pro-space-component-must-no-longer-be-rendered-when-the-user-selects-professionnel-import-proapp-from-proapp-and-render-it-in-place-of-the-previous-pro-route-component",
-      "featureTitle": "In `frontend/src/components/RoleSelection.tsx` (or `RoleSelectionV2.tsx`, whichever is currently active in ScreenRouter), replace the navigation target for the 'Professionnel' role selection with a render of `<ProApp />`. The old broken pro space component must no longer be rendered when the user selects 'Professionnel'. Import ProApp from `./ProApp` and render it in place of the previous pro route/component.",
+      "featureId": "feature-update-frontend-src-components-prologin-tsx-to-use-the-real-internet-identity-authentication-flow-from-authcontext-login-logout-isauthenticated-principal-after-successful-ii-authentication-call-the-canister-to-check-if-a-proprofile-exists-for-the-principal-and-navigate-to-nexusos-if-no-profile-exists-navigate-to-onboarding-builder-flow",
+      "featureTitle": "Update frontend/src/components/ProLogin.tsx to use the real Internet Identity authentication flow from AuthContext (login/logout, isAuthenticated, principal). After successful II authentication, call the canister to check if a ProProfile exists for the principal and navigate to 'nexusOS'. If no profile exists, navigate to onboarding/builder flow.",
       "files": [
-        "frontend/src/components/RoleSelectionV2.tsx"
+        "frontend/src/components/ProLogin.tsx"
       ],
       "components": [
         "authorization@4.0.0",
@@ -66,7 +66,127 @@
         "camera@1.0.0"
       ],
       "testIds": [
-        "REQ-3"
+        "REQ-11"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-connect-the-pro-dashboard-screens-to-the-canister-update-businessscreen-tsx-to-call-updatepro-on-save-and-addservice-removeservice-for-service-management-update-radarpro-tsx-to-fetch-from-getradardemandes-and-call-acceptbooking-declinebooking-update-walletpro-tsx-to-fetch-balance-from-getwalletsolde-and-real-transaction-history-from-the-canister-update-dashboardscreen-tsx-stats-to-use-canister-query-data-replace-all-hardcoded-mock-data-in-these-components-with-live-canister-queries-via-api-ts",
+      "featureTitle": "Connect the Pro dashboard screens to the canister. Update BusinessScreen.tsx to call updatePro() on save and addService()/removeService() for service management. Update RadarPro.tsx to fetch from getRadarDemandes() and call acceptBooking()/declineBooking(). Update WalletPro.tsx to fetch balance from getWalletSolde() and real transaction history from the canister. Update DashboardScreen.tsx stats to use canister query data. Replace all hardcoded/mock data in these components with live canister queries via api.ts.",
+      "files": [
+        "frontend/src/components/DashboardScreen.tsx",
+        "frontend/src/components/RadarPro.tsx",
+        "frontend/src/components/WalletPro.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-12"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-connect-the-client-facing-screens-to-the-canister-update-explorer-tsx-to-fetch-pros-from-getactivepros-and-getflashpros-update-bookingflow-tsx-to-call-createbooking-on-final-confirmation-step-update-clientdashboard-tsx-to-fetch-bookings-from-getmybookings-and-call-cancelbooking-on-cancel-action-replace-all-demodata-mockdata-usage-in-these-components",
+      "featureTitle": "Connect the Client-facing screens to the canister. Update Explorer.tsx to fetch pros from getActivePros() and getFlashPros(). Update BookingFlow.tsx to call createBooking() on final confirmation step. Update ClientDashboard.tsx to fetch bookings from getMyBookings() and call cancelBooking() on cancel action. Replace all demoData/mockData usage in these components.",
+      "files": [
+        "frontend/src/components/BookingFlow.tsx",
+        "frontend/src/components/Explorer.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-13"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-a-new-admin-panel-screen-at-route-key-admin-navigated-to-via-usestate-based-navigation-no-react-router-the-panel-must-use-the-exact-same-dark-premium-palette-void-050507-gold-f2d06b-flash-00d97a-alert-ff3d5a-t1-f4f4f8-font-inter-implement-four-sections-1-pros-list-with-validation-status-and-adminvalidatepro-action-button-2-full-transactions-table-3-revenue-metrics-dashboard-total-fees-active-pros-total-bookings-registered-users-4-header-with-nexus-admin-branding-register-this-screen-in-screenrouter-tsx",
+      "featureTitle": "Create a new Admin Panel screen at route key 'admin' (navigated to via useState-based navigation, no React Router). The panel must use the exact same dark premium palette (--void: #050507, --gold: #F2D06B, --flash: #00D97A, --alert: #FF3D5A, --t1: #F4F4F8, font: Inter). Implement four sections: (1) Pros list with validation status and adminValidatePro() action button, (2) Full transactions table, (3) Revenue metrics dashboard (total fees, active pros, total bookings, registered users), (4) Header with NEXUS admin branding. Register this screen in ScreenRouter.tsx.",
+      "files": [
+        "frontend/src/components/AdminPanel.tsx",
+        "frontend/src/components/ScreenRouter.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-14"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-create-frontend-src-lib-notifications-ts-exporting-notification-management-utilities-polling-getmynotifications-every-15-seconds-storing-unread-count-and-exposing-addlocalnotification-for-optimistic-updates-update-globalheader-tsx-to-display-the-bell-icon-with-a-red-badge-showing-the-unread-count-from-this-store-update-notificationcenter-tsx-to-render-the-slide-in-panel-from-the-right-with-the-full-notification-list-timestamps-notification-type-labels-and-per-item-dismiss-and-mark-read-actions-wire-all-5-notification-types-nouvelle-demande-paiement-confirme-fonds-liberes-avis-recu-booking-confirme-to-their-display-labels",
+      "featureTitle": "Create frontend/src/lib/notifications.ts exporting notification management utilities: polling getMyNotifications() every 15 seconds, storing unread count, and exposing addLocalNotification() for optimistic updates. Update GlobalHeader.tsx to display the bell icon with a red badge showing the unread count from this store. Update NotificationCenter.tsx to render the slide-in panel from the right with the full notification list, timestamps, notification type labels, and per-item dismiss and mark-read actions. Wire all 5 notification types (nouvelle_demande, paiement_confirme, fonds_liberes, avis_recu, booking_confirme) to their display labels.",
+      "files": [
+        "frontend/src/components/GlobalHeader.tsx",
+        "frontend/src/components/NotificationCenter.tsx"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-15"
+      ],
+      "confidence": "high"
+    },
+    {
+      "featureId": "feature-update-frontend-src-hooks-usequeries-ts-to-add-react-query-hooks-for-all-new-canister-endpoints-useactivepros-useflashpros-usemybookings-useradardemandes-usewalletsolde-usemynotifications-useadminallpros-useadmintransactions-useadminmetrics-add-mutation-hooks-usecreatebooking-useacceptbooking-usedeclinebooking-usecancelbooking-useupdatepro-useaddservice-useactivatesubscription-useadminvalidatepro-all-hooks-must-use-the-actor-from-actor-ts",
+      "featureTitle": "Update frontend/src/hooks/useQueries.ts to add React Query hooks for all new canister endpoints: useActivePros(), useFlashPros(), useMyBookings(), useRadarDemandes(), useWalletSolde(), useMyNotifications(), useAdminAllPros(), useAdminTransactions(), useAdminMetrics(). Add mutation hooks: useCreateBooking(), useAcceptBooking(), useDeclineBooking(), useCancelBooking(), useUpdatePro(), useAddService(), useActivateSubscription(), useAdminValidatePro(). All hooks must use the actor from actor.ts.",
+      "files": [
+        "frontend/src/hooks/useQueries.ts"
+      ],
+      "components": [
+        "authorization@4.0.0",
+        "core-infrastructure@1.0.2",
+        "shadcn-ui@1.0.0",
+        "build-template-react@1.0.0",
+        "initial-app@1.0.0",
+        "github-export-icp-cli@1.0.0",
+        "blob-storage@4.0.0",
+        "stripe@3.0.0",
+        "http-outcalls@3.0.0",
+        "camera@1.0.0"
+      ],
+      "testIds": [
+        "REQ-16"
       ],
       "confidence": "high"
     }

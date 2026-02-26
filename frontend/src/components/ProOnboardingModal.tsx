@@ -1,158 +1,202 @@
 import React from 'react';
 import { useAppContext } from '../context/AppContext';
-import { useSaveCallerUserProfile } from '../hooks/useQueries';
-import { AppUserRole } from '../backend';
 
 interface ProOnboardingModalProps {
+  isOpen: boolean;
   onClose: () => void;
+  onStart: () => void;
 }
 
-const BENEFITS = [
-  'Profil visible par des milliers de clients autour de vous',
-  'Réservations instantanées 24h/24',
-  'Paiements garantis NEXUS PAY',
-  'Notifications temps réel',
-  'Zéro commission les 7 premiers jours',
-];
+export default function ProOnboardingModal({ isOpen, onClose, onStart }: ProOnboardingModalProps) {
+  if (!isOpen) return null;
 
-export default function ProOnboardingModal({ onClose }: ProOnboardingModalProps) {
-  const { navigateTo, setAppRole } = useAppContext();
-  const saveProfile = useSaveCallerUserProfile();
-
-  const handleStart = async () => {
-    try {
-      await saveProfile.mutateAsync({ name: 'Professionnel', appRole: AppUserRole.professional });
-    } catch {
-      // continue even if backend save fails
-    }
-    setAppRole('pro');
-    navigateTo('builder');
-    onClose();
-  };
+  const benefits = [
+    { icon: '🚀', title: 'Profil visible immédiatement', desc: 'Apparaissez dans l\'Explorer dès l\'activation' },
+    { icon: '📅', title: 'Réservations automatiques', desc: 'Vos clients réservent 24h/24, 7j/7' },
+    { icon: '💳', title: 'Paiements sécurisés', desc: 'Encaissez sans effort via Stripe' },
+    { icon: '📊', title: 'Analytics en temps réel', desc: 'Suivez vos performances et revenus' },
+    { icon: '🔔', title: 'Notifications instantanées', desc: 'Soyez alerté à chaque nouvelle réservation' },
+  ];
 
   return (
-    <div style={{
-      position: 'fixed',
-      inset: 0,
-      zIndex: 100,
-      display: 'flex',
-      alignItems: 'flex-end',
-      justifyContent: 'center',
-      background: 'rgba(0,0,0,0.7)',
-      backdropFilter: 'blur(4px)',
-    }}>
-      <div style={{
-        width: '100%',
-        maxWidth: 430,
-        background: '#111111',
-        borderRadius: '24px 24px 0 0',
-        padding: '32px 24px 40px',
-        animation: 'slideUp 0.3s ease forwards',
-      }}>
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div>
-            <h2 style={{ fontSize: 24, fontWeight: 900, color: '#FFFFFF', marginBottom: 4 }}>
-              LANCER MON SERVICE
-            </h2>
-            <p style={{ fontSize: 14, color: '#E8C89A' }}>7 jours gratuits · Sans engagement</p>
-          </div>
-          <button
-            onClick={onClose}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#888888',
-              cursor: 'pointer',
-              fontSize: 20,
-              padding: 4,
-              minWidth: 44,
-              minHeight: 44,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            ✕
-          </button>
+    <div
+      onClick={onClose}
+      style={{
+        position: 'fixed',
+        inset: 0,
+        background: 'rgba(5,5,7,0.85)',
+        zIndex: 9000,
+        display: 'flex',
+        alignItems: 'flex-end',
+      }}
+    >
+      <div
+        onClick={(e) => e.stopPropagation()}
+        style={{
+          width: '100%',
+          maxHeight: 'calc(100vh - 64px - env(safe-area-inset-bottom, 0px))',
+          display: 'flex',
+          flexDirection: 'column',
+          background: '#0D0D13',
+          borderRadius: '24px 24px 0 0',
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: 'none',
+        }}
+      >
+        {/* Drag handle */}
+        <div style={{
+          width: 36,
+          height: 4,
+          background: '#2E2E3E',
+          borderRadius: 2,
+          margin: '12px auto',
+          flexShrink: 0,
+        }} />
+
+        {/* Fixed title */}
+        <div style={{
+          padding: '0 24px 16px',
+          flexShrink: 0,
+          borderBottom: '1px solid rgba(255,255,255,0.04)',
+        }}>
+          <p style={{
+            fontFamily: 'Inter',
+            fontWeight: 800,
+            fontSize: 20,
+            color: '#F4F4F8',
+            margin: 0,
+          }}>
+            Bienvenue sur NEXUS Pro
+          </p>
+          <p style={{
+            fontFamily: 'Inter',
+            fontSize: 13,
+            color: '#9898B4',
+            margin: '4px 0 0',
+          }}>
+            Démarrez votre essai gratuit de 7 jours
+          </p>
         </div>
 
-        {/* Benefits */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 32 }}>
-          {BENEFITS.map((benefit, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Scrollable content */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch' as any,
+          padding: '20px 24px',
+        }}>
+          {benefits.map((b, i) => (
+            <div key={i} style={{
+              display: 'flex',
+              alignItems: 'flex-start',
+              gap: 14,
+              padding: '12px 0',
+              borderBottom: i < benefits.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none',
+            }}>
               <div style={{
-                width: 28,
-                height: 28,
-                borderRadius: '50%',
-                background: 'rgba(232,200,154,0.1)',
+                width: 40,
+                height: 40,
+                background: 'rgba(242,208,107,0.1)',
+                borderRadius: 10,
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                fontSize: 20,
                 flexShrink: 0,
-                fontSize: 14,
-                color: '#E8C89A',
-                fontWeight: 700,
+              }}>
+                {b.icon}
+              </div>
+              <div>
+                <p style={{
+                  margin: 0,
+                  fontFamily: 'Inter',
+                  fontWeight: 700,
+                  fontSize: 14,
+                  color: '#F4F4F8',
+                }}>
+                  {b.title}
+                </p>
+                <p style={{
+                  margin: '2px 0 0',
+                  fontFamily: 'Inter',
+                  fontSize: 12,
+                  color: '#9898B4',
+                }}>
+                  {b.desc}
+                </p>
+              </div>
+              <div style={{
+                marginLeft: 'auto',
+                color: '#F2D06B',
+                fontSize: 16,
+                flexShrink: 0,
               }}>
                 ✓
               </div>
-              <p style={{ fontSize: 14, color: '#CCCCCC' }}>{benefit}</p>
             </div>
           ))}
+
+          <div style={{
+            background: 'rgba(242,208,107,0.06)',
+            border: '1px solid rgba(242,208,107,0.15)',
+            borderRadius: 12,
+            padding: '14px 16px',
+            marginTop: 16,
+          }}>
+            <p style={{
+              margin: 0,
+              fontFamily: 'Inter',
+              fontSize: 13,
+              color: '#F2D06B',
+              lineHeight: 1.5,
+            }}>
+              🎁 <strong>7 jours gratuits</strong>, puis 199 CHF/an. Annulable à tout moment.
+            </p>
+          </div>
         </div>
 
-        {/* CTAs */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <button
-            onClick={handleStart}
-            disabled={saveProfile.isPending}
-            style={{
-              width: '100%',
-              height: 56,
-              background: 'linear-gradient(135deg, #E8C89A, #D4A96A)',
-              border: 'none',
-              borderRadius: 14,
-              color: '#080808',
-              fontSize: 15,
-              fontWeight: 700,
-              letterSpacing: '1px',
-              cursor: saveProfile.isPending ? 'not-allowed' : 'pointer',
-              opacity: saveProfile.isPending ? 0.7 : 1,
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: 8,
-            }}
-          >
-            {saveProfile.isPending ? (
-              <>
-                <div style={{
-                  width: 16,
-                  height: 16,
-                  border: '2px solid rgba(8,8,8,0.3)',
-                  borderTop: '2px solid #080808',
-                  borderRadius: '50%',
-                  animation: 'spin 1s linear infinite',
-                }} />
-                Chargement...
-              </>
-            ) : (
-              'Commencer 7 jours gratuits'
-            )}
-          </button>
+        {/* Action buttons — always visible */}
+        <div style={{
+          flexShrink: 0,
+          padding: '12px 24px 16px',
+          borderTop: '1px solid rgba(255,255,255,0.04)',
+          display: 'flex',
+          gap: 12,
+          background: '#0D0D13',
+        }}>
           <button
             onClick={onClose}
             style={{
-              background: 'none',
-              border: 'none',
-              color: '#555555',
+              flex: 1,
+              height: 50,
+              background: '#121219',
+              border: '1px solid #1C1C26',
+              borderRadius: 12,
+              color: '#9898B4',
+              fontFamily: 'Inter',
+              fontWeight: 600,
               fontSize: 14,
               cursor: 'pointer',
-              padding: '12px',
-              width: '100%',
             }}
           >
-            Pas maintenant
+            Plus tard
+          </button>
+          <button
+            onClick={onStart}
+            style={{
+              flex: 2,
+              height: 50,
+              background: '#F2D06B',
+              border: 'none',
+              borderRadius: 12,
+              color: '#050507',
+              fontFamily: 'Inter',
+              fontWeight: 700,
+              fontSize: 14,
+              cursor: 'pointer',
+            }}
+          >
+            Démarrer l'essai gratuit
           </button>
         </div>
       </div>

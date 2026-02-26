@@ -1,491 +1,647 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { useProContext } from '../context/ProContext';
-import { IconCamera, IconX } from './icons/Icons';
+import CircularProgress from './CircularProgress';
+import ServiceEditor, { ServiceItem } from './ServiceEditor';
+import ExplorerPreview from './ExplorerPreview';
 
-type SubTab = 'identite' | 'paiement' | 'services' | 'galerie';
+type BusinessTab = 'profil' | 'services' | 'tarifs' | 'paiement' | 'galerie';
 
-interface BusinessScreenProps {
-  onActivate?: () => void;
-  // Legacy prop kept for backward compat — no longer used internally
-  onActivationSuccess?: () => void;
-}
+const TABS: { id: BusinessTab; label: string }[] = [
+  { id: 'profil', label: 'Profil' },
+  { id: 'services', label: 'Services' },
+  { id: 'tarifs', label: 'Tarifs' },
+  { id: 'paiement', label: 'Paiement' },
+  { id: 'galerie', label: 'Galerie' },
+];
 
-export default function BusinessScreen({ onActivate }: BusinessScreenProps) {
+export default function BusinessScreen() {
   const { proData, setProData } = useProContext();
-  const [activeSubTab, setActiveSubTab] = useState<SubTab>('identite');
+  const [activeTab, setActiveTab] = useState<BusinessTab>('profil');
+  const [showServiceEditor, setShowServiceEditor] = useState(false);
+  const [editingService, setEditingService] = useState<ServiceItem | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [saved, setSaved] = useState(false);
 
-  const fileInputRefs = [
-    useRef<HTMLInputElement | null>(null),
-    useRef<HTMLInputElement | null>(null),
-    useRef<HTMLInputElement | null>(null),
-    useRef<HTMLInputElement | null>(null),
-  ];
+  // Local form state mapped to ProData fields
+  const [prenom, setPrenom] = useState(proData.prenom || '');
+  const [ville, setVille] = useState(proData.ville || '');
+  const [categorie, setCategorie] = useState(proData.categorie || '');
+  const [bio, setBio] = useState(proData.bio || '');
+  const [slogan, setSlogan] = useState(proData.slogan || '');
+  const [iban, setIban] = useState(proData.iban || '');
+  const [radius, setRadius] = useState(10);
+  const [atHome, setAtHome] = useState(true);
 
-  const handleSlotClick = (index: number) => {
-    fileInputRefs[index].current?.click();
+  // Services stored in ProData as {nom, prix, duree, badge}
+  // We adapt them to/from ServiceItem for the editor
+  const proServices = proData.services || [];
+
+  // Convert ProData service shape → ServiceItem for the editor
+  const toServiceItem = (s: typeof proServices[0], idx: number): ServiceItem => ({
+    id: `svc-${idx}`,
+    name: s.nom,
+    price: s.prix,
+    duration: s.duree,
+    category: '',
+    badge: s.badge,
+  });
+
+  // Convert ServiceItem → ProData service shape
+  const fromServiceItem = (s: ServiceItem) => ({
+    nom: s.name,
+    prix: s.price,
+    duree: s.duration,
+    badge: s.badge || null,
+  });
+
+  // Editing: find the matching proData service by index
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+
+  const handleOpenAdd = () => {
+    setEditingService(null);
+    setEditingIndex(null);
+    setShowServiceEditor(true);
   };
 
-  const handleFileChange = (index: number, e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    if (!file.type.startsWith('image/')) return;
-    if (file.size > 10 * 1024 * 1024) {
-      alert('Image trop lourde (max 10MB)');
-      return;
+  const handleOpenEdit = (idx: number) => {
+    setEditingService(toServiceItem(proServices[idx], idx));
+    setEditingIndex(idx);
+    setShowServiceEditor(true);
+  };
+
+  const handleSaveService = (service: ServiceItem) => {
+    const converted = fromServiceItem(service);
+    if (editingIndex !== null) {
+      const updated = proServices.map((s, i) => (i === editingIndex ? converted : s));
+      setProData((prev) => ({ ...prev, services: updated }));
+    } else {
+      setProData((prev) => ({ ...prev, services: [...prev.services, converted] }));
     }
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const newPhotos = [...proData.photos];
-      newPhotos[index] = ev.target?.result as string;
-      setProData({ ...proData, photos: newPhotos });
-    };
-    reader.readAsDataURL(file);
-    e.target.value = '';
+    setShowServiceEditor(false);
+    setEditingService(null);
+    setEditingIndex(null);
   };
 
-  const photos = proData.photos;
-  const canActivate = photos.filter(Boolean).length >= 3;
+  const handleDeleteService = (idx: number) => {
+    const updated = proServices.filter((_, i) => i !== idx);
+    setProData((prev) => ({ ...prev, services: updated }));
+  };
 
-  const subTabs: { id: SubTab; label: string }[] = [
-    { id: 'identite', label: 'Identite' },
-    { id: 'paiement', label: 'Paiement' },
-    { id: 'services', label: 'Services' },
-    { id: 'galerie', label: 'Galerie' },
+  // Completion score
+  const completionFields = [
+    !!prenom,
+    !!ville,
+    !!categorie,
+    !!bio,
+    proServices.length > 0,
+    !!iban,
   ];
+  const completionPct = Math.round(
+    (completionFields.filter(Boolean).length / completionFields.length) * 100
+  );
 
-  return (
-    <div style={{
-      minHeight: '100%',
-      background: 'var(--void)',
-      fontFamily: 'Inter, sans-serif',
-    }}>
-      {/* Header */}
-      <div style={{ padding: '24px 20px 0' }}>
-        <h1 style={{ fontSize: 24, fontWeight: 800, color: 'var(--t1)', margin: '0 0 20px' }}>
-          Mon Business
-        </h1>
+  const handleSave = () => {
+    setProData((prev) => ({
+      ...prev,
+      prenom,
+      ville,
+      categorie,
+      bio,
+      slogan,
+      iban,
+    }));
+    setSaved(true);
+    setTimeout(() => setSaved(false), 2000);
+  };
 
-        {/* Sub-tab bar */}
+  const inputStyle: React.CSSProperties = {
+    width: '100%',
+    background: '#0D0D13',
+    border: '1px solid #1C1C26',
+    borderRadius: 10,
+    padding: '12px 14px',
+    color: '#F4F4F8',
+    fontFamily: 'Inter',
+    fontSize: 14,
+    outline: 'none',
+    boxSizing: 'border-box',
+  };
+
+  const labelStyle: React.CSSProperties = {
+    fontFamily: 'Inter',
+    fontSize: 12,
+    fontWeight: 600,
+    color: '#9898B4',
+    letterSpacing: '0.06em',
+    textTransform: 'uppercase',
+    marginBottom: 6,
+    display: 'block',
+  };
+
+  const fieldStyle: React.CSSProperties = { marginBottom: 16 };
+
+  // ── TAB RENDERERS ─────────────────────────────────────────────────────
+  // Each tab returns a div with NO forced height — content takes natural size.
+
+  const renderProfil = () => (
+    <div style={{ padding: '20px 20px 0' }}>
+      <div style={fieldStyle}>
+        <label style={labelStyle}>Nom du studio / marque</label>
+        <input
+          style={inputStyle}
+          placeholder="Ex: Studio Élégance"
+          value={prenom}
+          onChange={(e) => setPrenom(e.target.value)}
+        />
+      </div>
+      <div style={fieldStyle}>
+        <label style={labelStyle}>Slogan</label>
+        <input
+          style={inputStyle}
+          placeholder="Ex: L'excellence à domicile"
+          value={slogan}
+          onChange={(e) => setSlogan(e.target.value)}
+        />
+      </div>
+      <div style={fieldStyle}>
+        <label style={labelStyle}>Bio (max 500 caractères)</label>
+        <textarea
+          style={{ ...inputStyle, minHeight: 100, resize: 'none' }}
+          placeholder="Décrivez votre activité..."
+          maxLength={500}
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+        />
+        <span style={{ fontSize: 11, color: '#9898B4', fontFamily: 'Inter' }}>
+          {bio.length}/500
+        </span>
+      </div>
+      <div style={fieldStyle}>
+        <label style={labelStyle}>Catégorie</label>
+        <select
+          style={{ ...inputStyle, appearance: 'none' }}
+          value={categorie}
+          onChange={(e) => setCategorie(e.target.value)}
+        >
+          <option value="">Sélectionner...</option>
+          <option value="barber">Barbier</option>
+          <option value="coiffure">Coiffure</option>
+          <option value="esthetique">Esthétique</option>
+          <option value="massage">Massage</option>
+          <option value="nail">Nail Art</option>
+          <option value="maquillage">Maquillage</option>
+        </select>
+      </div>
+      <div style={fieldStyle}>
+        <label style={labelStyle}>Ville</label>
+        <input
+          style={inputStyle}
+          placeholder="Ex: Genève"
+          value={ville}
+          onChange={(e) => setVille(e.target.value)}
+        />
+      </div>
+      <div style={{ marginBottom: 20 }}>
+        <button
+          onClick={() => setShowPreview(true)}
+          style={{
+            width: '100%',
+            height: 44,
+            background: 'transparent',
+            border: '1px solid #F2D06B',
+            borderRadius: 10,
+            color: '#F2D06B',
+            fontFamily: 'Inter',
+            fontWeight: 600,
+            fontSize: 14,
+            cursor: 'pointer',
+          }}
+        >
+          👁 Aperçu Explorer
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderServices = () => (
+    <div style={{ padding: '20px 20px 0' }}>
+      <div style={{ marginBottom: 16 }}>
+        <button
+          onClick={handleOpenAdd}
+          style={{
+            width: '100%',
+            height: 48,
+            background: '#F2D06B',
+            border: 'none',
+            borderRadius: 12,
+            color: '#050507',
+            fontFamily: 'Inter',
+            fontWeight: 700,
+            fontSize: 14,
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: 8,
+          }}
+        >
+          <span style={{ fontSize: 18 }}>+</span> Ajouter un service
+        </button>
+      </div>
+
+      {proServices.length === 0 ? (
         <div style={{
-          display: 'flex',
-          gap: 4,
-          background: 'var(--d1)',
-          borderRadius: 12,
-          padding: 4,
-          marginBottom: 24,
+          textAlign: 'center',
+          padding: '40px 20px',
+          color: '#9898B4',
+          fontFamily: 'Inter',
+          fontSize: 14,
         }}>
-          {subTabs.map(({ id, label }) => (
-            <button
-              key={id}
-              onClick={() => setActiveSubTab(id)}
+          <div style={{ fontSize: 32, marginBottom: 12 }}>✂️</div>
+          <p style={{ margin: 0 }}>Aucun service ajouté</p>
+          <p style={{ margin: '4px 0 0', fontSize: 12 }}>
+            Ajoutez vos prestations pour attirer des clients
+          </p>
+        </div>
+      ) : (
+        <div>
+          {proServices.map((service, idx) => (
+            <div
+              key={idx}
               style={{
-                flex: 1,
-                padding: '8px 4px',
-                borderRadius: 9,
-                border: 'none',
-                background: activeSubTab === id ? 'var(--d3)' : 'transparent',
-                color: activeSubTab === id ? 'var(--t1)' : 'var(--t3)',
-                fontSize: 12,
-                fontWeight: activeSubTab === id ? 700 : 400,
-                cursor: 'pointer',
-                fontFamily: 'Inter, sans-serif',
-                transition: 'all 0.15s ease',
+                background: '#0D0D13',
+                border: '1px solid #1C1C26',
+                borderRadius: 12,
+                padding: '14px 16px',
+                marginBottom: 10,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
               }}
             >
-              {label}
+              <div>
+                <p style={{
+                  margin: 0,
+                  fontFamily: 'Inter',
+                  fontWeight: 600,
+                  fontSize: 14,
+                  color: '#F4F4F8',
+                }}>
+                  {service.nom}
+                </p>
+                <p style={{
+                  margin: '2px 0 0',
+                  fontFamily: 'Inter',
+                  fontSize: 12,
+                  color: '#9898B4',
+                }}>
+                  {service.duree} min · {service.prix} CHF
+                </p>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button
+                  onClick={() => handleOpenEdit(idx)}
+                  style={{
+                    background: '#1C1C26',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '6px 12px',
+                    color: '#9898B4',
+                    fontFamily: 'Inter',
+                    fontSize: 12,
+                    cursor: 'pointer',
+                  }}
+                >
+                  Modifier
+                </button>
+                <button
+                  onClick={() => handleDeleteService(idx)}
+                  style={{
+                    background: 'rgba(255,80,80,0.1)',
+                    border: 'none',
+                    borderRadius: 8,
+                    padding: '6px 10px',
+                    color: '#FF5050',
+                    fontFamily: 'Inter',
+                    fontSize: 12,
+                    cursor: 'pointer',
+                  }}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ height: 20 }} />
+    </div>
+  );
+
+  const renderTarifs = () => (
+    <div style={{ padding: '20px 20px 0' }}>
+      <div style={fieldStyle}>
+        <label style={labelStyle}>Zone de déplacement : {radius} km</label>
+        <input
+          type="range"
+          min={1}
+          max={50}
+          value={radius}
+          onChange={(e) => setRadius(Number(e.target.value))}
+          style={{ width: '100%', accentColor: '#F2D06B' }}
+        />
+        <div style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          fontSize: 11,
+          color: '#9898B4',
+          fontFamily: 'Inter',
+          marginTop: 4,
+        }}>
+          <span>1 km</span>
+          <span>50 km</span>
+        </div>
+      </div>
+      <div style={fieldStyle}>
+        <label style={labelStyle}>Prestation à domicile</label>
+        <div style={{ display: 'flex', gap: 10 }}>
+          {[
+            { label: 'Oui', value: true },
+            { label: 'Non', value: false },
+          ].map((opt) => (
+            <button
+              key={String(opt.value)}
+              onClick={() => setAtHome(opt.value)}
+              style={{
+                flex: 1,
+                height: 44,
+                background: atHome === opt.value ? '#F2D06B' : '#0D0D13',
+                border: `1px solid ${atHome === opt.value ? '#F2D06B' : '#1C1C26'}`,
+                borderRadius: 10,
+                color: atHome === opt.value ? '#050507' : '#9898B4',
+                fontFamily: 'Inter',
+                fontWeight: 600,
+                fontSize: 14,
+                cursor: 'pointer',
+              }}
+            >
+              {opt.label}
             </button>
           ))}
         </div>
       </div>
+      <div style={{ height: 20 }} />
+    </div>
+  );
 
-      {/* Content */}
-      <div style={{ padding: '0 20px 100px' }}>
-        {activeSubTab === 'identite' && (
-          <IdentiteTab proData={proData} setProData={setProData} />
-        )}
-        {activeSubTab === 'paiement' && (
-          <PaiementTab proData={proData} setProData={setProData} onActivate={onActivate} />
-        )}
-        {activeSubTab === 'services' && (
-          <ServicesTab proData={proData} setProData={setProData} />
-        )}
-        {activeSubTab === 'galerie' && (
-          <div>
-            <p style={{ fontSize: 13, color: 'var(--t3)', marginBottom: 20 }}>
-              Ajoutez au moins 3 photos pour activer votre profil.
-            </p>
-
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 28 }}>
-              {[0, 1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  onClick={() => handleSlotClick(i)}
-                  style={{
-                    width: '100%',
-                    height: 160,
-                    borderRadius: 16,
-                    overflow: 'hidden',
-                    border: photos[i] ? 'none' : '2px dashed rgba(242,208,107,0.3)',
-                    background: photos[i] ? 'none' : 'var(--d3)',
-                    cursor: 'pointer',
-                    position: 'relative',
-                  }}
-                >
-                  <input
-                    ref={fileInputRefs[i]}
-                    type="file"
-                    accept="image/*"
-                    style={{ display: 'none' }}
-                    onChange={(e) => handleFileChange(i, e)}
-                  />
-                  {photos[i] ? (
-                    <>
-                      <img
-                        src={photos[i] as string}
-                        alt={`Photo ${i + 1}`}
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'cover',
-                          display: 'block',
-                        }}
-                      />
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          const p = [...photos];
-                          p[i] = null;
-                          setProData({ ...proData, photos: p });
-                        }}
-                        style={{
-                          position: 'absolute',
-                          top: 8,
-                          right: 8,
-                          width: 24,
-                          height: 24,
-                          borderRadius: '50%',
-                          background: 'rgba(5,5,7,0.85)',
-                          border: 'none',
-                          cursor: 'pointer',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: 'var(--t1)',
-                        }}
-                      >
-                        <IconX size={12} />
-                      </button>
-                    </>
-                  ) : (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '100%',
-                      gap: 8,
-                    }}>
-                      <IconCamera color="var(--t3)" size={24} />
-                      <span style={{
-                        fontFamily: 'Inter, sans-serif',
-                        fontWeight: 500,
-                        fontSize: 13,
-                        color: 'var(--t3)',
-                      }}>
-                        Ajouter
-                      </span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-
-            <div style={{
-              fontSize: 12,
-              color: 'var(--t3)',
-              marginBottom: 24,
-              textAlign: 'center',
-            }}>
-              {photos.filter(Boolean).length}/3 photos minimum
-            </div>
-
-            {canActivate && (
-              <button
-                onClick={onActivate}
-                style={{
-                  width: '100%',
-                  padding: '18px',
-                  borderRadius: 16,
-                  border: 'none',
-                  background: '#F2D06B',
-                  color: '#050507',
-                  fontSize: 15,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  fontFamily: 'Inter, sans-serif',
-                  letterSpacing: '0.02em',
-                }}
-              >
-                Activer mon profil
-              </button>
-            )}
+  const renderPaiement = () => (
+    <div style={{ padding: '20px 20px 0' }}>
+      <div style={{
+        background: '#0D0D13',
+        border: '1px solid #1C1C26',
+        borderRadius: 14,
+        padding: '20px 18px',
+        marginBottom: 16,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
+          <div style={{
+            width: 36,
+            height: 36,
+            background: 'rgba(242,208,107,0.12)',
+            borderRadius: 10,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            fontSize: 18,
+          }}>
+            💳
           </div>
-        )}
+          <div>
+            <p style={{ margin: 0, fontFamily: 'Inter', fontWeight: 700, fontSize: 14, color: '#F4F4F8' }}>
+              Paiement sécurisé
+            </p>
+            <p style={{ margin: 0, fontFamily: 'Inter', fontSize: 12, color: '#9898B4' }}>
+              Powered by Stripe
+            </p>
+          </div>
+        </div>
+        <p style={{ margin: 0, fontFamily: 'Inter', fontSize: 13, color: '#9898B4', lineHeight: 1.5 }}>
+          Les paiements clients sont traités de manière sécurisée. Les fonds sont libérés 24h après la prestation.
+        </p>
       </div>
-    </div>
-  );
-}
 
-// ---- Sub-tab components ----
-
-interface TabProps {
-  proData: ReturnType<typeof useProContext>['proData'];
-  setProData: ReturnType<typeof useProContext>['setProData'];
-  onActivate?: () => void;
-}
-
-function IdentiteTab({ proData, setProData }: TabProps) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div>
-        <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-          Prenom / Nom de marque
-        </label>
+      <div style={fieldStyle}>
+        <label style={labelStyle}>IBAN (virement automatique)</label>
         <input
-          value={proData.prenom}
-          onChange={(e) => setProData({ ...proData, prenom: e.target.value })}
           style={inputStyle}
-          placeholder="Alexandre"
+          placeholder="CH00 0000 0000 0000 0000 0"
+          value={iban}
+          onChange={(e) => setIban(e.target.value)}
         />
       </div>
-      <div>
-        <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-          Ville
-        </label>
-        <input
-          value={proData.ville}
-          onChange={(e) => setProData({ ...proData, ville: e.target.value })}
-          style={inputStyle}
-          placeholder="Lausanne"
-        />
-      </div>
-      <div>
-        <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-          Categorie
-        </label>
-        <select
-          value={proData.categorie}
-          onChange={(e) => setProData({ ...proData, categorie: e.target.value })}
-          style={{ ...inputStyle, appearance: 'none' as const }}
-        >
-          <option value="barber">Barber</option>
-          <option value="coiffure">Coiffure</option>
-          <option value="esthetique">Esthetique</option>
-          <option value="massage">Massage</option>
-        </select>
-      </div>
-      <div>
-        <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-          Slogan
-        </label>
-        <input
-          value={proData.slogan}
-          onChange={(e) => setProData({ ...proData, slogan: e.target.value })}
-          style={inputStyle}
-          placeholder="L art de la coupe parfaite"
-        />
-      </div>
-      <div>
-        <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-          Bio
-        </label>
-        <textarea
-          value={proData.bio}
-          onChange={(e) => setProData({ ...proData, bio: e.target.value })}
-          style={{ ...inputStyle, height: 100, resize: 'none' as const }}
-          placeholder="Decrivez votre expertise..."
-        />
-      </div>
-    </div>
-  );
-}
 
-function PaiementTab({ proData, setProData, onActivate }: TabProps) {
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       <div style={{
         background: 'rgba(242,208,107,0.06)',
         border: '1px solid rgba(242,208,107,0.15)',
-        borderRadius: 14,
-        padding: '14px 16px',
+        borderRadius: 10,
+        padding: '12px 14px',
+        marginBottom: 16,
       }}>
-        <p style={{ fontSize: 12, fontWeight: 600, color: '#F2D06B', margin: '0 0 4px' }}>
-          NEXUS PAY
-        </p>
-        <p style={{ fontSize: 12, color: 'var(--t3)', margin: 0, lineHeight: 1.5 }}>
-          Les paiements sont traites automatiquement. Renseignez votre IBAN pour recevoir vos virements.
+        <p style={{ margin: 0, fontFamily: 'Inter', fontSize: 12, color: '#F2D06B', lineHeight: 1.5 }}>
+          ⚡ Commission plateforme : 1 CHF par réservation. Le reste vous est versé automatiquement.
         </p>
       </div>
-      <div>
-        <label style={{ fontSize: 12, fontWeight: 600, color: 'var(--t3)', display: 'block', marginBottom: 8, letterSpacing: '0.05em', textTransform: 'uppercase' }}>
-          IBAN
-        </label>
-        <input
-          value={proData.iban}
-          onChange={(e) => setProData({ ...proData, iban: e.target.value })}
-          style={inputStyle}
-          placeholder="CH56 0483 5012 3456 7800 9"
-        />
-      </div>
-      <div style={{
-        background: 'var(--d1)',
-        borderRadius: 14,
-        padding: '14px 16px',
-        border: '1px solid rgba(255,255,255,0.04)',
-      }}>
-        <p style={{ fontSize: 12, fontWeight: 600, color: 'var(--t2)', margin: '0 0 8px' }}>
-          Abonnement Pro
-        </p>
-        <p style={{ fontSize: 12, color: 'var(--t3)', margin: '0 0 14px', lineHeight: 1.5 }}>
-          7 jours gratuits, puis 29 CHF/mois. Annulez a tout moment.
-        </p>
-        {onActivate && (
-          <button
-            onClick={onActivate}
-            style={{
-              background: '#F2D06B',
-              color: '#050507',
-              fontFamily: 'Inter',
-              fontWeight: 700,
-              fontSize: 13,
-              border: 'none',
-              borderRadius: 10,
-              padding: '8px 16px',
-              cursor: 'pointer',
-            }}
-          >
-            Lancer mon service
-          </button>
-        )}
-      </div>
+      <div style={{ height: 20 }} />
     </div>
   );
-}
 
-function ServicesTab({ proData, setProData }: TabProps) {
-  const addService = () => {
-    setProData({
-      ...proData,
-      services: [
-        ...proData.services,
-        { nom: '', prix: 0, duree: 30, badge: null },
-      ],
-    });
+  const renderGalerie = () => (
+    <div style={{ padding: '20px 20px 0' }}>
+      <p style={{ fontFamily: 'Inter', fontSize: 13, color: '#9898B4', marginTop: 0, marginBottom: 16 }}>
+        Ajoutez des photos de vos réalisations pour attirer des clients.
+      </p>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(3, 1fr)',
+        gap: 10,
+        marginBottom: 16,
+      }}>
+        {(proData.photos || [null, null, null, null]).map((photo, idx) => (
+          <div
+            key={idx}
+            style={{
+              aspectRatio: '1',
+              background: photo ? `url(${photo}) center/cover no-repeat` : '#0D0D13',
+              border: '1px dashed #1C1C26',
+              borderRadius: 10,
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              overflow: 'hidden',
+            }}
+          >
+            {!photo && (
+              <span style={{ fontSize: 24, color: '#2E2E3E' }}>+</span>
+            )}
+          </div>
+        ))}
+      </div>
+      <p style={{ fontFamily: 'Inter', fontSize: 12, color: '#9898B4', textAlign: 'center' }}>
+        Minimum 3 photos recommandées
+      </p>
+      <div style={{ height: 20 }} />
+    </div>
+  );
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case 'profil': return renderProfil();
+      case 'services': return renderServices();
+      case 'tarifs': return renderTarifs();
+      case 'paiement': return renderPaiement();
+      case 'galerie': return renderGalerie();
+      default: return null;
+    }
   };
 
   return (
-    <div>
-      {proData.services.length === 0 ? (
-        <div style={{
-          textAlign: 'center',
-          padding: '40px 0',
-          color: 'var(--t3)',
-          fontSize: 13,
-        }}>
-          <p style={{ marginBottom: 16 }}>Aucun service pour l instant.</p>
-          <button
-            onClick={addService}
-            style={{
-              background: 'var(--d3)',
-              border: '1px dashed rgba(242,208,107,0.3)',
-              borderRadius: 12,
-              padding: '12px 24px',
-              color: '#F2D06B',
-              fontSize: 13,
-              fontWeight: 600,
-              cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          >
-            + Ajouter un service
-          </button>
-        </div>
-      ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {proData.services.map((service, i) => (
-            <div key={i} style={{
-              background: 'var(--d1)',
-              borderRadius: 14,
-              padding: '14px 16px',
-              border: '1px solid rgba(255,255,255,0.04)',
-            }}>
-              <input
-                value={service.nom}
-                onChange={(e) => {
-                  const s = [...proData.services];
-                  s[i] = { ...s[i], nom: e.target.value };
-                  setProData({ ...proData, services: s });
-                }}
-                style={{ ...inputStyle, marginBottom: 8 }}
-                placeholder="Nom du service"
-              />
-              <div style={{ display: 'flex', gap: 8 }}>
-                <input
-                  type="number"
-                  value={service.prix}
-                  onChange={(e) => {
-                    const s = [...proData.services];
-                    s[i] = { ...s[i], prix: Number(e.target.value) };
-                    setProData({ ...proData, services: s });
-                  }}
-                  style={{ ...inputStyle, flex: 1 }}
-                  placeholder="Prix CHF"
-                />
-                <input
-                  type="number"
-                  value={service.duree}
-                  onChange={(e) => {
-                    const s = [...proData.services];
-                    s[i] = { ...s[i], duree: Number(e.target.value) };
-                    setProData({ ...proData, services: s });
-                  }}
-                  style={{ ...inputStyle, flex: 1 }}
-                  placeholder="Duree min"
-                />
-              </div>
+    <>
+      {/* ── ROOT: fixed fullscreen flex column ── */}
+      <div style={{
+        position: 'fixed',
+        inset: 0,
+        display: 'flex',
+        flexDirection: 'column',
+        background: '#050507',
+      }}>
+        {/* ── HEADER (flex-shrink:0) ── */}
+        <div style={{ flexShrink: 0 }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '16px 20px 10px',
+          }}>
+            <div>
+              <p style={{
+                margin: 0,
+                fontFamily: 'Inter',
+                fontWeight: 800,
+                fontSize: 20,
+                color: '#F4F4F8',
+              }}>
+                Mon Business
+              </p>
+              <p style={{
+                margin: '2px 0 0',
+                fontFamily: 'Inter',
+                fontSize: 12,
+                color: '#9898B4',
+              }}>
+                Complétez votre profil professionnel
+              </p>
             </div>
-          ))}
+            <CircularProgress percentage={completionPct} />
+          </div>
+
+          {/* Tab navigation */}
+          <div style={{
+            display: 'flex',
+            overflowX: 'auto',
+            padding: '0 20px',
+            scrollbarWidth: 'none',
+            borderBottom: '1px solid #1C1C26',
+          }}>
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                style={{
+                  flexShrink: 0,
+                  padding: '8px 14px 10px',
+                  background: 'transparent',
+                  border: 'none',
+                  borderBottom: activeTab === tab.id ? '2px solid #F2D06B' : '2px solid transparent',
+                  color: activeTab === tab.id ? '#F2D06B' : '#9898B4',
+                  fontFamily: 'Inter',
+                  fontWeight: activeTab === tab.id ? 700 : 500,
+                  fontSize: 13,
+                  cursor: 'pointer',
+                  transition: 'color 0.2s',
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* ── SCROLLABLE CONTENT (flex:1, overflowY:auto) ── */}
+        {/* Inner div has NO forced height — content takes its natural size */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch' as any,
+        }}>
+          {renderTabContent()}
+        </div>
+
+        {/* ── YELLOW SAVE BUTTON (flex-shrink:0, anchored above tab bar) ── */}
+        <div style={{
+          flexShrink: 0,
+          padding: '12px 20px',
+          paddingBottom: 'calc(12px + env(safe-area-inset-bottom, 8px))' as any,
+          background: '#050507',
+          borderTop: '1px solid #1C1C26',
+        }}>
           <button
-            onClick={addService}
+            onClick={handleSave}
             style={{
-              background: 'transparent',
-              border: '1px dashed rgba(242,208,107,0.3)',
-              borderRadius: 12,
-              padding: '12px',
-              color: '#F2D06B',
-              fontSize: 13,
-              fontWeight: 600,
+              width: '100%',
+              height: 54,
+              background: saved ? '#4CAF50' : '#F2D06B',
+              color: '#050507',
+              border: 'none',
+              borderRadius: 14,
+              fontFamily: 'Inter',
+              fontWeight: 700,
+              fontSize: 15,
               cursor: 'pointer',
-              fontFamily: 'Inter, sans-serif',
+              transition: 'background 0.3s',
             }}
           >
-            + Ajouter un service
+            {saved ? '✓ Sauvegardé !' : 'Sauvegarder et continuer'}
           </button>
         </div>
+      </div>
+
+      {/* ── SERVICE EDITOR MODAL ── */}
+      {showServiceEditor && (
+        <ServiceEditor
+          service={editingService}
+          onSave={handleSaveService}
+          onClose={() => {
+            setShowServiceEditor(false);
+            setEditingService(null);
+            setEditingIndex(null);
+          }}
+        />
       )}
-    </div>
+
+      {/* ── EXPLORER PREVIEW MODAL ── */}
+      {showPreview && (
+        <ExplorerPreview
+          isOpen={showPreview}
+          onClose={() => setShowPreview(false)}
+          proName={prenom}
+          city={ville}
+          category={categorie}
+          location="domicile"
+          services={proServices}
+          mainPhoto={proData.photos?.[0] || null}
+        />
+      )}
+    </>
   );
 }
-
-const inputStyle: React.CSSProperties = {
-  width: '100%',
-  padding: '12px 14px',
-  borderRadius: 12,
-  border: '1px solid rgba(255,255,255,0.08)',
-  background: 'var(--d2)',
-  color: 'var(--t1)',
-  fontSize: 14,
-  fontFamily: 'Inter, sans-serif',
-  outline: 'none',
-  boxSizing: 'border-box',
-};

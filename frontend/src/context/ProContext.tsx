@@ -16,7 +16,7 @@ interface ProContextType {
   proActif: boolean;
   setProActif: (v: boolean) => void;
   proData: ProData;
-  setProData: (d: ProData) => void;
+  setProData: (d: ProData | ((prev: ProData) => ProData)) => void;
   walletCooldownEnd: number | null;
   setWalletCooldownEnd: (v: number | null) => void;
 }
@@ -48,7 +48,16 @@ export function ProProvider({ children }: { children: ReactNode }) {
   const [walletCooldownEnd, setWalletCooldownEnd] = useState<number | null>(null);
 
   return (
-    <ProContext.Provider value={{ proActif, setProActif, proData, setProData, walletCooldownEnd, setWalletCooldownEnd }}>
+    <ProContext.Provider
+      value={{
+        proActif,
+        setProActif,
+        proData,
+        setProData,
+        walletCooldownEnd,
+        setWalletCooldownEnd,
+      }}
+    >
       {children}
     </ProContext.Provider>
   );

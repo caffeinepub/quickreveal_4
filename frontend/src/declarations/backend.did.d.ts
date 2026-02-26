@@ -132,14 +132,22 @@ export interface _SERVICE {
   >,
   '_caffeineStorageUpdateGatewayPrincipals' : ActorMethod<[], undefined>,
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'adminGetAllBookings' : ActorMethod<[], Array<Booking>>,
+  'adminGetAllPros' : ActorMethod<[], Array<ProProfile>>,
+  'adminGetMetrics' : ActorMethod<
+    [],
+    {
+      'totalBookings' : bigint,
+      'totalRegisteredUsers' : bigint,
+      'totalActivePros' : bigint,
+    }
+  >,
+  'adminValidatePro' : ActorMethod<[Principal], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'createBookingRequest' : ActorMethod<
     [Principal, string, string, string, string],
     string
   >,
-  /**
-   * / Creates Stripe checkout session (authenticated users only).
-   */
   'createCheckoutSession' : ActorMethod<
     [Array<ShoppingItem>, string, string],
     string
@@ -149,57 +157,22 @@ export interface _SERVICE {
     [number, number, bigint, [] | [string]],
     Array<ProProfile>
   >,
-  /**
-   * / Returns a single booking. Only the client, the assigned professional, or an admin may view it.
-   */
   'getBooking' : ActorMethod<[string], [] | [Booking]>,
-  /**
-   * / Returns bookings for a given professional. Caller must be that professional or an admin.
-   */
   'getBookingsByProfessional' : ActorMethod<[Principal], Array<Booking>>,
-  /**
-   * / Returns bookings for a given user. Caller must be the user themselves or an admin.
-   */
   'getBookingsByUser' : ActorMethod<
     [Principal, [] | [BookingStatus]],
     Array<Booking>
   >,
-  /**
-   * / Returns the caller's own user profile.
-   */
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
-  /**
-   * / Returns a pro profile. Published profiles are publicly visible; draft profiles
-   * / are only visible to the owner or an admin.
-   */
   'getProProfile' : ActorMethod<[Principal], ProProfile>,
-  /**
-   * / Gets Stripe session status. Only authenticated users may query session status
-   * / to prevent unauthenticated callers from probing sessions or triggering outcalls.
-   */
   'getStripeSessionStatus' : ActorMethod<[string], StripeSessionStatus>,
-  /**
-   * / Fetches another user's profile. Caller can view their own; admins can view any.
-   */
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
-  /**
-   * / Checks if Stripe is configured.
-   */
   'isStripeConfigured' : ActorMethod<[], boolean>,
   'publishProfile' : ActorMethod<[], undefined>,
-  /**
-   * / Saves the caller's own user profile.
-   */
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
-  /**
-   * / Sets Stripe configuration (admin only).
-   */
   'setStripeConfiguration' : ActorMethod<[StripeConfiguration], undefined>,
-  /**
-   * / Transform query (used internally by ICP HTTP outcalls infrastructure).
-   */
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
   'updateBookingStatus' : ActorMethod<[string, BookingStatus], undefined>,
   'updateGallery' : ActorMethod<

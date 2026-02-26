@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Send } from 'lucide-react';
 
 interface Message {
   id: string;
@@ -8,178 +7,237 @@ interface Message {
   time: string;
 }
 
-interface BookingLike {
-  id: string;
-  clientName?: string;
-  service?: string;
-  price?: number;
-}
-
-interface Props {
-  booking: BookingLike;
+interface MessagingSheetProps {
+  isOpen: boolean;
   onClose: () => void;
+  proName?: string;
+  clientName?: string;
 }
 
 const INITIAL_MESSAGES: Message[] = [
-  {
-    id: 'm1',
-    text: 'Bonjour ! Je confirme mon rendez-vous pour tout à l\'heure.',
-    sender: 'client',
-    time: '10:32',
-  },
-  {
-    id: 'm2',
-    text: 'Parfait ! Je serai là à l\'heure. Avez-vous des préférences particulières ?',
-    sender: 'pro',
-    time: '10:33',
-  },
-  {
-    id: 'm3',
-    text: 'Non, je vous fais confiance !',
-    sender: 'client',
-    time: '10:34',
-  },
+  { id: '1', sender: 'pro', text: 'Bonjour ! Votre réservation est confirmée pour demain à 14h.', time: '10:30' },
+  { id: '2', sender: 'client', text: 'Parfait, merci ! Est-ce que je dois apporter quelque chose ?', time: '10:32' },
+  { id: '3', sender: 'pro', text: 'Non, tout est prévu de notre côté. À demain !', time: '10:35' },
 ];
 
-const AUTO_REPLIES = [
-  'Je suis en route !',
-  'J\'arrive dans 5 minutes.',
-  'Merci pour votre confiance !',
-  'À tout de suite !',
+const CLIENT_REPLIES = [
+  'Super, merci !',
+  'D\'accord, je serai là.',
+  'Parfait !',
+  'Merci pour l\'info.',
 ];
 
-export default function MessagingSheet({ booking, onClose }: Props) {
+export default function MessagingSheet({ isOpen, onClose, proName = 'Pro', clientName = 'Client' }: MessagingSheetProps) {
   const [messages, setMessages] = useState<Message[]>(INITIAL_MESSAGES);
   const [input, setInput] = useState('');
-  const bottomRef = useRef<HTMLDivElement>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+    if (isOpen) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }, [isOpen, messages]);
 
-  const sendMessage = () => {
+  if (!isOpen) return null;
+
+  const handleSend = () => {
     if (!input.trim()) return;
-    const now = new Date();
-    const time = `${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
-    const newMsg: Message = { id: `m-${Date.now()}`, text: input, sender: 'pro', time };
-    setMessages(prev => [...prev, newMsg]);
+    const newMsg: Message = {
+      id: Date.now().toString(),
+      text: input.trim(),
+      sender: 'pro',
+      time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
+    };
+    setMessages((prev) => [...prev, newMsg]);
     setInput('');
 
-    // Auto-reply
+    // Simulate client reply
     setTimeout(() => {
       const reply: Message = {
-        id: `m-auto-${Date.now()}`,
-        text: AUTO_REPLIES[Math.floor(Math.random() * AUTO_REPLIES.length)],
+        id: (Date.now() + 1).toString(),
+        text: CLIENT_REPLIES[Math.floor(Math.random() * CLIENT_REPLIES.length)],
         sender: 'client',
-        time,
+        time: new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' }),
       };
-      setMessages(prev => [...prev, reply]);
+      setMessages((prev) => [...prev, reply]);
     }, 1500);
   };
 
   return (
     <div
+      onClick={onClose}
       style={{
         position: 'fixed',
         inset: 0,
-        background: 'rgba(0,0,0,0.7)',
-        zIndex: 400,
+        background: 'rgba(5,5,7,0.85)',
+        zIndex: 9000,
         display: 'flex',
         alignItems: 'flex-end',
       }}
-      onClick={onClose}
     >
       <div
+        onClick={(e) => e.stopPropagation()}
         style={{
           width: '100%',
-          height: '70vh',
-          background: '#0D0D13',
-          borderRadius: '24px 24px 0 0',
+          maxHeight: 'calc(100vh - 64px - env(safe-area-inset-bottom, 0px))',
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden',
+          background: '#0D0D13',
+          borderRadius: '24px 24px 0 0',
+          border: '1px solid rgba(255,255,255,0.06)',
+          borderBottom: 'none',
         }}
-        onClick={e => e.stopPropagation()}
       >
-        {/* Header */}
-        <div style={{ padding: '16px 20px', borderBottom: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        {/* Drag handle */}
+        <div style={{
+          width: 36,
+          height: 4,
+          background: '#2E2E3E',
+          borderRadius: 2,
+          margin: '12px auto',
+          flexShrink: 0,
+        }} />
+
+        {/* Fixed header */}
+        <div style={{
+          padding: '0 24px 16px',
+          flexShrink: 0,
+          borderBottom: '1px solid rgba(255,255,255,0.04)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}>
           <div>
-            <div style={{ fontSize: '15px', fontWeight: 700, color: '#F4F4F8', fontFamily: 'Inter, sans-serif' }}>
-              {booking.clientName || 'Client'}
-            </div>
-            <div style={{ fontSize: '12px', color: '#54546C', fontFamily: 'Inter, sans-serif' }}>
-              {booking.service || 'Service'} · {booking.price || 0} CHF
-            </div>
-          </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
-            <X size={20} color="#54546C" />
-          </button>
-        </div>
-
-        {/* Messages */}
-        <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {messages.map(msg => (
-            <div
-              key={msg.id}
-              style={{
-                display: 'flex',
-                justifyContent: msg.sender === 'pro' ? 'flex-end' : 'flex-start',
-              }}
-            >
-              <div style={{
-                maxWidth: '75%',
-                padding: '10px 14px',
-                borderRadius: msg.sender === 'pro' ? '18px 18px 4px 18px' : '18px 18px 18px 4px',
-                background: msg.sender === 'pro' ? '#F2D06B' : '#1C1C26',
-                color: msg.sender === 'pro' ? '#050507' : '#F4F4F8',
-                fontSize: '14px',
-                fontFamily: 'Inter, sans-serif',
-              }}>
-                {msg.text}
-                <div style={{ fontSize: '10px', color: msg.sender === 'pro' ? 'rgba(5,5,7,0.5)' : '#54546C', marginTop: '4px', textAlign: 'right' }}>
-                  {msg.time}
-                </div>
-              </div>
-            </div>
-          ))}
-          <div ref={bottomRef} />
-        </div>
-
-        {/* Input */}
-        <div style={{ padding: '12px 16px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', gap: '10px', flexShrink: 0 }}>
-          <input
-            value={input}
-            onChange={e => setInput(e.target.value)}
-            onKeyDown={e => e.key === 'Enter' && sendMessage()}
-            placeholder="Votre message..."
-            style={{
-              flex: 1,
-              height: '44px',
-              background: '#1C1C26',
-              border: '1px solid rgba(255,255,255,0.05)',
-              borderRadius: '12px',
-              padding: '0 14px',
+            <p style={{
+              fontFamily: 'Inter',
+              fontWeight: 800,
+              fontSize: 18,
               color: '#F4F4F8',
-              fontSize: '14px',
-              outline: 'none',
-              fontFamily: 'Inter, sans-serif',
-            }}
-          />
+              margin: 0,
+            }}>
+              {clientName}
+            </p>
+            <p style={{
+              fontFamily: 'Inter',
+              fontSize: 12,
+              color: '#9898B4',
+              margin: '2px 0 0',
+            }}>
+              Réservation confirmée
+            </p>
+          </div>
           <button
-            onClick={sendMessage}
+            onClick={onClose}
             style={{
-              width: '44px',
-              height: '44px',
-              borderRadius: '12px',
-              background: '#F2D06B',
+              background: '#1C1C26',
               border: 'none',
+              borderRadius: 8,
+              width: 32,
+              height: 32,
+              color: '#9898B4',
+              fontSize: 16,
               cursor: 'pointer',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
             }}
           >
-            <Send size={16} color="#050507" />
+            ✕
+          </button>
+        </div>
+
+        {/* Scrollable messages */}
+        <div style={{
+          flex: 1,
+          overflowY: 'auto',
+          WebkitOverflowScrolling: 'touch' as any,
+          padding: '16px 20px',
+        }}>
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              style={{
+                display: 'flex',
+                justifyContent: msg.sender === 'pro' ? 'flex-end' : 'flex-start',
+                marginBottom: 12,
+              }}
+            >
+              <div style={{
+                maxWidth: '75%',
+                background: msg.sender === 'pro' ? '#F2D06B' : '#1C1C26',
+                borderRadius: msg.sender === 'pro' ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                padding: '10px 14px',
+              }}>
+                <p style={{
+                  margin: 0,
+                  fontFamily: 'Inter',
+                  fontSize: 14,
+                  color: msg.sender === 'pro' ? '#050507' : '#F4F4F8',
+                  lineHeight: 1.4,
+                }}>
+                  {msg.text}
+                </p>
+                <p style={{
+                  margin: '4px 0 0',
+                  fontFamily: 'Inter',
+                  fontSize: 10,
+                  color: msg.sender === 'pro' ? 'rgba(5,5,7,0.5)' : '#9898B4',
+                  textAlign: 'right',
+                }}>
+                  {msg.time}
+                </p>
+              </div>
+            </div>
+          ))}
+          <div ref={messagesEndRef} />
+        </div>
+
+        {/* Input area — always visible */}
+        <div style={{
+          flexShrink: 0,
+          padding: '12px 20px 16px',
+          borderTop: '1px solid rgba(255,255,255,0.04)',
+          display: 'flex',
+          gap: 10,
+          background: '#0D0D13',
+        }}>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleSend()}
+            placeholder="Écrire un message..."
+            style={{
+              flex: 1,
+              background: '#121219',
+              border: '1px solid #1C1C26',
+              borderRadius: 12,
+              padding: '12px 14px',
+              color: '#F4F4F8',
+              fontFamily: 'Inter',
+              fontSize: 14,
+              outline: 'none',
+            }}
+          />
+          <button
+            onClick={handleSend}
+            style={{
+              width: 48,
+              height: 48,
+              background: '#F2D06B',
+              border: 'none',
+              borderRadius: 12,
+              color: '#050507',
+              fontSize: 18,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexShrink: 0,
+            }}
+          >
+            ↑
           </button>
         </div>
       </div>
